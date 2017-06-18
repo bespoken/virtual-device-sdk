@@ -1,6 +1,8 @@
 **/*.js
 **/*.js.map
 
+lib/
+
 node_modules/
 
 .idea/
@@ -8,5 +10,6 @@ node_modules/
 *.log
 .env
 .nyc_output
+coverage/
 
 

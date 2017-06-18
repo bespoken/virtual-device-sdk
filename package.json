@@ -2,12 +2,13 @@
   "name": "silent-echo-sdk",
   "license": "Apache 2.0",
   "private": false,
+  "typings": "./lib/src/Index.d.ts",
   "version": "0.1.1",
   "engines": {
     "node": "> 6.0.0"
   },
   "files": [
-    "lib/**/*.js"
+    "lib/src/*.js"
   ],
   "repository": {
     "type": "git",
@@ -16,16 +17,19 @@
   "scripts": {
     "tsc": "tsc",
     "pretest": "npm run tsc",
-    "test": "nyc mocha test/**/*-test.js",
+    "test": "nyc mocha lib/test/*Test.js",
     "posttest": "nyc report --reporter=json && codecov -f coverage/*.json",
     "typings": "typings install"
   },
-  "dependencies": {},
+  "dependencies": {
+
+  },
   "devDependencies": {
     "@types/chai": "^4.0.0",
     "@types/dotenv": "^4.0.0",
     "@types/mocha": "^2.2.41",
     "chai": "^4.0.2",
+    "codecov": "^2.2.0",
     "dotenv": "^4.0.0",
     "mocha": "^3.2.0",
     "nyc": "^10.1.2",

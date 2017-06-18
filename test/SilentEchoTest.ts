@@ -1,6 +1,6 @@
 import {assert} from "chai";
 import * as dotenv from "dotenv";
-import {SilentEcho} from "../lib/silent-echo";
+import {SilentEcho} from "../src/SilentEcho";
 
 describe("SilentEcho", function() {
     this.timeout(20000);

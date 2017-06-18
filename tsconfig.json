@@ -3,12 +3,14 @@
   "compilerOptions": {
     "allowUnreachableCode": false,
     "allowJs": false,
+    "declaration": true,
     "module": "commonjs",
     "noImplicitAny": true,
     "noUnusedLocals": true,
     "noImplicitReturns": true,
-    "removeComments": true,
+    "outDir": "lib",
     "preserveConstEnums": true,
+    "removeComments": true,
     "sourceMap": true,
     "strictNullChecks" :true,
     "target": "ES6"
