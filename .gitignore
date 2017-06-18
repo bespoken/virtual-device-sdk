@@ -1,0 +1,12 @@
+**/*.js
+**/*.js.map
+
+node_modules/
+
+.idea/
+
+*.log
+.env
+.nyc_output
+
+
