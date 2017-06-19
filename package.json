@@ -2,6 +2,7 @@
   "name": "silent-echo-sdk",
   "license": "Apache 2.0",
   "private": false,
+  "main": "./lib/src/index.js",
   "typings": "./lib/src/Index.d.ts",
   "version": "0.1.2",
   "engines": {
