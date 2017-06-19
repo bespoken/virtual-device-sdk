@@ -8,7 +8,8 @@
     "node": "> 6.0.0"
   },
   "files": [
-    "lib/src/*.js"
+    "lib/src/*.js",
+    "lib/src/*.d.ts"
   ],
   "repository": {
     "type": "git",

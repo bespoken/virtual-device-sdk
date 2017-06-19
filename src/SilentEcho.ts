@@ -31,8 +31,7 @@ export class SilentEcho {
 
             const request = https.get(url, callback);
             request.on("error", function(error: string) {
-                // Handle error
-                console.log("error: " + error);
+                reject(error);
             });
 
             request.end();
