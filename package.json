@@ -3,7 +3,7 @@
   "license": "Apache 2.0",
   "private": false,
   "typings": "./lib/src/Index.d.ts",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "engines": {
     "node": "> 6.0.0"
   },
@@ -22,9 +22,7 @@
     "posttest": "nyc report --reporter=json && codecov -f coverage/*.json",
     "typings": "typings install"
   },
-  "dependencies": {
-
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/chai": "^4.0.0",
     "@types/dotenv": "^4.0.0",
