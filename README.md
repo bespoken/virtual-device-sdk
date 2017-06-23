@@ -27,4 +27,4 @@ export interface ISilentResult {
 ```
 
 # What's Next
-Lots more to come! Stay tuned!
+Lots more to come. Stay tuned!
