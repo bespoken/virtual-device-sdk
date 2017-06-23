@@ -12,8 +12,8 @@ Here is a simple example in Javascript:
 const echoSDK = require("silent-echo-sdk");
 const silentEcho = new echoSDK.SilentEcho("<ASK_US_HOW_TO_GET_YOUR_TOKEN>");
 silentEcho.message(message).then((result) => {
-    console.log("SentMessageToSilentEcho");
-    console.log("Reply: " + result.transcript);
+    console.log("Reply Transcript: " + result.transcript);
+    console.log("Reply Audio: " + result.transcript_audio_url);
 });
 ```
 
