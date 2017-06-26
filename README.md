@@ -11,7 +11,7 @@ npm install silent-echo-sdk --save
 ```
 Get your token:
 ```
-https://silentecho.bespoken.io/register?token=true
+[https://silentecho.bespoken.io/register?token=true](https://silentecho.bespoken.io/register?token=true)
 ```
 # Sending a Message
 Here is a simple example in Javascript:
