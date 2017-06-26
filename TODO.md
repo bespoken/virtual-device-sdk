@@ -1,0 +1,4 @@
+- [ ] Add better readme, docs, and links to examples
+- [ ] Add getting started
+- [ ] Add instructions on getting a token
+- [ ] Add circle and code coverage
