@@ -6,8 +6,12 @@ Add SilentEcho to your Slack - [try it here](https://silentechobot.bespoken.io/s
 
 # Installation
 Add the Silent Echo SDK to your project:  
-```
+```bash
 npm install silent-echo-sdk --save
+```
+Get your token:
+```
+https://silentecho.bespoken.io/register?token=true
 ```
 # Sending a Message
 Here is a simple example in Javascript:
