@@ -1,6 +1,9 @@
 # Silent Echo SDK
 Use the Silent Echo SDK to build UIs and bots that interact with Alexa via text.
 
+Check out our first example project to use it - [SilentEchoBot](https://github.com/bespoken/silent-echo-bot)!  
+Add SilentEcho to your Slack - [try it here](https://silentechobot.bespoken.io/slack_auth)!
+
 # Installation
 Add the Silent Echo SDK to your project:  
 ```
