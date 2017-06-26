@@ -9,7 +9,7 @@ Add the Silent Echo SDK to your project:
 ```bash
 npm install silent-echo-sdk --save
 ```
-Get your token:
+Get your token:  
 [https://silentecho.bespoken.io/register?token=true](https://silentecho.bespoken.io/register?token=true)
 
 # Sending a Message
