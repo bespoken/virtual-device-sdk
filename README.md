@@ -10,13 +10,15 @@ Add the Silent Echo SDK to your project:
 npm install silent-echo-sdk --save
 ```
 Get your token:  
-[https://silentecho.bespoken.io/register?token=true](https://silentecho.bespoken.io/register?token=true)
+[https://silentecho.bespoken.io/link_account?token=true](https://silentecho.bespoken.io/link_account?token=true)
+
+Save the token that is generated - you will use it in the step below.
 
 # Sending a Message
 Here is a simple example in Javascript:
 ```javascript
 const echoSDK = require("silent-echo-sdk");
-const silentEcho = new echoSDK.SilentEcho("<ASK_US_HOW_TO_GET_YOUR_TOKEN>");
+const silentEcho = new echoSDK.SilentEcho("<PUT_YOUR_TOKEN_HERE>");
 silentEcho.message(message).then((result) => {
     console.log("Reply Transcript: " + result.transcript);
     console.log("Reply Audio: " + result.transcript_audio_url);
