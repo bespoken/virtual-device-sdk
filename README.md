@@ -35,4 +35,6 @@ export interface ISilentResult {
 ```
 
 # What's Next
-More bots. Lots of 'em.
+* Support for cards
+* Keep the session open longer for deep skill interactions
+* More bots. Lots of 'em.
