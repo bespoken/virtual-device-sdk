@@ -12,10 +12,11 @@ describe("SilentEcho", function() {
         it("Should return a transcript", async () => {
             const sdk = new SilentEcho(process.env.TEST_TOKEN);
             const result = await sdk.message("Hi");
-            console.log(JSON.stringify(result));
+            console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.transcript);
             assert.isDefined(result.transcript_audio_url);
             assert.isTrue(result.transcript_audio_url.startsWith("https://storage.googleapis.com/raw_audio/"));
+            assert.isNull(result.stream_url);
         });
 
         it("Should have stream URL", async () => {
@@ -23,7 +24,8 @@ describe("SilentEcho", function() {
             const result = await sdk.message("tell we study billionaires to play");
             console.log(result.stream_url);
             assert.isDefined(result.stream_url);
-            assert.isTrue(result.stream_url.startsWith("https://dts.podtrac.com/redirect.mp3/rss.art19.com/episodes"));
+            assert.isTrue(result.stream_url &&
+                result.stream_url.startsWith("https://dts.podtrac.com/redirect.mp3/rss.art19.com/episodes"));
         });
 
         it("Should handle error", async () => {
