@@ -44,5 +44,5 @@ export class SilentEcho {
 export interface ISilentResult {
     transcript: string;
     transcript_audio_url: string;
-    stream_url: string;
+    stream_url: string | null;
 }
