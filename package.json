@@ -12,6 +12,11 @@
     "lib/src/*.js",
     "lib/src/*.d.ts"
   ],
+  "nyc": {
+    "exclude": [
+      "lib/test/**"
+    ]
+  },
   "repository": {
     "type": "git",
     "url": "git://github.com/bespoken/silent-echo-sdk.git"

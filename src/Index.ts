@@ -1,6 +1,7 @@
-import {ISilentResult, SilentEcho} from "./SilentEcho";
+import {ICard, ISilentResult, SilentEcho} from "./SilentEcho";
 
 export {
     SilentEcho,
-    ISilentResult
+    ISilentResult,
+    ICard,
 }

@@ -42,7 +42,17 @@ export class SilentEcho {
 }
 
 export interface ISilentResult {
+    card: ICard | null;
+    raw_json: any;
     transcript: string;
     transcript_audio_url: string;
     stream_url: string | null;
+}
+
+export interface ICard {
+    imageURL: string;
+    mainTitle: string;
+    subTitle: string;
+    textField: string;
+    type: string;
 }
