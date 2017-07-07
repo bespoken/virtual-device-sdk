@@ -50,9 +50,9 @@ export interface ISilentResult {
 }
 
 export interface ICard {
-    imageURL: string;
+    imageURL: string | null;
     mainTitle: string;
-    subTitle: string;
+    subTitle: string | null;
     textField: string;
     type: string;
 }

@@ -4,19 +4,13 @@ import {SilentEcho} from "../src/SilentEcho";
 
 describe("SilentEcho", function() {
     this.timeout(20000);
-    let token: string;
     before(() => {
         dotenv.config();
-        if (process.env.TEST_TOKEN) {
-            token = process.env.TEST_TOKEN as string;
-        } else {
-            assert.fail("No TEST_TOKEN defined");
-        }
     });
 
     describe("#message()", () => {
         it("Should return a transcript", async () => {
-            const sdk = new SilentEcho(token);
+            const sdk = new SilentEcho(process.env.TEST_TOKEN as string);
             const result = await sdk.message("Hi");
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.transcript);
@@ -26,7 +20,7 @@ describe("SilentEcho", function() {
         });
 
         it("Should have stream URL", async () => {
-            const sdk = new SilentEcho(token);
+            const sdk = new SilentEcho(process.env.TEST_TOKEN as string);
             const result = await sdk.message("tell we study billionaires to play");
             console.log(result.stream_url);
             assert.isDefined(result.stream_url);
