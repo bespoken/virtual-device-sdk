@@ -29,7 +29,7 @@ export class SilentEcho {
                 });
             };
 
-            const request = https.get(url, callback);
+            const request = https.get(url as any, callback);
             request.on("error", function(error: string) {
                 reject(error);
             });
