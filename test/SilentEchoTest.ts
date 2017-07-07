@@ -7,8 +7,9 @@ describe("SilentEcho", function() {
     let token: string;
     before(() => {
         dotenv.config();
-        token = process.env.TEST_TOKEN;
-        if (!token) {
+        if (process.env.TEST_TOKEN) {
+            token = process.env.TEST_TOKEN as string;
+        } else {
             assert.fail("No TEST_TOKEN defined");
         }
     });
