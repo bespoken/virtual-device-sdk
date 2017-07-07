@@ -1,5 +1,6 @@
 import {IncomingMessage} from "http";
 import * as https from "https";
+import * as _ from "lodash";
 
 export class SilentEcho {
     public baseURL: string;
@@ -23,8 +24,8 @@ export class SilentEcho {
 
                 response.on("end", () => {
                     if (response.statusCode === 200) {
-                        const result: ISilentResult = JSON.parse(data);
-                        resolve(result);
+                        const result: ISilentResult = _.pickBy(JSON.parse(data), _.identity);
+			resolve(result);
                     } else {
                         reject(data);
                     }
