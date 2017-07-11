@@ -39,9 +39,9 @@ export interface ISilentResult {
 }
 
 export interface ICard {
-    imageURL: string;
-    mainTitle: string;
-    subTitle: string;
+    imageURL: string | null;
+    mainTitle: string | null;
+    subTitle: string | null;
     textField: string;
     type: string;
 }
