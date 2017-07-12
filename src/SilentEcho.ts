@@ -43,15 +43,18 @@ export class SilentEcho {
 
 export interface ISilentResult {
     card: ICard | null;
-    raw_json: any;
+    debug?: {
+        raw_json: any;
+    };
+    session_timeout: number;
+    stream_url: string | null;
     transcript: string;
     transcript_audio_url: string;
-    stream_url: string | null;
 }
 
 export interface ICard {
     imageURL: string | null;
-    mainTitle: string;
+    mainTitle: string | null;
     subTitle: string | null;
     textField: string;
     type: string;
