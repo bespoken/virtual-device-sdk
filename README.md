@@ -1,6 +1,7 @@
 [![CircleCI](https://circleci.com/gh/bespoken/silent-echo-sdk.svg?style=svg)](https://circleci.com/gh/bespoken/silent-echo-sdk)
 [![codecov](https://codecov.io/gh/bespoken/silent-echo-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/bespoken/silent-echo-sdk)
-[![npm](https://img.shields.io/npm/v/npm.svg)](https://www.npmjs.com/package/silent-echo-sdk)
+[![npm](https://img.shields.io/npm/v/silent-echo-sdk.svg)](https://www.npmjs.com/package/silent-echo-sdk)
+
 # Silent Echo SDK
 Use the Silent Echo SDK to build UIs and bots that interact with Alexa via text.
 
