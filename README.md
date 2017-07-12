@@ -59,13 +59,13 @@ export interface ICard {
 The SilentEcho service can also be called directly via HTTP.
 
 ## Pre-Requisites
-Get a SilentEcho Token:
+Get a SilentEcho Token:  
 [https://silentecho.bespoken.io/link_account?token=true](https://silentecho.bespoken.io/link_account?token=true)
 
 Save the token - you will use it when call the HTTP interface.
 
 ## Requests
-The Base URL is:
+The Base URL is:  
 https://silentecho.bespoken.io
 
 * /process
