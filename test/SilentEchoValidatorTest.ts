@@ -18,13 +18,13 @@ describe("SilentEchoValidator", function() {
         it("success", async () => {
 		const tests = [
 			{input: "tell we study billionaires to play",
-			comparison: "",
+			comparison: "contains",
 			expectedTranscript: undefined,
-			expectedStreamURL: ""}];
+			expectedStreamURL: "https://dts.podtrac.com/redirect.mp3/rss.art19.com/episodes"}];
 		const silentEchoValidator = new SilentEchoValidator(token);
 		const validatorResults = await silentEchoValidator.execute(tests);
 		for (const validatorResult of validatorResults) {
-			assert.isUndefined(validatorResult.error);
+			assert(validatorResult.result === "success", `${JSON.stringify(validatorResult)}`);
 		}
         });
     });
