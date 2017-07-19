@@ -13,7 +13,7 @@ export class SilentEchoValidator {
 			const promise = this.silentEcho.message(test.input)
 				.then((actual: ISilentResult): Validator => {
 					const result: SilentEchoValidatorResult = {actual, test};
-					return new Validator(result, );
+					return new Validator(result, undefined);
 				})
 				.catch((error): Validator => {
 					const result: SilentEchoValidatorResult = {test};
@@ -28,6 +28,8 @@ export class SilentEchoValidator {
 					const validator: Validator = inspection.value();
 					if (validator.result && validator.check()) {
 						validator.result.result = "success";
+					} else {
+						validator.result.result = "failure";
 					}
 					results.push(validator.result);
 				} else {
@@ -66,20 +68,25 @@ class Validator {
 	public check(): boolean {
 		if (this.error) return false;
 		if (!this.result) return false;
+		if (this.result.test.comparison !== "contains") return false;
+		if (!this.result.test.expectedTranscript &&
+			!this.result.test.expectedStreamURL) {
+			return true;
+		}
 		if (this.result.actual &&
 			this.result.actual.transcript &&
 			this.result.test.expectedTranscript &&
 			this.result.test.comparison === "contains" &&
-			!this.result.actual.transcript.includes(this.result.test.expectedTranscript)) {
-			return false;
+			this.result.actual.transcript.includes(this.result.test.expectedTranscript)) {
+			return true;
 		}
 		if (this.result.actual &&
 			this.result.actual.stream_url &&
 			this.result.test.expectedStreamURL &&
 			this.result.test.comparison === "contains" &&
-			!this.result.actual.stream_url.includes(this.result.test.expectedStreamURL)) {
-			return false;
+			this.result.actual.stream_url.includes(this.result.test.expectedStreamURL)) {
+			return true;
 		}
-		return true;
+		return false;
 	}
 }
