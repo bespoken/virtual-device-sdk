@@ -1,5 +1,3 @@
-import * as Bluebird from "bluebird";
-
 import {ISilentResult, SilentEcho} from "./SilentEcho";
 
 export class SilentEchoValidator {
@@ -8,36 +6,25 @@ export class SilentEchoValidator {
 		this.silentEcho = new SilentEcho(token);
 	}
 	public async execute(silentEchoTests: SilentEchoTest[]): Promise<SilentEchoValidatorResult[]> {
-		const promises: Bluebird<any>[] = [];
-		for (const test of silentEchoTests) {
-			const promise = this.silentEcho.message(test.input)
-				.then((actual: ISilentResult): Validator => {
-					const result: SilentEchoValidatorResult = {actual, test};
-					return new Validator(result, undefined);
-				})
-				.catch((error): Validator => {
-					const result: SilentEchoValidatorResult = {test};
-					return new Validator(result, error);
-				});
-			promises.push(Bluebird.resolve(promise));
-		}
 		const results: SilentEchoValidatorResult[] = [];
-		await Bluebird.all(promises.map((p) => p.reflect()))
-    			.each((inspection: Bluebird.Inspection<any>) => {
-				if (inspection.isFulfilled()) {
-					const validator: Validator = inspection.value();
-					if (validator.result && validator.check()) {
-						validator.result.result = "success";
-					} else {
-						validator.result.result = "failure";
-					}
-					results.push(validator.result);
+		for (const test of silentEchoTests) {
+			try {
+				const actual: ISilentResult = await this.silentEcho.message(test.input)
+				const result: SilentEchoValidatorResult = {actual, test};
+				const validator: Validator = new Validator(result, undefined);
+				if (validator.result && validator.check()) {
+					validator.result.result = "success";
 				} else {
-					const validator: Validator = inspection.reason();
 					validator.result.result = "failure";
-					results.push(validator.result);
 				}
-			});
+				results.push(validator.result);
+			} catch (err) {
+				const result: SilentEchoValidatorResult = {test};
+				const validator: Validator = new Validator(result, err);
+				validator.result.result = "failure";
+				results.push(validator.result);
+			}
+		}
 		return Promise.resolve(results);
 	}
 }
