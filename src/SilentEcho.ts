@@ -24,11 +24,10 @@ export class SilentEcho {
                 response.on("end", () => {
                     if (response.statusCode === 200) {
                         const result: ISilentResult = JSON.parse(data);
-			resolve(result);
+                        resolve(result);
                     } else {
                         reject(data);
                     }
-
                 });
             };
 
