@@ -21,8 +21,9 @@ describe("SilentEcho", function() {
 
         it("Should have stream URL", async () => {
             const sdk = new SilentEcho(process.env.TEST_TOKEN as string);
+            sdk.baseURL = "https://silentecho-dev.bespoken.io/process";
             const result = await sdk.message("tell we study billionaires to play");
-            console.log(result.stream_url);
+            console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.stream_url);
             assert.isTrue(result.stream_url &&
                 result.stream_url.startsWith("https://dts.podtrac.com/redirect.mp3/rss.art19.com/episodes"));
