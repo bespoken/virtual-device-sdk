@@ -1,6 +1,7 @@
 - [X] Add circle and code coverage
 - [X] Add instructions on getting a token
-- [ ] Add HTTP docs
+- [X] Add HTTP docs
 - [ ] Add better readme, docs, and links to examples
 - [ ] Add getting started
 - [ ] Add typedocs
+- [X] Fix inconsistent casing!

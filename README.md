@@ -38,12 +38,12 @@ Here is the full result payload:
 export interface ISilentResult {
     card: ICard | null;
     debug?: {
-        raw_json: any;
+        rawJSON: any;
     };
-    session_timeout: number;
-    stream_url: string | null;
+    sessionTimeout: number;
+    streamURL: string | null;
     transcript: string;
-    transcript_audio_url: string;
+    transcriptAudioURL: string;
 }
 
 export interface ICard {
@@ -90,10 +90,10 @@ HTTP Response:
 ```
 {
     "card": null,
-    "session_timeout": 0,
-    "stream_url": null,
+    "sessionTimeout": 0,
+    "streamURL": null,
     "transcript": "hi",
-    "transcript_audio_url": "https://storage.googleapis.com/raw_audio/7898e6fb-2d3d-4039-9b4a-00641fa1c249.mp3"
+    "transcriptAudioURL": "https://storage.googleapis.com/raw_audio/7898e6fb-2d3d-4039-9b4a-00641fa1c249.mp3"
 }
 ```
 
