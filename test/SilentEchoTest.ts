@@ -25,11 +25,11 @@ describe("SilentEcho", function() {
         it("Should have stream URL", async () => {
             const sdk = new SilentEcho(process.env.TEST_TOKEN as string);
             sdk.baseURL = BASE_URL;
-            const result = await sdk.message("tell we study billionaires to play");
+            const result = await sdk.message("tell test player to play");
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.streamURL);
-            assert.isTrue(result.streamURL &&
-                result.streamURL.startsWith("https://dts.podtrac.com/redirect.mp3/rss.art19.com/episodes"));
+            assert.isTrue((result.streamURL as any).startsWith(
+                "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010"));
         });
 
         it("Should have debug info", async () => {

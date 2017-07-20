@@ -4,7 +4,7 @@
   "private": false,
   "main": "./lib/src/Index.js",
   "typings": "./lib/src/Index.d.ts",
-  "version": "0.1.7",
+  "version": "0.2.0",
   "engines": {
     "node": "> 6.0.0"
   },
@@ -22,8 +22,9 @@
     "url": "git://github.com/bespoken/silent-echo-sdk.git"
   },
   "scripts": {
+    "lint": "tslint src/**/*.ts && tslint test/**/*.ts",
     "tsc": "tsc",
-    "pretest": "npm run tsc",
+    "pretest": "npm run tsc && npm run lint",
     "test": "nyc mocha lib/test/*Test.js",
     "posttest": "nyc report --reporter=json && codecov -f coverage/*.json",
     "typings": "typings install"
