@@ -7,8 +7,11 @@ export class SilentEcho {
         this.baseURL = "https://silentecho.bespoken.io/process";
     }
 
-    public message(message: string): Promise<ISilentResult> {
-        const url = this.baseURL + "?message=" + message + "&user_id=" + this.token;
+    public message(message: string, debug: boolean = false): Promise<ISilentResult> {
+        let url = this.baseURL + "?message=" + message + "&user_id=" + this.token;
+        if (debug) {
+            url += "&debug=true";
+        }
 
         const promise = new Promise<ISilentResult>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
@@ -44,12 +47,12 @@ export class SilentEcho {
 export interface ISilentResult {
     card: ICard | null;
     debug?: {
-        raw_json: any;
+        rawJSON: any;
     };
-    session_timeout: number;
-    stream_url: string | null;
+    sessionTimeout: number;
+    streamURL: string | null;
     transcript: string;
-    transcript_audio_url: string;
+    transcriptAudioURL: string;
 }
 
 export interface ICard {
