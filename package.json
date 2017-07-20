@@ -28,7 +28,6 @@
     "posttest": "nyc report --reporter=json && codecov -f coverage/*.json",
     "typings": "typings install"
   },
-  "dependencies": {},
   "devDependencies": {
     "@types/chai": "^4.0.0",
     "@types/dotenv": "^4.0.0",
