@@ -68,10 +68,10 @@ class Validator {
 			return true;
 		}
 		if (this.result.actual &&
-			this.result.actual.stream_url &&
+			this.result.actual.streamURL &&
 			this.result.test.expectedStreamURL &&
 			this.result.test.comparison === "contains" &&
-			this.result.actual.stream_url.includes(this.result.test.expectedStreamURL)) {
+			this.result.actual.streamURL.includes(this.result.test.expectedStreamURL)) {
 			return true;
 		}
 		return false;
