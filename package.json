@@ -29,10 +29,8 @@
     "typings": "typings install"
   },
   "devDependencies": {
-    "@types/bluebird": "^3.5.8",
     "@types/chai": "^4.0.0",
     "@types/dotenv": "^4.0.0",
-    "@types/lodash": "^4.14.69",
     "@types/mocha": "^2.2.41",
     "chai": "^4.0.2",
     "codecov": "^2.2.0",
