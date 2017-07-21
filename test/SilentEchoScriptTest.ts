@@ -1,6 +1,6 @@
 import {assert} from "chai";
 import * as dotenv from "dotenv";
-import {SilentEchoScript} from "../src/SilentEchoScript";
+import {SilentEchoScript, SilentEchoScriptSyntaxError} from "../src/SilentEchoScript";
 
 describe("SilentEchoScript", function() {
     this.timeout(20000);
@@ -19,7 +19,7 @@ describe("SilentEchoScript", function() {
         it("success", async () => {
             const scripContents = `
             "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010"
+            "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const expected = [
                    {
@@ -30,7 +30,7 @@ describe("SilentEchoScript", function() {
                    },
                    {
                        comparison: "contains",
-                       expectedStreamURL: "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010",
+                       expectedStreamURL: "https://feeds.soundcloud.com/stream/",
                        expectedTranscript: undefined,
                        input: "tell test player to play",
                    },
@@ -43,12 +43,65 @@ describe("SilentEchoScript", function() {
         it("success", async () => {
             const scripContents = `
 	        "open test player": "welcome to the simple audio player"
-	        "tell test player to play": "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010"
+	        "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const silentEchoScript = new SilentEchoScript(token, BASE_URL);
             const validatorResults = await silentEchoScript.execute(scripContents);
             for (const validatorResult of validatorResults) {
                 assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+            }
+        });
+    });
+    describe("#validate()", () => {
+        it("returns undefined", async () => {
+            const tests = [
+                {
+                expected: undefined,
+                scriptContents: `
+                    "open test player": "welcome to the simple audio player"
+                    "tell test player to play": "https://feeds.soundcloud.com/stream/"
+                `,
+                }];
+            for (const test of tests) {
+                const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+                assert.equal(silentEchoScript.validate(test.scriptContents), test.expected);
+            }
+        });
+        it("returns syntax error", async () => {
+            const tests = [
+                {expected: SilentEchoScriptSyntaxError,
+                scriptContents: `wrong contents`,
+                },
+                {expected: SilentEchoScriptSyntaxError,
+                scriptContents: `open test player`,
+                },
+                {expected: SilentEchoScriptSyntaxError,
+                scriptContents: `"open test player":`,
+                },
+                {expected: SilentEchoScriptSyntaxError,
+                scriptContents: `"open test player": welcome to the simple audio player`,
+                },
+                {expected: SilentEchoScriptSyntaxError,
+                scriptContents: `"open test player": "welcome to the simple audio player`,
+                },
+                {expected: SilentEchoScriptSyntaxError,
+                scriptContents: `
+                    "open test player": "welcome to the simple audio player"
+                    "tell test player to play"
+                `,
+                },
+                {
+                expected: SilentEchoScriptSyntaxError,
+                scriptContents: `
+                    "open test player": "welcome to the simple audio player"
+                    "tell test player to play": https://feeds.soundcloud.com/stream/"
+                `,
+                },
+                ];
+            for (const test of tests) {
+                const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+                assert.equal(silentEchoScript.validate(test.scriptContents),
+                    test.expected, `test: ${JSON.stringify(test)}`);
             }
         });
     });
