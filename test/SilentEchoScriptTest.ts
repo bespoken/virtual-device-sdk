@@ -19,7 +19,7 @@ describe("SilentEchoScript", function() {
         it("success", async () => {
             const scripContents = `
             "open test player": "welcome to the simple audio player"
-	        "tell test player to play": "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010"
+            "tell test player to play": "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010"
 	        `;
             const expected = [
                    {
