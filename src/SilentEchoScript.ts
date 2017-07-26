@@ -5,6 +5,11 @@ import {
 } from "./SilentEchoValidator";
 
 const URLRegexp = /^https?:\/\//i;
+
+// ScripContentRegexp matches two strings within quotes:
+// "match #1": "match #2"
+const ScripContentRegexp = /\"([^"]*)\"\:\s?\"([^"]*)\"/;
+
 export const SilentEchoScriptSyntaxError = new Error("Invalid script syntax, please " +
     "provide a script with the following sctructure:" + `
     "<Input>": "<ExpectedOutput>"
@@ -28,7 +33,7 @@ export class SilentEchoScript {
                 let input: string | null = "";
                 let output: string | null = "";
                 try {
-                    matches = line.match(/\"([^"]*)\"\:\s?\"([^"]*)\"/);
+                    matches = line.match(ScripContentRegexp);
                     input = matches && matches[1];
                     output = matches && matches[2];
                 } catch (err) {
