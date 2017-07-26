@@ -29,10 +29,17 @@ describe("SilentEchoScript", function() {
     describe("#tests()", () => {
         it("success", async () => {
             const scripContents = `
+            "Hi": "welcome to the simple audio player"
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const expected = [
+                   {
+                       comparison: "contains",
+                       expectedStreamURL: undefined,
+                       expectedTranscript: "welcome to the simple audio player",
+                       input: "Hi",
+                   },
                    {
                        comparison: "contains",
                        expectedStreamURL: undefined,
@@ -53,6 +60,7 @@ describe("SilentEchoScript", function() {
     describe("#execute()", () => {
         it("success", async () => {
             const scripContents = `
+            "Hi": "welcome to the simple audio player"
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
