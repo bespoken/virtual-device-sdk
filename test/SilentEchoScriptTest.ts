@@ -1,9 +1,9 @@
 import {assert} from "chai";
 import * as dotenv from "dotenv";
 import * as Sinon from "sinon";
-import * as fixtures from "./fixtures";
 import {ISilentResult, SilentEcho} from "../src/SilentEcho";
 import {SilentEchoScript, SilentEchoScriptSyntaxError} from "../src/SilentEchoScript";
+import * as fixtures from "./fixtures";
 
 describe("SilentEchoScript", function() {
     this.timeout(20000);
