@@ -1,5 +1,8 @@
 import {assert} from "chai";
 import * as dotenv from "dotenv";
+import * as Sinon from "sinon";
+import * as fixtures from "./fixtures";
+import {ISilentResult, SilentEcho} from "../src/SilentEcho";
 import {SilentEchoValidator} from "../src/SilentEchoValidator";
 
 describe("SilentEchoValidator", function() {
@@ -7,6 +10,8 @@ describe("SilentEchoValidator", function() {
     const BASE_URL = "https://silentecho-dev.bespoken.io/process";
 
     let token: string;
+    let messageStub: any;
+
     before(() => {
         dotenv.config();
         if (process.env.TEST_TOKEN) {
@@ -14,7 +19,13 @@ describe("SilentEchoValidator", function() {
         } else {
             assert.fail("No TEST_TOKEN defined");
         }
+        const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
+            return fixtures.message(message);
+        };
+        messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+
     });
+
     describe("#execute()", () => {
         it("success", async () => {
             const tests = [
