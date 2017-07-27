@@ -34,25 +34,30 @@ describe("SilentEchoScript", function() {
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const expected = [
-                   {
-                       comparison: "contains",
-                       expectedStreamURL: undefined,
-                       expectedTranscript: "welcome to the simple audio player",
-                       input: "Hi",
-                   },
-                   {
-                       comparison: "contains",
-                       expectedStreamURL: undefined,
-                       expectedTranscript: "welcome to the simple audio player",
-                       input: "open test player",
-                   },
-                   {
-                       comparison: "contains",
-                       expectedStreamURL: "https://feeds.soundcloud.com/stream/",
-                       expectedTranscript: undefined,
-                       input: "tell test player to play",
-                   },
-               ];
+                {
+                    tests: [{
+                        comparison: "contains",
+                        expectedStreamURL: undefined,
+                        expectedTranscript: "welcome to the simple audio player",
+                        input: "Hi",
+                        sequence: 1,
+                    },
+                    {
+                        comparison: "contains",
+                        expectedStreamURL: undefined,
+                        expectedTranscript: "welcome to the simple audio player",
+                        input: "open test player",
+                        sequence: 1,
+                    },
+                    {
+                        comparison: "contains",
+                        expectedStreamURL: "https://feeds.soundcloud.com/stream/",
+                        expectedTranscript: undefined,
+                        input: "tell test player to play",
+                        sequence: 1,
+                    }],
+                },
+            ];
             const silentEchoScript = new SilentEchoScript(token, BASE_URL);
             assert.deepEqual(silentEchoScript.tests(scripContents), expected);
         });
@@ -65,10 +70,36 @@ describe("SilentEchoScript", function() {
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const silentEchoScript = new SilentEchoScript(token, BASE_URL);
-            const validatorResults = await silentEchoScript.execute(scripContents);
-            for (const validatorResult of validatorResults) {
-                assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+            const validatorResult = await silentEchoScript.execute(scripContents);
+            assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+            for (const test of validatorResult.tests) {
+                assert.equal(test.result, "success", `${JSON.stringify(test)}`);
             }
+        });
+
+        it("success sequence", async () => {
+            const scripContents = `
+            "Hi": "welcome to the simple audio player"
+            "open test player": "welcome to the simple audio player"
+            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+
+            "Hi": "welcome to the simple audio player"
+
+            "Hi": "welcome to the simple audio player"
+            "open test player": "welcome to the simple audio player"
+	        `;
+            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const validatorResult = await silentEchoScript.execute(scripContents);
+            assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+            for (const test of validatorResult.tests) {
+                assert.equal(test.result, "success", `${JSON.stringify(test)}`);
+            }
+            const firstSequenceTests = validatorResult.tests.filter((resultItem) => resultItem.test.sequence === 1);
+            assert.equal(firstSequenceTests.length, 3, `${firstSequenceTests}`);
+            const secondSequenceTests = validatorResult.tests.filter((resultItem) => resultItem.test.sequence === 2);
+            assert.equal(secondSequenceTests.length, 1, `${secondSequenceTests}`);
+            const thirdSequenceTests = validatorResult.tests.filter((resultItem) => resultItem.test.sequence === 3);
+            assert.equal(thirdSequenceTests.length, 2, `${thirdSequenceTests}`);
         });
     });
     describe("#validate()", () => {

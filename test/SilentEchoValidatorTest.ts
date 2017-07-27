@@ -28,40 +28,48 @@ describe("SilentEchoValidator", function() {
 
     describe("#execute()", () => {
         it("success", async () => {
-            const tests = [
+            const sequences = [
                 {
-                    comparison: "contains",
-                    expectedStreamURL: undefined,
-                    expectedTranscript: "welcome to the simple audio player",
-                    input: "open test player",
-                },
-                {
-                    comparison: "contains",
-                    expectedStreamURL: "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010",
-                    expectedTranscript: undefined,
-                    input: "tell test player to play",
+                    tests: [{
+                        comparison: "contains",
+                        expectedStreamURL: undefined,
+                        expectedTranscript: "welcome to the simple audio player",
+                        input: "open test player",
+                        sequence: 1,
+                    },
+                    {
+                        comparison: "contains",
+                        expectedStreamURL: "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010",
+                        expectedTranscript: undefined,
+                        input: "tell test player to play",
+                        sequence: 1,
+                    }],
                 },
             ];
             const silentEchoValidator = new SilentEchoValidator(token, BASE_URL);
-            const validatorResults = await silentEchoValidator.execute(tests);
-            for (const validatorResult of validatorResults) {
-                assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+            const validatorResult = await silentEchoValidator.execute(sequences);
+            assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+            for (const test of validatorResult.tests) {
+                assert.equal(test.result, "success", `${JSON.stringify(test)}`);
             }
         });
 
         it("failure", async () => {
-            const tests = [
+            const sequences = [
                 {
-                    comparison: "contains",
-                    expectedStreamURL: undefined,
-                    expectedTranscript: "wrong transcript",
-                    input: "tell test player to play",
+                    tests: [{
+                        comparison: "contains",
+                        expectedStreamURL: undefined,
+                        expectedTranscript: "wrong transcript",
+                        input: "tell test player to play",
+                        sequence: 1,
+                    }],
                 },
             ];
             const silentEchoValidator = new SilentEchoValidator(token, BASE_URL);
-            const validatorResults = await silentEchoValidator.execute(tests);
-            for (const validatorResult of validatorResults) {
-                assert.equal(validatorResult.result, "failure", `${JSON.stringify(validatorResult)}`);
+            const validatorResult = await silentEchoValidator.execute(sequences);
+            for (const test of validatorResult.tests) {
+                assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
             }
         });
     });
