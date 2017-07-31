@@ -29,10 +29,13 @@ export class SilentEchoScript {
         const sequences: ISilentEchoTestSequence[] = [];
         let currentSequence: ISilentEchoTestSequence = {tests: []};
         let sequence: number = 1;
+        let sequenceIndex: number = 1;
+        let absoluteIndex: number = 0;
         const lines = scriptContents.split("\n");
         for (let line of lines) {
             line = line.trim();
             if (line !== "") {
+                absoluteIndex += 1;
                 let matches: RegExpMatchArray | null = [];
                 let input: string | null = "";
                 let output: string | null = "";
@@ -47,11 +50,13 @@ export class SilentEchoScript {
                     throw SilentEchoScriptSyntaxError;
                 }
                 const test: ISilentEchoTest = {
+                    absoluteIndex,
                     comparison: "contains",
                     expectedStreamURL: undefined,
                     expectedTranscript: undefined,
                     input,
                     sequence,
+                    sequenceIndex,
                 };
                 if (URLRegexp.test(output)) {
                     test.expectedStreamURL = output;
@@ -59,11 +64,13 @@ export class SilentEchoScript {
                     test.expectedTranscript = output;
                 }
                 currentSequence.tests.push(test);
+                sequenceIndex += 1;
             } else {
                 if (currentSequence.tests.length) {
                     sequence += 1;
                     sequences.push({...currentSequence});
                     currentSequence = {tests: []};
+                    sequenceIndex = 1;
                 }
             }
         }

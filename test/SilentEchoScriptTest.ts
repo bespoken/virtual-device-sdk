@@ -36,25 +36,31 @@ describe("SilentEchoScript", function() {
             const expected = [
                 {
                     tests: [{
+                        absoluteIndex: 1,
                         comparison: "contains",
                         expectedStreamURL: undefined,
                         expectedTranscript: "welcome to the simple audio player",
                         input: "Hi",
                         sequence: 1,
+                        sequenceIndex: 1,
                     },
                     {
+                        absoluteIndex: 2,
                         comparison: "contains",
                         expectedStreamURL: undefined,
                         expectedTranscript: "welcome to the simple audio player",
                         input: "open test player",
                         sequence: 1,
+                        sequenceIndex: 2,
                     },
                     {
+                        absoluteIndex: 3,
                         comparison: "contains",
                         expectedStreamURL: "https://feeds.soundcloud.com/stream/",
                         expectedTranscript: undefined,
                         input: "tell test player to play",
                         sequence: 1,
+                        sequenceIndex: 3,
                     }],
                 },
             ];
@@ -94,12 +100,32 @@ describe("SilentEchoScript", function() {
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "success", `${JSON.stringify(test)}`);
             }
-            const firstSequenceTests = validatorResult.tests.filter((resultItem) => resultItem.test.sequence === 1);
-            assert.equal(firstSequenceTests.length, 3, `${firstSequenceTests}`);
-            const secondSequenceTests = validatorResult.tests.filter((resultItem) => resultItem.test.sequence === 2);
-            assert.equal(secondSequenceTests.length, 1, `${secondSequenceTests}`);
-            const thirdSequenceTests = validatorResult.tests.filter((resultItem) => resultItem.test.sequence === 3);
-            assert.equal(thirdSequenceTests.length, 2, `${thirdSequenceTests}`);
+
+            let absoluteIndex: number = 0;
+            const assertSequenceInfo = (sequence: number, testsQuantity: number) => {
+                const sequenceTests = validatorResult.tests.filter((resultItem) => {
+                    return resultItem.test.sequence === sequence;
+                });
+                const msg = "unexpected sequence tests quantity, " +
+                `expected: ${testsQuantity}, got: ${sequenceTests.length}`;
+                assert.equal(sequenceTests.length, testsQuantity, msg);
+
+                let i: number = 0;
+                sequenceTests.sort((a: any, b: any) => a.test.sequenceIndex - b.test.sequenceIndex);
+                for (const resultItem of sequenceTests) {
+                    i += 1;
+                    absoluteIndex += 1;
+                    const sequenceMsg = "unexpected sequence index, " +
+                    `expected ${i}, got: ${resultItem.test.sequenceIndex}`;
+                    const absoluteMsg = "unexpected absolute index, " +
+                    `expected ${absoluteIndex}, got: ${resultItem.test.absoluteIndex}`;
+                    assert.equal(resultItem.test.sequenceIndex, i, sequenceMsg);
+                    assert.equal(resultItem.test.absoluteIndex, absoluteIndex, absoluteMsg);
+                }
+            };
+            assertSequenceInfo(1, 3);
+            assertSequenceInfo(2, 1);
+            assertSequenceInfo(3, 2);
         });
     });
     describe("#validate()", () => {
