@@ -10,7 +10,10 @@ export class SilentEchoValidator {
 
     public async execute(silentEchoTestSequences: ISilentEchoTestSequence[]): Promise<ISilentEchoValidatorResult> {
         const result: ISilentEchoValidatorResult = {tests: []};
+        const totalSequences: number = silentEchoTestSequences.length;
+        let currentSequenceIndex: number = 0;
         for (const sequence of silentEchoTestSequences) {
+            currentSequenceIndex += 1;
             for (const test of sequence.tests) {
                 try {
                     const actual: ISilentResult = await this.silentEcho.message(test.input);
@@ -27,6 +30,12 @@ export class SilentEchoValidator {
                     const validator: Validator = new Validator(resultItem, err);
                     validator.resultItem.result = "failure";
                     result.tests.push(validator.resultItem);
+                }
+            }
+            if (totalSequences > currentSequenceIndex) {
+                await this.silentEcho.message("Alexa, pause");
+                if (process.env.NODE_ENV !== "test") {
+                    await new Promise((resolve) => setTimeout(resolve, 10000));
                 }
             }
         }

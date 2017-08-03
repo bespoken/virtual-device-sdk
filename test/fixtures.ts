@@ -41,5 +41,14 @@ export function message(message: string): Promise<ISilentResult> {
             transcriptAudioURL: "",
         });
     }
-    return Promise.reject({});
+    if (message.includes("pause")) {
+        return Promise.resolve({
+            card: null,
+            sessionTimeout: 0,
+            streamURL: "",
+            transcript: "",
+            transcriptAudioURL: "",
+        });
+    }
+    return Promise.reject(`unexpected message: ${message}`);
 };
