@@ -1,13 +1,24 @@
 import {assert} from "chai";
 import * as dotenv from "dotenv";
-import {SilentEcho} from "../src/SilentEcho";
+import * as Sinon from "sinon";
+import {ISilentResult, SilentEcho} from "../src/SilentEcho";
+import * as fixtures from "./fixtures";
 
 describe("SilentEcho", function() {
     this.timeout(20000);
     const BASE_URL = "https://silentecho-dev.bespoken.io/process";
+    let messageStub: any;
 
     before(() => {
         dotenv.config();
+        const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
+            return fixtures.message(message);
+        };
+        messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+    });
+
+    after(() => {
+        messageStub.restore();
     });
 
     describe("#message()", () => {
@@ -44,7 +55,7 @@ describe("SilentEcho", function() {
         it("Should handle error", async () => {
             const sdk = new SilentEcho("nonsense");
             try {
-                await sdk.message("Hi");
+                await sdk.message("nonsense");
                 assert.fail("This should have thrown an exception");
             } catch (e) {
                 assert.equal(e, "Invalid token for user_id");
