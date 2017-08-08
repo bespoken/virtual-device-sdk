@@ -11,14 +11,18 @@ describe("SilentEcho", function() {
 
     before(() => {
         dotenv.config();
-        const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
-            return fixtures.message(message);
-        };
-        messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+        if (process.env.ENABLE_MESSAGES_MOCK) {
+            const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
+                return fixtures.message(message);
+            };
+            messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+        }
     });
 
     after(() => {
-        messageStub.restore();
+        if (process.env.ENABLE_MESSAGES_MOCK) {
+            messageStub.restore();
+        }
     });
 
     describe("#message()", () => {

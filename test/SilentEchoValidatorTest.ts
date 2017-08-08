@@ -19,11 +19,18 @@ describe("SilentEchoValidator", function() {
         } else {
             assert.fail("No TEST_TOKEN defined");
         }
-        const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
-            return fixtures.message(message);
-        };
-        messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+        if (process.env.ENABLE_MESSAGES_MOCK) {
+            const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
+                return fixtures.message(message);
+            };
+            messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+        }
+    });
 
+    after(() => {
+        if (process.env.ENABLE_MESSAGES_MOCK) {
+            messageStub.restore();
+        }
     });
 
     describe("#execute()", () => {
