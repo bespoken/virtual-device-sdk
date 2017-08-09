@@ -6,7 +6,7 @@ import {SilentEchoValidator} from "../src/SilentEchoValidator";
 import * as fixtures from "./fixtures";
 
 describe("SilentEchoValidator", function() {
-    this.timeout(20000);
+    this.timeout(60000);
     const BASE_URL = "https://silentecho-dev.bespoken.io/process";
 
     let token: string;
