@@ -33,8 +33,7 @@ describe("SilentEcho", function() {
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.transcript);
             assert.isDefined(result.transcriptAudioURL);
-            assert.isTrue(result.transcriptAudioURL.startsWith("https://storage.googleapis.com/raw_audio/"));
-            assert.isNull(result.streamURL);
+            assert.isNull(result.transcriptAudioURL);
         });
 
         it("Should have stream URL", async () => {
@@ -54,16 +53,6 @@ describe("SilentEcho", function() {
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.debug);
             assert.isDefined((result.debug as any).rawJSON.messageBody);
-        });
-
-        it("Should handle error", async () => {
-            const sdk = new SilentEcho("nonsense");
-            try {
-                await sdk.message("nonsense");
-                assert.fail("This should have thrown an exception");
-            } catch (e) {
-                assert.equal(e, "Invalid token for user_id");
-            }
         });
     });
 });
