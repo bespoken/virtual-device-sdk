@@ -6,7 +6,7 @@ import {SilentEchoScript, SilentEchoScriptSyntaxError} from "../src/SilentEchoSc
 import * as fixtures from "./fixtures";
 
 describe("SilentEchoScript", function() {
-    this.timeout(20000);
+    this.timeout(120000);
     const BASE_URL = "https://silentecho-dev.bespoken.io/process";
 
     let token: string;
@@ -75,7 +75,7 @@ describe("SilentEchoScript", function() {
     describe("#execute()", () => {
         it("success", async () => {
             const scripContents = `
-            "Hi": "welcome to the simple audio player"
+            "Hi": "h"
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
@@ -89,13 +89,13 @@ describe("SilentEchoScript", function() {
 
         it("success sequence", async () => {
             const scripContents = `
-            "Hi": "welcome to the simple audio player"
+            "Hi": "h"
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 
-            "Hi": "welcome to the simple audio player"
+            "Hi": "h"
 
-            "Hi": "welcome to the simple audio player"
+            "Hi": "h"
             "open test player": "welcome to the simple audio player"
 	        `;
             const silentEchoScript = new SilentEchoScript(token, BASE_URL);
