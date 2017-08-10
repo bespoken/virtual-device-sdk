@@ -6,7 +6,7 @@ import {SilentEchoValidator} from "../src/SilentEchoValidator";
 import * as fixtures from "./fixtures";
 
 describe("SilentEchoValidator", function() {
-    this.timeout(20000);
+    this.timeout(60000);
     const BASE_URL = "https://silentecho-dev.bespoken.io/process";
 
     let token: string;
@@ -19,11 +19,18 @@ describe("SilentEchoValidator", function() {
         } else {
             assert.fail("No TEST_TOKEN defined");
         }
-        const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
-            return fixtures.message(message);
-        };
-        messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+        if (process.env.ENABLE_MESSAGES_MOCK) {
+            const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
+                return fixtures.message(message);
+            };
+            messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+        }
+    });
 
+    after(() => {
+        if (process.env.ENABLE_MESSAGES_MOCK) {
+            messageStub.restore();
+        }
     });
 
     describe("#execute()", () => {
