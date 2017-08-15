@@ -96,6 +96,8 @@ export class SilentEchoScript {
         const totalTests = result.tests;
         const succeededTests = result.tests.filter((test: any) => test.result === "success");
         const failedTests = result.tests.filter((test: any) => test.result === "failure");
+        const overallContent = `${totalTests.length} tests, ${succeededTests.length} succeeded` +
+            `, ${failedTests.length} failed`;
         const nowDate = new Date();
         const nowUTC = `${nowDate.getUTCMonth() + 1}/${nowDate.getUTCDate()}/${nowDate.getUTCFullYear()} ` +
             `${nowDate.getUTCHours()}:${nowDate.getUTCMinutes()}:${nowDate.getUTCSeconds()} UTC`;
@@ -157,7 +159,7 @@ export class SilentEchoScript {
                 </div>
                 <div class="overall">
                     <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
-                    <p class="content">${totalTests.length} tests, ${succeededTests.length} succeeded, ${failedTests.length} failed</p>
+                    <p class="content">${overallContent}</p>
                 </div>
                 <div class="time">
                     <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>

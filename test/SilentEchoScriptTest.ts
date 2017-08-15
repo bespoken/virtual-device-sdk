@@ -194,6 +194,7 @@ describe("SilentEchoScript", function() {
 	        `;
             const silentEchoScript = new SilentEchoScript(token, BASE_URL);
             const validatorResult = await silentEchoScript.execute(scripContents);
+            // tslint:disable:max-line-length
             const expected = `
             <div>
                 <div style="margin:0 0 -18px;" class="output">
@@ -240,6 +241,7 @@ describe("SilentEchoScript", function() {
                         </table>
                     </div>
             </div>`;
+            // tslint:enable:max-line-length
             assert.equal(silentEchoScript.prettifyAsHTML(validatorResult, false), expected);
         });
     });
