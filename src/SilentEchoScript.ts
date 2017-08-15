@@ -92,7 +92,7 @@ export class SilentEchoScript {
         }
     }
 
-    public prettifyAsHTML(result: ISilentEchoValidatorResult): string {
+    public prettifyAsHTML(result: ISilentEchoValidatorResult, includeTimeContent: boolean = true): string {
         const totalTests = result.tests;
         const succeededTests = result.tests.filter((test: any) => test.result === "success");
         const failedTests = result.tests.filter((test: any) => test.result === "failure");
@@ -129,8 +129,7 @@ export class SilentEchoScript {
                             <td ${tdStyles}>${test.actual.streamURL
                                 ? test.actual.streamURL
                                 : test.actual.transcript || ""}</td>
-                        </tr>
-                    `;
+                        </tr>`;
                     testsHTML.push(html);
                 }
                 const html = `
@@ -158,15 +157,12 @@ export class SilentEchoScript {
                 </div>
                 <div class="overall">
                     <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
-                    <p class="content">
-                        ${totalTests.length} tests, ${succeededTests.length} succeeded, ${failedTests.length} failed
-                    </p>
+                    <p class="content">${totalTests.length} tests, ${succeededTests.length} succeeded, ${failedTests.length} failed</p>
                 </div>
                 <div class="time">
                     <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
-                    <p class="content">${nowUTC}</p>
-                </div>
-                ${sequencesHTML.join("")}
+                    <p class="content">${includeTimeContent && nowUTC || ""}</p>
+                </div>${sequencesHTML.join("")}
             </div>`;
     }
 }

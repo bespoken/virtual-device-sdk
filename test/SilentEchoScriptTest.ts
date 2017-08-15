@@ -185,4 +185,62 @@ describe("SilentEchoScript", function() {
             }
         });
     });
+    describe("#prettifyAsHTML()", () => {
+        it("success", async () => {
+            const scripContents = `
+            "Hi": "h"
+            "open test player": "welcome to the simple audio player"
+            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+	        `;
+            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const validatorResult = await silentEchoScript.execute(scripContents);
+            const expected = `
+            <div>
+                <div style="margin:0 0 -18px;" class="output">
+                    <p style="font-weight:bold;"class="heading">Output:</p>
+                </div>
+                <div class="overall">
+                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
+                    <p class="content">3 tests, 3 succeeded, 0 failed</p>
+                </div>
+                <div class="time">
+                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
+                    <p class="content"></p>
+                </div>
+                    <div style="margin-bottom:16px;" class="sequence">
+                        <p style="margin:0 0 2px;font-weight:bold;" class="heading">Sequence: 1</p>
+                        <table style="border-collapse:collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="border:1px solid black;padding:5px;">Result</th>
+                                    <th style="border:1px solid black;padding:5px;">Input</th>
+                                    <th style="border:1px solid black;padding:5px;">Expected</th>
+                                    <th style="border:1px solid black;padding:5px;">Actual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        <tr>
+                            <td style="border:1px solid black;padding:5px;">&#10004;</td>
+                            <td style="border:1px solid black;padding:5px;">Hi</td>
+                            <td style="border:1px solid black;padding:5px;">h</td>
+                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid black;padding:5px;">&#10004;</td>
+                            <td style="border:1px solid black;padding:5px;">open test player</td>
+                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
+                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid black;padding:5px;">&#10004;</td>
+                            <td style="border:1px solid black;padding:5px;">tell test player to play</td>
+                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
+                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010</td>
+                        </tr></tbody>
+                        </table>
+                    </div>
+            </div>`;
+            assert.equal(silentEchoScript.prettifyAsHTML(validatorResult, false), expected);
+        });
+    });
 });
