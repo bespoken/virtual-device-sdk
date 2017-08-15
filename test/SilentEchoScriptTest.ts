@@ -224,19 +224,19 @@ describe("SilentEchoScript", function() {
                             <td style="border:1px solid black;padding:5px;">&#10004;</td>
                             <td style="border:1px solid black;padding:5px;">Hi</td>
                             <td style="border:1px solid black;padding:5px;">h</td>
-                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
+                            <td style="border:1px solid black;padding:5px;">hello</td>
                         </tr>
                         <tr>
                             <td style="border:1px solid black;padding:5px;">&#10004;</td>
                             <td style="border:1px solid black;padding:5px;">open test player</td>
                             <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
-                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
+                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player say play to play some audio</td>
                         </tr>
                         <tr>
                             <td style="border:1px solid black;padding:5px;">&#10004;</td>
                             <td style="border:1px solid black;padding:5px;">tell test player to play</td>
                             <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
-                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010</td>
+                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010-building-an-alexa-skill-with-flask-ask-with-john-wheeler.mp3</td>
                         </tr></tbody>
                         </table>
                     </div>
