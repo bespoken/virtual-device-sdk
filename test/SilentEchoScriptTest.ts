@@ -188,7 +188,6 @@ describe("SilentEchoScript", function() {
     describe("#prettifyAsHTML()", () => {
         it("success", async () => {
             const scripContents = `
-            "Hi": "h"
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
@@ -202,7 +201,7 @@ describe("SilentEchoScript", function() {
                 </div>
                 <div class="overall">
                     <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
-                    <p class="content">3 tests, 3 succeeded, 0 failed</p>
+                    <p class="content" style="color:rgb(76,175,80);">2 tests, 2 succeeded, 0 failed</p>
                 </div>
                 <div class="time">
                     <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
@@ -220,19 +219,13 @@ describe("SilentEchoScript", function() {
                                 </tr>
                             </thead>
                             <tbody>
-                        <tr>
-                            <td style="border:1px solid black;padding:5px;">&#10004;</td>
-                            <td style="border:1px solid black;padding:5px;">Hi</td>
-                            <td style="border:1px solid black;padding:5px;">h</td>
-                            <td style="border:1px solid black;padding:5px;">hello</td>
-                        </tr>
-                        <tr>
+                        <tr style="color:rgb(76,175,80);">
                             <td style="border:1px solid black;padding:5px;">&#10004;</td>
                             <td style="border:1px solid black;padding:5px;">open test player</td>
                             <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
                             <td style="border:1px solid black;padding:5px;">welcome to the simple audio player say play to play some audio</td>
                         </tr>
-                        <tr>
+                        <tr style="color:rgb(76,175,80);">
                             <td style="border:1px solid black;padding:5px;">&#10004;</td>
                             <td style="border:1px solid black;padding:5px;">tell test player to play</td>
                             <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>

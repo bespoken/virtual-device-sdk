@@ -93,6 +93,8 @@ export class SilentEchoScript {
     }
 
     public prettifyAsHTML(result: ISilentEchoValidatorResult, includeTimeContent: boolean = true): string {
+        const colorRed = "rgb(244,67,54)";
+        const colorGreen = "rgb(76,175,80)";
         const totalTests = result.tests;
         const succeededTests = result.tests.filter((test: any) => test.result === "success");
         const failedTests = result.tests.filter((test: any) => test.result === "failure");
@@ -114,13 +116,31 @@ export class SilentEchoScript {
         const tdAndThStyles = `style="border:1px solid black;padding:5px;"`;
         const tdStyles = tdAndThStyles;
         const thStyles = tdAndThStyles;
+        const trStyles = (r: string): string => {
+            let color: string = "";
+            if (r === "success") {
+                color = colorGreen;
+            } else if (r === "failure") {
+                color = colorRed;
+            }
+            return `style="color:${color};"`;
+        };
+        const overallContentStyles = (): string => {
+            let color: string = "";
+            if (failedTests.length > 0) {
+                color = colorRed;
+            } else {
+                color = colorGreen;
+            }
+            return `style="color:${color};"`;
+        };
         for (const key in sequences) {
             if (sequences.hasOwnProperty(key)) {
                 const tests = sequences[key];
                 const testsHTML = [];
                 for (const test of tests) {
                     const html = `
-                        <tr>
+                        <tr ${trStyles(test.result)}>
                             <td ${tdStyles}>${test.result === "success"
                                 ? "&#10004;"
                                 : "&#10008;"}</td>
@@ -159,7 +179,7 @@ export class SilentEchoScript {
                 </div>
                 <div class="overall">
                     <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
-                    <p class="content">${overallContent}</p>
+                    <p class="content" ${overallContentStyles()}>${overallContent}</p>
                 </div>
                 <div class="time">
                     <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
