@@ -1,6 +1,6 @@
 import {ICard, ISilentResult, SilentEcho} from "./SilentEcho";
-import {SilentEchoScript} from "./SilentEchoScript";
-import {SilentEchoValidator} from "./SilentEchoValidator";
+import {SilentEchoScript, SilentEchoScriptSyntaxError} from "./SilentEchoScript";
+import {ISilentEchoValidatorResult, SilentEchoValidator} from "./SilentEchoValidator";
 
 export {
     SilentEcho,
@@ -8,4 +8,6 @@ export {
     ICard,
     SilentEchoValidator,
     SilentEchoScript,
+    SilentEchoScriptSyntaxError,
+    ISilentEchoValidatorResult,
 }
