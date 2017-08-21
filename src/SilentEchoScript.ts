@@ -7,9 +7,9 @@ import {
 
 const URLRegexp = /^https?:\/\//i;
 
-// ScripContentRegexp matches two strings within quotes:
+// ScriptContentRegexp matches two strings within quotes:
 // "match #1": "match #2"
-const ScripContentRegexp = /\"([^"]*)\"\:\s?\"([^"]*)\"/;
+const ScriptContentRegexp = /\"([^"]*)\"\:\s?\"([^"]*)\"/;
 
 export const SilentEchoScriptSyntaxError = new Error("Invalid script syntax, please " +
     "provide a script with the following sctructure, each block is a sequence:" + `
@@ -32,7 +32,9 @@ export class SilentEchoScript {
         let sequenceIndex: number = 1;
         let absoluteIndex: number = 0;
         const lines = scriptContents.split("\n");
+        let currentLineIndex: number = 0;
         for (let line of lines) {
+            currentLineIndex += 1;
             line = line.trim();
             if (line !== "") {
                 absoluteIndex += 1;
@@ -40,7 +42,7 @@ export class SilentEchoScript {
                 let input: string | null = "";
                 let output: string | null = "";
                 try {
-                    matches = line.match(ScripContentRegexp);
+                    matches = line.match(ScriptContentRegexp);
                     input = matches && matches[1];
                     output = matches && matches[2];
                 } catch (err) {
@@ -65,7 +67,8 @@ export class SilentEchoScript {
                 }
                 currentSequence.tests.push(test);
                 sequenceIndex += 1;
-            } else {
+            }
+            if (line === "" || currentLineIndex === lines.length) {
                 if (currentSequence.tests.length) {
                     sequence += 1;
                     sequences.push({...currentSequence});

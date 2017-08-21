@@ -74,16 +74,25 @@ describe("SilentEchoScript", function() {
     });
     describe("#execute()", () => {
         it("success", async () => {
-            const scripContents = `
-            "Hi": "h"
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
-	        `;
+            const tests = [
+                `"Hi": "h"`,
+                `"Hi": "h"
+                `,
+                `
+                "Hi": "h"`,
+                `
+                "Hi": "h"
+                "open test player": "welcome to the simple audio player"
+                "tell test player to play": "https://feeds.soundcloud.com/stream/"
+                `,
+            ];
             const silentEchoScript = new SilentEchoScript(token, BASE_URL);
-            const validatorResult = await silentEchoScript.execute(scripContents);
-            assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
-            for (const test of validatorResult.tests) {
-                assert.equal(test.result, "success", `${JSON.stringify(test)}`);
+            for (const test of tests) {
+                const validatorResult = await silentEchoScript.execute(test);
+                assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+                for (const t of validatorResult.tests) {
+                    assert.equal(t.result, "success", `${JSON.stringify(t)}`);
+                }
             }
         });
 
