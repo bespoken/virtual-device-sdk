@@ -15,7 +15,7 @@ export class SilentEchoValidator {
         for (const sequence of silentEchoTestSequences) {
             currentSequenceIndex += 1;
             if (currentSequenceIndex === 1) {
-                await this.silentEcho.message("Alexa, pause");
+                await this.silentEcho.message("Alexa, exit");
                 if (process.env.ENABLE_MESSAGES_MOCK !== "true") {
                     await new Promise((resolve) => setTimeout(resolve, 10000));
                 }
@@ -39,7 +39,7 @@ export class SilentEchoValidator {
                 }
             }
             if (totalSequences > currentSequenceIndex) {
-                await this.silentEcho.message("Alexa, pause");
+                await this.silentEcho.message("Alexa, exit");
                 if (process.env.ENABLE_MESSAGES_MOCK !== "true") {
                     await new Promise((resolve) => setTimeout(resolve, 10000));
                 }
