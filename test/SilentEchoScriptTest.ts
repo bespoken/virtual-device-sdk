@@ -75,13 +75,13 @@ describe("SilentEchoScript", function() {
     describe("#execute()", () => {
         it("success", async () => {
             const tests = [
-                `"Hi": "h"`,
-                `"Hi": "h"
+                `"Hi": "*"`,
+                `"Hi": ""
                 `,
                 `
-                "Hi": "h"`,
+                "Hi": ""`,
                 `
-                "Hi": "h"
+                "Hi": "*"
                 "open test player": "welcome to the simple audio player"
                 "tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
@@ -98,13 +98,13 @@ describe("SilentEchoScript", function() {
 
         it("success sequence", async () => {
             const scripContents = `
-            "Hi": "h"
+            "Hi": "*"
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 
-            "Hi": "h"
+            "Hi": "*"
 
-            "Hi": "h"
+            "Hi": "*"
             "open test player": "welcome to the simple audio player"
 	        `;
             const silentEchoScript = new SilentEchoScript(token, BASE_URL);

@@ -104,6 +104,12 @@ class Validator {
             !this.resultItem.test.expectedStreamURL) {
             return true;
         }
+        if (this.resultItem.test.expectedTranscript === "*"
+            || this.resultItem.test.expectedStreamURL === "*"
+            || this.resultItem.test.expectedTranscript === ""
+            || this.resultItem.test.expectedStreamURL === "") {
+            return true;
+        }
         if (this.resultItem.actual &&
             this.resultItem.actual.transcript &&
             this.resultItem.test.expectedTranscript &&

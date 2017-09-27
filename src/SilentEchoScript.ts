@@ -48,7 +48,7 @@ export class SilentEchoScript {
                 } catch (err) {
                     throw SilentEchoScriptSyntaxError;
                 }
-                if (!matches || !input || !output) {
+                if (!matches || !input) {
                     throw SilentEchoScriptSyntaxError;
                 }
                 const test: ISilentEchoTest = {
@@ -60,10 +60,10 @@ export class SilentEchoScript {
                     sequence,
                     sequenceIndex,
                 };
-                if (URLRegexp.test(output)) {
+                if (output && URLRegexp.test(output)) {
                     test.expectedStreamURL = output;
                 } else {
-                    test.expectedTranscript = output;
+                    test.expectedTranscript = output || undefined;
                 }
                 currentSequence.tests.push(test);
                 sequenceIndex += 1;
