@@ -76,10 +76,10 @@ describe("SilentEchoScript", function() {
         it("success", async () => {
             const tests = [
                 `"Hi": "*"`,
-                `"Hi": "*"
+                `"Hi": ""
                 `,
                 `
-                "Hi": "*"`,
+                "Hi": ""`,
                 `
                 "Hi": "*"
                 "open test player": "welcome to the simple audio player"
