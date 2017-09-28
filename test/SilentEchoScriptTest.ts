@@ -1,11 +1,16 @@
 import {assert} from "chai";
+import * as chai from "chai";
 import * as dotenv from "dotenv";
 import * as Sinon from "sinon";
+import * as sinonChai from "sinon-chai";
 import {ISilentResult, SilentEcho} from "../src/SilentEcho";
 import {ISilentEchoScriptCallback,
     SilentEchoScript,
     SilentEchoScriptSyntaxError} from "../src/SilentEchoScript";
 import * as fixtures from "./fixtures";
+
+chai.use(sinonChai);
+const expect = chai.expect;
 
 describe("SilentEchoScript", function() {
     this.timeout(120000);
@@ -158,13 +163,15 @@ describe("SilentEchoScript", function() {
             ];
             const silentEchoScript = new SilentEchoScript(token, BASE_URL);
             const messageCallback: ISilentEchoScriptCallback = (data: any) => {
-                console.log("on.message, data: ", data);
+                // console.log("on.message, data: ", data);
             };
+            const messageCallbackSpy = Sinon.spy(messageCallback);
             const resultCallback: ISilentEchoScriptCallback = (data: any) => {
-                console.log("on.result, data: ", data);
+                // console.log("on.result, data: ", data);
             };
-            silentEchoScript.on("message", messageCallback);
-            silentEchoScript.on("result", resultCallback);
+            const resultCallbackSpy = Sinon.spy(resultCallback);
+            silentEchoScript.on("message", messageCallbackSpy);
+            silentEchoScript.on("result", resultCallbackSpy);
             for (const test of tests) {
                 const validatorResult = await silentEchoScript.execute(test);
                 assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
@@ -172,6 +179,8 @@ describe("SilentEchoScript", function() {
                     assert.equal(t.result, "success", `${JSON.stringify(t)}`);
                 }
             }
+            expect(messageCallbackSpy).to.have.been.callCount(6);
+            expect(resultCallbackSpy).to.have.been.callCount(6);
         });
     });
     describe("#validate()", () => {
