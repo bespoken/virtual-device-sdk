@@ -22,14 +22,6 @@ export class SilentEchoValidator {
         }
     }
 
-    private emit(event: string, data: any) {
-        if (event in this.subscribers) {
-            this.subscribers[event].forEach((subscriber) => {
-                subscriber(data);
-            });
-        }
-    }
-
     public async execute(silentEchoTestSequences: ISilentEchoTestSequence[]): Promise<ISilentEchoValidatorResult> {
         const result: ISilentEchoValidatorResult = {tests: []};
         const totalSequences: number = silentEchoTestSequences.length;
@@ -72,6 +64,14 @@ export class SilentEchoValidator {
             result.result = "success";
         }
         return Promise.resolve(result);
+    }
+
+    private emit(event: string, data: any) {
+        if (event in this.subscribers) {
+            this.subscribers[event].forEach((subscriber) => {
+                subscriber(data);
+            });
+        }
     }
 }
 
