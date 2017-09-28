@@ -7,6 +7,7 @@ import {ISilentResult, SilentEcho} from "../src/SilentEcho";
 import {ISilentEchoScriptCallback,
     SilentEchoScript,
     SilentEchoScriptSyntaxError} from "../src/SilentEchoScript";
+import {ISilentEchoValidatorResultItem} from "../src/SilentEchoValidator";
 import * as fixtures from "./fixtures";
 
 chai.use(sinonChai);
@@ -162,13 +163,15 @@ describe("SilentEchoScript", function() {
                 `,
             ];
             const silentEchoScript = new SilentEchoScript(token, BASE_URL);
-            const messageCallback: ISilentEchoScriptCallback = (data: any) => {
+            const messageCallback: ISilentEchoScriptCallback = (
+                resultItem: ISilentEchoValidatorResultItem) => {
                 // console.log("on.message, data: ", data);
-            };
+                };
             const messageCallbackSpy = Sinon.spy(messageCallback);
-            const resultCallback: ISilentEchoScriptCallback = (data: any) => {
+            const resultCallback: ISilentEchoScriptCallback = (
+                resultItem: ISilentEchoValidatorResultItem) => {
                 // console.log("on.result, data: ", data);
-            };
+                };
             const resultCallbackSpy = Sinon.spy(resultCallback);
             silentEchoScript.on("message", messageCallbackSpy);
             silentEchoScript.on("result", resultCallbackSpy);

@@ -2,6 +2,7 @@ import {
     ISilentEchoTest,
     ISilentEchoTestSequence,
     ISilentEchoValidatorResult,
+    ISilentEchoValidatorResultItem,
     SilentEchoValidator,
 } from "./SilentEchoValidator";
 
@@ -18,7 +19,8 @@ export const SilentEchoScriptSyntaxError = new Error("Invalid script syntax, ple
 
     "<Input>": "<ExpectedOutput>"`);
 
-export type ISilentEchoScriptCallback = (data: any) => void;
+export type ISilentEchoScriptCallback = (
+    resultItem: ISilentEchoValidatorResultItem) => void;
 
 export class SilentEchoScript {
     private silentEchoValidator: SilentEchoValidator;
