@@ -2,9 +2,9 @@ import {assert} from "chai";
 import * as dotenv from "dotenv";
 import * as Sinon from "sinon";
 import {ISilentResult, SilentEcho} from "../src/SilentEcho";
-import {SilentEchoScript,
-    SilentEchoScriptSyntaxError,
-    SilentEchoScriptCallback} from "../src/SilentEchoScript";
+import {ISilentEchoScriptCallback,
+    SilentEchoScript,
+    SilentEchoScriptSyntaxError} from "../src/SilentEchoScript";
 import * as fixtures from "./fixtures";
 
 describe("SilentEchoScript", function() {
@@ -157,11 +157,11 @@ describe("SilentEchoScript", function() {
                 `,
             ];
             const silentEchoScript = new SilentEchoScript(token, BASE_URL);
-            let messageCallback: SilentEchoScriptCallback = (data: any) => {
-                console.log('on.message, data: ', data);
+            const messageCallback: ISilentEchoScriptCallback = (data: any) => {
+                console.log("on.message, data: ", data);
             };
-            let resultCallback: SilentEchoScriptCallback = (data: any) => {
-                console.log('on.result, data: ', data);
+            const resultCallback: ISilentEchoScriptCallback = (data: any) => {
+                console.log("on.result, data: ", data);
             };
             silentEchoScript.on("message", messageCallback);
             silentEchoScript.on("result", resultCallback);

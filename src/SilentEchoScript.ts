@@ -18,7 +18,7 @@ export const SilentEchoScriptSyntaxError = new Error("Invalid script syntax, ple
 
     "<Input>": "<ExpectedOutput>"`);
 
-export interface SilentEchoScriptCallback { (data: any): void }
+export type ISilentEchoScriptCallback = (data: any) => void;
 
 export class SilentEchoScript {
     private silentEchoValidator: SilentEchoValidator;
@@ -193,7 +193,7 @@ export class SilentEchoScript {
             </div>`;
     }
 
-    public on(event: string, cb: SilentEchoScriptCallback) {
+    public on(event: string, cb: ISilentEchoScriptCallback) {
         this.silentEchoValidator.subscribe(event, cb);
     }
 }

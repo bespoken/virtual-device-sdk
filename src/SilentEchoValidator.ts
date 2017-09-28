@@ -1,6 +1,6 @@
 import {ISilentResult, SilentEcho} from "./SilentEcho";
 
-interface subscribersType {
+interface ISubscribers {
     [index: string]: any[];
     message: any[];
     result: any[];
@@ -8,7 +8,7 @@ interface subscribersType {
 
 export class SilentEchoValidator {
     private silentEcho: SilentEcho;
-    private subscribers: subscribersType;
+    private subscribers: ISubscribers;
 
     constructor(token: string, baseURL = "https://silentecho.bespoken.io/process") {
         this.silentEcho = new SilentEcho(token);
@@ -24,7 +24,7 @@ export class SilentEchoValidator {
 
     public emit(event: string, data: any) {
         if (event in this.subscribers) {
-            this.subscribers[event].forEach(subscriber => {
+            this.subscribers[event].forEach((subscriber) => {
                 subscriber(data);
             });
         }
