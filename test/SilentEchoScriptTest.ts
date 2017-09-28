@@ -2,7 +2,9 @@ import {assert} from "chai";
 import * as dotenv from "dotenv";
 import * as Sinon from "sinon";
 import {ISilentResult, SilentEcho} from "../src/SilentEcho";
-import {SilentEchoScript, SilentEchoScriptSyntaxError} from "../src/SilentEchoScript";
+import {SilentEchoScript,
+    SilentEchoScriptSyntaxError,
+    SilentEchoScriptCallback} from "../src/SilentEchoScript";
 import * as fixtures from "./fixtures";
 
 describe("SilentEchoScript", function() {
@@ -95,7 +97,6 @@ describe("SilentEchoScript", function() {
                 }
             }
         });
-
         it("success sequence", async () => {
             const scripContents = `
             "Hi": "*"
@@ -139,6 +140,38 @@ describe("SilentEchoScript", function() {
             assertSequenceInfo(1, 3);
             assertSequenceInfo(2, 1);
             assertSequenceInfo(3, 2);
+        });
+    });
+    describe("#on()", () => {
+        it("success ", async () => {
+            const tests = [
+                `"Hi": "*"`,
+                `"Hi": ""
+                `,
+                `
+                "Hi": ""`,
+                `
+                "Hi": "*"
+                "open test player": "welcome to the simple audio player"
+                "tell test player to play": "https://feeds.soundcloud.com/stream/"
+                `,
+            ];
+            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            let messageCallback: SilentEchoScriptCallback = (data: any) => {
+                console.log('on.message, data: ', data);
+            };
+            let resultCallback: SilentEchoScriptCallback = (data: any) => {
+                console.log('on.result, data: ', data);
+            };
+            silentEchoScript.on("message", messageCallback);
+            silentEchoScript.on("result", resultCallback);
+            for (const test of tests) {
+                const validatorResult = await silentEchoScript.execute(test);
+                assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+                for (const t of validatorResult.tests) {
+                    assert.equal(t.result, "success", `${JSON.stringify(t)}`);
+                }
+            }
         });
     });
     describe("#validate()", () => {

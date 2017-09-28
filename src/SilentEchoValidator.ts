@@ -1,11 +1,33 @@
 import {ISilentResult, SilentEcho} from "./SilentEcho";
 
+interface subscribersType {
+    [index: string]: any[];
+    message: any[];
+    result: any[];
+}
+
 export class SilentEchoValidator {
     private silentEcho: SilentEcho;
+    private subscribers: subscribersType;
 
     constructor(token: string, baseURL = "https://silentecho.bespoken.io/process") {
         this.silentEcho = new SilentEcho(token);
         this.silentEcho.baseURL = baseURL;
+        this.subscribers = {message: [], result: []};
+    }
+
+    public subscribe(event: string, cb: any) {
+        if (event in this.subscribers) {
+            this.subscribers[event].push(cb);
+        }
+    }
+
+    public emit(event: string, data: any) {
+        if (event in this.subscribers) {
+            this.subscribers[event].forEach(subscriber => {
+                subscriber(data);
+            });
+        }
     }
 
     public async execute(silentEchoTestSequences: ISilentEchoTestSequence[]): Promise<ISilentEchoValidatorResult> {
@@ -19,20 +41,24 @@ export class SilentEchoValidator {
             }
             for (const test of sequence.tests) {
                 try {
-                    const actual: ISilentResult = await this.silentEcho.message(test.input);
-                    const resultItem: ISilentEchoValidatorResultItem = {actual, test};
+                    const resultItem: ISilentEchoValidatorResultItem = {test};
                     const validator: Validator = new Validator(resultItem, undefined);
+                    this.emit("message", validator.resultItem);
+                    const actual: ISilentResult = await this.silentEcho.message(test.input);
+                    resultItem.actual = actual;
                     if (validator.resultItem && validator.check()) {
                         validator.resultItem.result = "success";
                     } else {
                         validator.resultItem.result = "failure";
                     }
                     result.tests.push(validator.resultItem);
+                    this.emit("result", validator.resultItem);
                 } catch (err) {
                     const resultItem: ISilentEchoValidatorResultItem = {test};
                     const validator: Validator = new Validator(resultItem, err);
                     validator.resultItem.result = "failure";
                     result.tests.push(validator.resultItem);
+                    this.emit("result", validator.resultItem);
                 }
             }
             if (totalSequences > currentSequenceIndex) {

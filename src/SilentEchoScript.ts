@@ -18,6 +18,8 @@ export const SilentEchoScriptSyntaxError = new Error("Invalid script syntax, ple
 
     "<Input>": "<ExpectedOutput>"`);
 
+export interface SilentEchoScriptCallback { (data: any): void }
+
 export class SilentEchoScript {
     private silentEchoValidator: SilentEchoValidator;
 
@@ -189,5 +191,9 @@ export class SilentEchoScript {
                     <p class="content">${includeTimeContent && nowUTC || ""}</p>
                 </div>${sequencesHTML.join("")}
             </div>`;
+    }
+
+    public on(event: string, cb: SilentEchoScriptCallback) {
+        this.silentEchoValidator.subscribe(event, cb);
     }
 }
