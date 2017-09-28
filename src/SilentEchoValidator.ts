@@ -22,7 +22,7 @@ export class SilentEchoValidator {
         }
     }
 
-    public emit(event: string, data: any) {
+    private emit(event: string, data: any) {
         if (event in this.subscribers) {
             this.subscribers[event].forEach((subscriber) => {
                 subscriber(data);
