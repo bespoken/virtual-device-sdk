@@ -106,7 +106,7 @@ export interface ISilentEchoValidatorResult {
     tests: ISilentEchoValidatorResultItem[];
 }
 
-class Validator {
+export class Validator {
     public resultItem: ISilentEchoValidatorResultItem;
     public error?: Error;
 

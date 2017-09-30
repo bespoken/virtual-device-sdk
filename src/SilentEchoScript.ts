@@ -4,6 +4,7 @@ import {
     ISilentEchoValidatorResult,
     ISilentEchoValidatorResultItem,
     SilentEchoValidator,
+    Validator,
 } from "./SilentEchoValidator";
 
 const URLRegexp = /^https?:\/\//i;
@@ -99,6 +100,34 @@ export class SilentEchoScript {
         }
     }
 
+    // prettifyAsPartialHTML prettyfies given validator result items into HTML.
+    public prettifyAsPartialHTML(scriptContents: string,
+                                 partialResultItems: ISilentEchoValidatorResultItem[],
+                                 includeTimeContent: boolean = true): string {
+        const silentEchoTestSequences: ISilentEchoTestSequence[] = this.tests(scriptContents);
+        const result: ISilentEchoValidatorResult = {tests: []};
+        for (const sequence of silentEchoTestSequences) {
+            for (const test of sequence.tests) {
+                const resultItem: ISilentEchoValidatorResultItem = {test};
+                const validator: Validator = new Validator(resultItem, undefined);
+                result.tests.push(validator.resultItem);
+            }
+        }
+        for (const partialResultItem of partialResultItems) {
+            for (const i in result.tests) {
+                if (result.tests[i]) {
+                    const resultItem = result.tests[i];
+                    if (resultItem.test.absoluteIndex === partialResultItem.test.absoluteIndex) {
+                        result.tests[i] = partialResultItem;
+                        break;
+                    }
+                }
+            }
+        }
+        return this.prettifyAsHTML(result, includeTimeContent);
+    }
+
+    // prettifyAsHTML prettyfies given validator result into HTML.
     public prettifyAsHTML(result: ISilentEchoValidatorResult, includeTimeContent: boolean = true): string {
         const colorRed = "rgb(244,67,54)";
         const colorGreen = "rgb(76,175,80)";
@@ -120,7 +149,8 @@ export class SilentEchoScript {
             }
         }
         const sequencesHTML = [];
-        const tdAndThStyles = `style="border:1px solid black;padding:5px;"`;
+        const tdAndThStyleProps = "border:1px solid black;padding:5px;";
+        const tdAndThStyles = `style="${tdAndThStyleProps}"`;
         const tdStyles = tdAndThStyles;
         const thStyles = tdAndThStyles;
         const trStyles = (r: string): string => {
@@ -130,7 +160,7 @@ export class SilentEchoScript {
             } else if (r === "failure") {
                 color = colorRed;
             }
-            return `style="color:${color};"`;
+            return ` style="color:${color};"`;
         };
         const overallContentStyles = (): string => {
             let color: string = "";
@@ -147,17 +177,18 @@ export class SilentEchoScript {
                 const testsHTML = [];
                 for (const test of tests) {
                     const html = `
-                        <tr ${trStyles(test.result)}>
-                            <td ${tdStyles}>${test.result === "success"
+                        <tr${(test.result && trStyles(test.result)) || ""}>
+                            <td style="${tdAndThStyleProps}text-align:center;">${
+                                (test.result && (test.result === "success"
                                 ? "&#10004;"
-                                : "&#10008;"}</td>
+                                : "&#10008;") || "<img src='/images/Spinner.svg' height=24>")}</td>
                             <td ${tdStyles}>${test.test.input}</td>
                             <td ${tdStyles}>${test.test.expectedStreamURL
                                 ? test.test.expectedStreamURL
                                 : test.test.expectedTranscript || ""}</td>
-                            <td ${tdStyles}>${test.actual.streamURL
+                            <td ${tdStyles}>${test.actual && test.actual.streamURL
                                 ? test.actual.streamURL
-                                : test.actual.transcript || ""}</td>
+                                : (test.actual && test.actual.transcript) || ""}</td>
                         </tr>`;
                     testsHTML.push(html);
                 }
