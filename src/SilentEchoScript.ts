@@ -171,6 +171,11 @@ export class SilentEchoScript {
             }
             return `style="color:${color};"`;
         };
+        const statusIcon = (test: any): string => {
+            return (test.result && (test.result === "success"
+            ? "&#10004;"
+            : "&#10008;") || "<img src='/images/Spinner.svg' height=24>");
+        };
         for (const key in sequences) {
             if (sequences.hasOwnProperty(key)) {
                 const tests = sequences[key];
@@ -178,10 +183,8 @@ export class SilentEchoScript {
                 for (const test of tests) {
                     const html = `
                         <tr${(test.result && trStyles(test.result)) || ""}>
-                            <td style="${tdAndThStyleProps}text-align:center;">${
-                                (test.result && (test.result === "success"
-                                ? "&#10004;"
-                                : "&#10008;") || "<img src='/images/Spinner.svg' height=24>")}</td>
+                            <td style="${tdAndThStyleProps}text-align:center;">
+                                ${statusIcon(test)}</td>
                             <td ${tdStyles}>${test.test.input}</td>
                             <td ${tdStyles}>${test.test.expectedStreamURL
                                 ? test.test.expectedStreamURL
