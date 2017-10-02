@@ -109,6 +109,7 @@ export class SilentEchoScript {
         for (const sequence of silentEchoTestSequences) {
             for (const test of sequence.tests) {
                 const resultItem: ISilentEchoValidatorResultItem = {test};
+                resultItem.status = "scheduled";
                 const validator: Validator = new Validator(resultItem, undefined);
                 result.tests.push(validator.resultItem);
             }
@@ -172,9 +173,19 @@ export class SilentEchoScript {
             return `style="color:${color};"`;
         };
         const statusIcon = (test: any): string => {
-            return (test.result && (test.result === "success"
-            ? "&#10004;"
-            : "&#10008;") || "<img src='/images/Spinner.svg' height=24>");
+            if (test.status === "running") {
+                return "<img src='/images/Spinner.svg' height=24>";
+            } else if (test.status === "scheduled") {
+                return "<img src='/images/Schedule.svg' height=18>";
+            } else if (test.status === "done" && test.result
+                && test.result === "success") {
+                return "&#10004;";
+            } else if (test.status === "done" && test.result
+                && test.result !== "success") {
+                return "&#10008;";
+            } else {
+                return "";
+            }
         };
         for (const key in sequences) {
             if (sequences.hasOwnProperty(key)) {
@@ -215,6 +226,12 @@ export class SilentEchoScript {
         }
         return `
             <div>
+                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
+                    Validation Script Results
+                    ${(totalTests.length === succeededTests.length + failedTests.length)
+                    ? ""
+                    : "<img src='/images/Spinner.svg' height=34>"}
+                </p>
                 <div style="margin:0 0 -18px;" class="output">
                     <p style="font-weight:bold;"class="heading">Output:</p>
                 </div>

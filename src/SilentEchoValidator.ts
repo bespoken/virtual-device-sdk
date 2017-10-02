@@ -34,6 +34,7 @@ export class SilentEchoValidator {
             for (const test of sequence.tests) {
                 try {
                     const resultItem: ISilentEchoValidatorResultItem = {test};
+                    resultItem.status = "running";
                     const validator: Validator = new Validator(resultItem, undefined);
                     this.emit("message", validator.resultItem);
                     const actual: ISilentResult = await this.silentEcho.message(test.input);
@@ -43,12 +44,14 @@ export class SilentEchoValidator {
                     } else {
                         validator.resultItem.result = "failure";
                     }
+                    validator.resultItem.status = "done";
                     result.tests.push(validator.resultItem);
                     this.emit("result", validator.resultItem);
                 } catch (err) {
                     const resultItem: ISilentEchoValidatorResultItem = {test};
                     const validator: Validator = new Validator(resultItem, err);
                     validator.resultItem.result = "failure";
+                    validator.resultItem.status = "done";
                     result.tests.push(validator.resultItem);
                     this.emit("result", validator.resultItem);
                 }
@@ -98,6 +101,7 @@ export interface ISilentEchoTestSequence {
 export interface ISilentEchoValidatorResultItem {
     actual?: ISilentResult;
     result?: "success" | "failure";
+    status?: "scheduled" | "running" | "done";
     test: ISilentEchoTest;
 }
 
