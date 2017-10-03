@@ -194,8 +194,7 @@ export class SilentEchoScript {
                 for (const test of tests) {
                     const html = `
                         <tr${(test.result && trStyles(test.result)) || ""}>
-                            <td style="${tdAndThStyleProps}text-align:center;">
-                                ${statusIcon(test)}</td>
+                            <td style="${tdAndThStyleProps}text-align:center;">${statusIcon(test)}</td>
                             <td ${tdStyles}>${test.test.input}</td>
                             <td ${tdStyles}>${test.test.expectedStreamURL
                                 ? test.test.expectedStreamURL
@@ -224,13 +223,13 @@ export class SilentEchoScript {
                 sequencesHTML.push(html);
                 }
         }
+        const showHeadingSpinner = (totalTests.length === succeededTests.length + failedTests.length);
+        const headingSpinner = (showHeadingSpinner
+            ? "<img src='/images/Spinner.svg' height=34>" : "");
         return `
             <div>
                 <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
-                    Validation Script Results
-                    ${(totalTests.length === succeededTests.length + failedTests.length)
-                    ? ""
-                    : "<img src='/images/Spinner.svg' height=34>"}
+                    Validation Script Results${headingSpinner}
                 </p>
                 <div style="margin:0 0 -18px;" class="output">
                     <p style="font-weight:bold;"class="heading">Output:</p>

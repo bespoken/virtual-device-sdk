@@ -246,6 +246,9 @@ describe("SilentEchoScript", function() {
             // tslint:disable:max-line-length
             const expected = `
             <div>
+                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
+                    Validation Script Results<img src='/images/Spinner.svg' height=34>
+                </p>
                 <div style="margin:0 0 -18px;" class="output">
                     <p style="font-weight:bold;"class="heading">Output:</p>
                 </div>
@@ -298,6 +301,9 @@ describe("SilentEchoScript", function() {
             // tslint:disable:max-line-length
             const expected = `
             <div>
+                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
+                    Validation Script Results
+                </p>
                 <div style="margin:0 0 -18px;" class="output">
                     <p style="font-weight:bold;"class="heading">Output:</p>
                 </div>
@@ -322,13 +328,13 @@ describe("SilentEchoScript", function() {
                             </thead>
                             <tbody>
                         <tr>
-                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/images/Spinner.svg' height=24></td>
+                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/images/Schedule.svg' height=18></td>
                             <td style="border:1px solid black;padding:5px;">open test player</td>
                             <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
                             <td style="border:1px solid black;padding:5px;"></td>
                         </tr>
                         <tr>
-                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/images/Spinner.svg' height=24></td>
+                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/images/Schedule.svg' height=18></td>
                             <td style="border:1px solid black;padding:5px;">tell test player to play</td>
                             <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
                             <td style="border:1px solid black;padding:5px;"></td>
