@@ -1,13 +1,21 @@
 import {assert} from "chai";
+import * as chai from "chai";
 import * as dotenv from "dotenv";
 import * as Sinon from "sinon";
+import * as sinonChai from "sinon-chai";
 import {ISilentResult, SilentEcho} from "../src/SilentEcho";
-import {SilentEchoScript, SilentEchoScriptSyntaxError} from "../src/SilentEchoScript";
+import {ISilentEchoScriptCallback,
+    SilentEchoScript,
+    SilentEchoScriptSyntaxError} from "../src/SilentEchoScript";
+import {ISilentEchoValidatorResultItem} from "../src/SilentEchoValidator";
 import * as fixtures from "./fixtures";
+
+chai.use(sinonChai);
+const expect = chai.expect;
 
 describe("SilentEchoScript", function() {
     this.timeout(120000);
-    const BASE_URL = "https://silentecho-dev.bespoken.io/process";
+    const BASE_URL = "https://silentecho.bespoken.io/process";
 
     let token: string;
     let messageStub: any;
@@ -95,7 +103,6 @@ describe("SilentEchoScript", function() {
                 }
             }
         });
-
         it("success sequence", async () => {
             const scripContents = `
             "Hi": "*"
@@ -139,6 +146,44 @@ describe("SilentEchoScript", function() {
             assertSequenceInfo(1, 3);
             assertSequenceInfo(2, 1);
             assertSequenceInfo(3, 2);
+        });
+    });
+    describe("#on()", () => {
+        it("success ", async () => {
+            const tests = [
+                `"Hi": "*"`,
+                `"Hi": ""
+                `,
+                `
+                "Hi": ""`,
+                `
+                "Hi": "*"
+                "open test player": "welcome to the simple audio player"
+                "tell test player to play": "https://feeds.soundcloud.com/stream/"
+                `,
+            ];
+            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const messageCallback: ISilentEchoScriptCallback = (
+                resultItem: ISilentEchoValidatorResultItem) => {
+                    assert.equal(resultItem.status, "running");
+                };
+            const messageCallbackSpy = Sinon.spy(messageCallback);
+            const resultCallback: ISilentEchoScriptCallback = (
+                resultItem: ISilentEchoValidatorResultItem) => {
+                    assert.equal(resultItem.status, "done");
+                };
+            const resultCallbackSpy = Sinon.spy(resultCallback);
+            silentEchoScript.on("message", messageCallbackSpy);
+            silentEchoScript.on("result", resultCallbackSpy);
+            for (const test of tests) {
+                const validatorResult = await silentEchoScript.execute(test);
+                assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+                for (const t of validatorResult.tests) {
+                    assert.equal(t.result, "success", `${JSON.stringify(t)}`);
+                }
+            }
+            expect(messageCallbackSpy).to.have.been.callCount(6);
+            expect(resultCallbackSpy).to.have.been.callCount(6);
         });
     });
     describe("#validate()", () => {
@@ -205,6 +250,9 @@ describe("SilentEchoScript", function() {
             // tslint:disable:max-line-length
             const expected = `
             <div>
+                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
+                    Validation Script Results<img src='/images/Spinner.svg' height=34>
+                </p>
                 <div style="margin:0 0 -18px;" class="output">
                     <p style="font-weight:bold;"class="heading">Output:</p>
                 </div>
@@ -229,13 +277,13 @@ describe("SilentEchoScript", function() {
                             </thead>
                             <tbody>
                         <tr style="color:rgb(76,175,80);">
-                            <td style="border:1px solid black;padding:5px;">&#10004;</td>
+                            <td style="border:1px solid black;padding:5px;text-align:center;">&#10004;</td>
                             <td style="border:1px solid black;padding:5px;">open test player</td>
                             <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
                             <td style="border:1px solid black;padding:5px;">welcome to the simple audio player say play to play some audio</td>
                         </tr>
                         <tr style="color:rgb(76,175,80);">
-                            <td style="border:1px solid black;padding:5px;">&#10004;</td>
+                            <td style="border:1px solid black;padding:5px;text-align:center;">&#10004;</td>
                             <td style="border:1px solid black;padding:5px;">tell test player to play</td>
                             <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
                             <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010-building-an-alexa-skill-with-flask-ask-with-john-wheeler.mp3</td>
@@ -245,6 +293,258 @@ describe("SilentEchoScript", function() {
             </div>`;
             // tslint:enable:max-line-length
             assert.equal(silentEchoScript.prettifyAsHTML(validatorResult, false), expected);
+        });
+    });
+    describe("#prettifyAsPartialHTML()", () => {
+        it("renders correctly scheduled result items", async () => {
+            const scripContents = `
+            "open test player": "welcome to the simple audio player"
+            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+	        `;
+            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            // tslint:disable:max-line-length
+            const expected = `
+            <div>
+                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
+                    Validation Script Results
+                </p>
+                <div style="margin:0 0 -18px;" class="output">
+                    <p style="font-weight:bold;"class="heading">Output:</p>
+                </div>
+                <div class="overall">
+                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
+                    <p class="content" style="color:rgb(76,175,80);">2 tests, 0 succeeded, 0 failed</p>
+                </div>
+                <div class="time">
+                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
+                    <p class="content"></p>
+                </div>
+                    <div style="margin-bottom:16px;" class="sequence">
+                        <p style="margin:0 0 2px;font-weight:bold;" class="heading">Sequence: 1</p>
+                        <table style="border-collapse:collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="border:1px solid black;padding:5px;">Result</th>
+                                    <th style="border:1px solid black;padding:5px;">Input</th>
+                                    <th style="border:1px solid black;padding:5px;">Expected</th>
+                                    <th style="border:1px solid black;padding:5px;">Actual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        <tr>
+                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/images/Schedule.svg' height=18></td>
+                            <td style="border:1px solid black;padding:5px;">open test player</td>
+                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
+                            <td style="border:1px solid black;padding:5px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/images/Schedule.svg' height=18></td>
+                            <td style="border:1px solid black;padding:5px;">tell test player to play</td>
+                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
+                            <td style="border:1px solid black;padding:5px;"></td>
+                        </tr></tbody>
+                        </table>
+                    </div>
+            </div>`;
+            // tslint:enable:max-line-length
+            assert.equal(silentEchoScript.prettifyAsPartialHTML(scripContents, [], false), expected);
+        });
+        it("renders correctly running result items", async () => {
+            const scripContents = `
+            "open test player": "welcome to the simple audio player"
+            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+	        `;
+            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            // tslint:disable:max-line-length
+            const expected = `
+            <div>
+                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
+                    Validation Script Results
+                </p>
+                <div style="margin:0 0 -18px;" class="output">
+                    <p style="font-weight:bold;"class="heading">Output:</p>
+                </div>
+                <div class="overall">
+                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
+                    <p class="content" style="color:rgb(76,175,80);">2 tests, 0 succeeded, 0 failed</p>
+                </div>
+                <div class="time">
+                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
+                    <p class="content"></p>
+                </div>
+                    <div style="margin-bottom:16px;" class="sequence">
+                        <p style="margin:0 0 2px;font-weight:bold;" class="heading">Sequence: 1</p>
+                        <table style="border-collapse:collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="border:1px solid black;padding:5px;">Result</th>
+                                    <th style="border:1px solid black;padding:5px;">Input</th>
+                                    <th style="border:1px solid black;padding:5px;">Expected</th>
+                                    <th style="border:1px solid black;padding:5px;">Actual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        <tr>
+                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/images/Spinner.svg' height=24></td>
+                            <td style="border:1px solid black;padding:5px;">open test player</td>
+                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
+                            <td style="border:1px solid black;padding:5px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/images/Schedule.svg' height=18></td>
+                            <td style="border:1px solid black;padding:5px;">tell test player to play</td>
+                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
+                            <td style="border:1px solid black;padding:5px;"></td>
+                        </tr></tbody>
+                        </table>
+                    </div>
+            </div>`;
+            // tslint:enable:max-line-length
+            const resultItem: ISilentEchoValidatorResultItem  = {
+                status: "running",
+                test: {
+                    absoluteIndex: 1,
+                    comparison: "contains",
+                    expectedTranscript: "welcome to the simple audio player",
+                    input: "open test player",
+                    sequence: 1,
+                    sequenceIndex: 1,
+                },
+            };
+            const resultItems = [resultItem];
+            assert.equal(silentEchoScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
+        });
+        it("renders correctly done result items", async () => {
+            const scripContents = `
+            "open test player": "welcome to the simple audio player"
+            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+	        `;
+            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            // tslint:disable:max-line-length
+            const expected = `
+            <div>
+                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
+                    Validation Script Results
+                </p>
+                <div style="margin:0 0 -18px;" class="output">
+                    <p style="font-weight:bold;"class="heading">Output:</p>
+                </div>
+                <div class="overall">
+                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
+                    <p class="content" style="color:rgb(76,175,80);">2 tests, 1 succeeded, 0 failed</p>
+                </div>
+                <div class="time">
+                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
+                    <p class="content"></p>
+                </div>
+                    <div style="margin-bottom:16px;" class="sequence">
+                        <p style="margin:0 0 2px;font-weight:bold;" class="heading">Sequence: 1</p>
+                        <table style="border-collapse:collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="border:1px solid black;padding:5px;">Result</th>
+                                    <th style="border:1px solid black;padding:5px;">Input</th>
+                                    <th style="border:1px solid black;padding:5px;">Expected</th>
+                                    <th style="border:1px solid black;padding:5px;">Actual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        <tr style="color:rgb(76,175,80);">
+                            <td style="border:1px solid black;padding:5px;text-align:center;">&#10004;</td>
+                            <td style="border:1px solid black;padding:5px;">open test player</td>
+                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
+                            <td style="border:1px solid black;padding:5px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/images/Schedule.svg' height=18></td>
+                            <td style="border:1px solid black;padding:5px;">tell test player to play</td>
+                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
+                            <td style="border:1px solid black;padding:5px;"></td>
+                        </tr></tbody>
+                        </table>
+                    </div>
+            </div>`;
+            // tslint:enable:max-line-length
+            const resultItem: ISilentEchoValidatorResultItem  = {
+                result: "success",
+                status: "done",
+                test: {
+                    absoluteIndex: 1,
+                    comparison: "contains",
+                    expectedTranscript: "welcome to the simple audio player",
+                    input: "open test player",
+                    sequence: 1,
+                    sequenceIndex: 1,
+                },
+            };
+            const resultItems = [resultItem];
+            assert.equal(silentEchoScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
+        });
+        it("renders correctly failed result items", async () => {
+            const scripContents = `
+            "open test player": "welcome to the simple audio player"
+            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+	        `;
+            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            // tslint:disable:max-line-length
+            const expected = `
+            <div>
+                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
+                    Validation Script Results
+                </p>
+                <div style="margin:0 0 -18px;" class="output">
+                    <p style="font-weight:bold;"class="heading">Output:</p>
+                </div>
+                <div class="overall">
+                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
+                    <p class="content" style="color:rgb(244,67,54);">2 tests, 0 succeeded, 1 failed</p>
+                </div>
+                <div class="time">
+                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
+                    <p class="content"></p>
+                </div>
+                    <div style="margin-bottom:16px;" class="sequence">
+                        <p style="margin:0 0 2px;font-weight:bold;" class="heading">Sequence: 1</p>
+                        <table style="border-collapse:collapse;">
+                            <thead>
+                                <tr>
+                                    <th style="border:1px solid black;padding:5px;">Result</th>
+                                    <th style="border:1px solid black;padding:5px;">Input</th>
+                                    <th style="border:1px solid black;padding:5px;">Expected</th>
+                                    <th style="border:1px solid black;padding:5px;">Actual</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                        <tr style="color:rgb(244,67,54);">
+                            <td style="border:1px solid black;padding:5px;text-align:center;">&#10008;</td>
+                            <td style="border:1px solid black;padding:5px;">open test player</td>
+                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
+                            <td style="border:1px solid black;padding:5px;"></td>
+                        </tr>
+                        <tr>
+                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/images/Schedule.svg' height=18></td>
+                            <td style="border:1px solid black;padding:5px;">tell test player to play</td>
+                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
+                            <td style="border:1px solid black;padding:5px;"></td>
+                        </tr></tbody>
+                        </table>
+                    </div>
+            </div>`;
+            // tslint:enable:max-line-length
+            const resultItem: ISilentEchoValidatorResultItem  = {
+                result: "failure",
+                status: "done",
+                test: {
+                    absoluteIndex: 1,
+                    comparison: "contains",
+                    expectedTranscript: "welcome to the simple audio player",
+                    input: "open test player",
+                    sequence: 1,
+                    sequenceIndex: 1,
+                },
+            };
+            const resultItems = [resultItem];
+            assert.equal(silentEchoScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
         });
     });
 });

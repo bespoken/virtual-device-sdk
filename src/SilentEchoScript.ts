@@ -2,7 +2,9 @@ import {
     ISilentEchoTest,
     ISilentEchoTestSequence,
     ISilentEchoValidatorResult,
+    ISilentEchoValidatorResultItem,
     SilentEchoValidator,
+    Validator,
 } from "./SilentEchoValidator";
 
 const URLRegexp = /^https?:\/\//i;
@@ -17,6 +19,9 @@ export const SilentEchoScriptSyntaxError = new Error("Invalid script syntax, ple
     "<Input>": "<ExpectedOutput>"
 
     "<Input>": "<ExpectedOutput>"`);
+
+export type ISilentEchoScriptCallback = (
+    resultItem: ISilentEchoValidatorResultItem) => void;
 
 export class SilentEchoScript {
     private silentEchoValidator: SilentEchoValidator;
@@ -95,6 +100,35 @@ export class SilentEchoScript {
         }
     }
 
+    // prettifyAsPartialHTML prettyfies given validator result items into HTML.
+    public prettifyAsPartialHTML(scriptContents: string,
+                                 partialResultItems: ISilentEchoValidatorResultItem[],
+                                 includeTimeContent: boolean = true): string {
+        const silentEchoTestSequences: ISilentEchoTestSequence[] = this.tests(scriptContents);
+        const result: ISilentEchoValidatorResult = {tests: []};
+        for (const sequence of silentEchoTestSequences) {
+            for (const test of sequence.tests) {
+                const resultItem: ISilentEchoValidatorResultItem = {test};
+                resultItem.status = "scheduled";
+                const validator: Validator = new Validator(resultItem, undefined);
+                result.tests.push(validator.resultItem);
+            }
+        }
+        for (const partialResultItem of partialResultItems) {
+            for (const i in result.tests) {
+                if (result.tests[i]) {
+                    const resultItem = result.tests[i];
+                    if (resultItem.test.absoluteIndex === partialResultItem.test.absoluteIndex) {
+                        result.tests[i] = partialResultItem;
+                        break;
+                    }
+                }
+            }
+        }
+        return this.prettifyAsHTML(result, includeTimeContent);
+    }
+
+    // prettifyAsHTML prettyfies given validator result into HTML.
     public prettifyAsHTML(result: ISilentEchoValidatorResult, includeTimeContent: boolean = true): string {
         const colorRed = "rgb(244,67,54)";
         const colorGreen = "rgb(76,175,80)";
@@ -116,7 +150,8 @@ export class SilentEchoScript {
             }
         }
         const sequencesHTML = [];
-        const tdAndThStyles = `style="border:1px solid black;padding:5px;"`;
+        const tdAndThStyleProps = "border:1px solid black;padding:5px;";
+        const tdAndThStyles = `style="${tdAndThStyleProps}"`;
         const tdStyles = tdAndThStyles;
         const thStyles = tdAndThStyles;
         const trStyles = (r: string): string => {
@@ -126,7 +161,7 @@ export class SilentEchoScript {
             } else if (r === "failure") {
                 color = colorRed;
             }
-            return `style="color:${color};"`;
+            return ` style="color:${color};"`;
         };
         const overallContentStyles = (): string => {
             let color: string = "";
@@ -137,23 +172,36 @@ export class SilentEchoScript {
             }
             return `style="color:${color};"`;
         };
+        const statusIcon = (test: any): string => {
+            if (test.status === "running") {
+                return "<img src='/images/Spinner.svg' height=24>";
+            } else if (test.status === "scheduled") {
+                return "<img src='/images/Schedule.svg' height=18>";
+            } else if (test.status === "done" && test.result
+                && test.result === "success") {
+                return "&#10004;";
+            } else if (test.status === "done" && test.result
+                && test.result !== "success") {
+                return "&#10008;";
+            } else {
+                return "";
+            }
+        };
         for (const key in sequences) {
             if (sequences.hasOwnProperty(key)) {
                 const tests = sequences[key];
                 const testsHTML = [];
                 for (const test of tests) {
                     const html = `
-                        <tr ${trStyles(test.result)}>
-                            <td ${tdStyles}>${test.result === "success"
-                                ? "&#10004;"
-                                : "&#10008;"}</td>
+                        <tr${(test.result && trStyles(test.result)) || ""}>
+                            <td style="${tdAndThStyleProps}text-align:center;">${statusIcon(test)}</td>
                             <td ${tdStyles}>${test.test.input}</td>
                             <td ${tdStyles}>${test.test.expectedStreamURL
                                 ? test.test.expectedStreamURL
                                 : test.test.expectedTranscript || ""}</td>
-                            <td ${tdStyles}>${test.actual.streamURL
+                            <td ${tdStyles}>${test.actual && test.actual.streamURL
                                 ? test.actual.streamURL
-                                : test.actual.transcript || ""}</td>
+                                : (test.actual && test.actual.transcript) || ""}</td>
                         </tr>`;
                     testsHTML.push(html);
                 }
@@ -175,8 +223,14 @@ export class SilentEchoScript {
                 sequencesHTML.push(html);
                 }
         }
+        const showHeadingSpinner = (totalTests.length === succeededTests.length + failedTests.length);
+        const headingSpinner = (showHeadingSpinner
+            ? "<img src='/images/Spinner.svg' height=34>" : "");
         return `
             <div>
+                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
+                    Validation Script Results${headingSpinner}
+                </p>
                 <div style="margin:0 0 -18px;" class="output">
                     <p style="font-weight:bold;"class="heading">Output:</p>
                 </div>
@@ -189,5 +243,9 @@ export class SilentEchoScript {
                     <p class="content">${includeTimeContent && nowUTC || ""}</p>
                 </div>${sequencesHTML.join("")}
             </div>`;
+    }
+
+    public on(event: string, cb: ISilentEchoScriptCallback) {
+        this.silentEchoValidator.subscribe(event, cb);
     }
 }
