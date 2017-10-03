@@ -15,7 +15,7 @@ const expect = chai.expect;
 
 describe("SilentEchoScript", function() {
     this.timeout(120000);
-    const BASE_URL = "https://silentecho-dev.bespoken.io/process";
+    const BASE_URL = "https://silentecho.bespoken.io/process";
 
     let token: string;
     let messageStub: any;

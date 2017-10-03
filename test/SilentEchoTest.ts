@@ -6,7 +6,7 @@ import * as fixtures from "./fixtures";
 
 describe("SilentEcho", function() {
     this.timeout(60000);
-    const BASE_URL = "https://silentecho-dev.bespoken.io/process";
+    const BASE_URL = "https://silentecho.bespoken.io/process";
     let messageStub: any;
 
     before(() => {
