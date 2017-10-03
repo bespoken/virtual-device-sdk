@@ -165,12 +165,10 @@ describe("SilentEchoScript", function() {
             const silentEchoScript = new SilentEchoScript(token, BASE_URL);
             const messageCallback: ISilentEchoScriptCallback = (
                 resultItem: ISilentEchoValidatorResultItem) => {
-                // console.log("on.message, data: ", data);
                 };
             const messageCallbackSpy = Sinon.spy(messageCallback);
             const resultCallback: ISilentEchoScriptCallback = (
                 resultItem: ISilentEchoValidatorResultItem) => {
-                // console.log("on.result, data: ", data);
                 };
             const resultCallbackSpy = Sinon.spy(resultCallback);
             silentEchoScript.on("message", messageCallbackSpy);
