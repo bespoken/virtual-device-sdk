@@ -223,7 +223,7 @@ export class SilentEchoScript {
                 sequencesHTML.push(html);
                 }
         }
-        const showHeadingSpinner = (totalTests.length === succeededTests.length + failedTests.length);
+        const showHeadingSpinner = (totalTests.length !== succeededTests.length + failedTests.length);
         const headingSpinner = (showHeadingSpinner
             ? "<img src='/images/Spinner.svg' height=34>" : "");
         return `

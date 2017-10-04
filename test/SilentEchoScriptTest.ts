@@ -251,7 +251,7 @@ describe("SilentEchoScript", function() {
             const expected = `
             <div>
                 <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
-                    Validation Script Results<img src='/images/Spinner.svg' height=34>
+                    Validation Script Results
                 </p>
                 <div style="margin:0 0 -18px;" class="output">
                     <p style="font-weight:bold;"class="heading">Output:</p>
@@ -306,7 +306,7 @@ describe("SilentEchoScript", function() {
             const expected = `
             <div>
                 <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
-                    Validation Script Results
+                    Validation Script Results<img src='/images/Spinner.svg' height=34>
                 </p>
                 <div style="margin:0 0 -18px;" class="output">
                     <p style="font-weight:bold;"class="heading">Output:</p>
@@ -359,7 +359,7 @@ describe("SilentEchoScript", function() {
             const expected = `
             <div>
                 <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
-                    Validation Script Results
+                    Validation Script Results<img src='/images/Spinner.svg' height=34>
                 </p>
                 <div style="margin:0 0 -18px;" class="output">
                     <p style="font-weight:bold;"class="heading">Output:</p>
@@ -424,7 +424,7 @@ describe("SilentEchoScript", function() {
             const expected = `
             <div>
                 <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
-                    Validation Script Results
+                    Validation Script Results<img src='/images/Spinner.svg' height=34>
                 </p>
                 <div style="margin:0 0 -18px;" class="output">
                     <p style="font-weight:bold;"class="heading">Output:</p>
@@ -490,7 +490,7 @@ describe("SilentEchoScript", function() {
             const expected = `
             <div>
                 <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
-                    Validation Script Results
+                    Validation Script Results<img src='/images/Spinner.svg' height=34>
                 </p>
                 <div style="margin:0 0 -18px;" class="output">
                     <p style="font-weight:bold;"class="heading">Output:</p>
