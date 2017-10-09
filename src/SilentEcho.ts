@@ -7,7 +7,7 @@ export class SilentEcho {
         this.baseURL = "https://silentecho.bespoken.io/process";
     }
 
-    public message(message: string, debug: boolean = false): Promise<ISilentResult> {
+    public message(message: string, debug?: boolean): Promise<ISilentResult> {
         let url = this.baseURL + "?message=" + message + "&user_id=" + this.token;
         if (debug) {
             url += "&debug=true";
