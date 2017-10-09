@@ -10,7 +10,7 @@ export class SilentEchoValidator {
     private silentEcho: SilentEcho;
     private subscribers: ISubscribers;
 
-    constructor(token: string, baseURL?) {
+    constructor(token: string, baseURL?: string) {
         this.silentEcho = new SilentEcho(token);
         this.silentEcho.baseURL = baseURL ? baseURL : "https://silentecho.bespoken.io/process";
         this.subscribers = {message: [], result: []};
