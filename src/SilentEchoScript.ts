@@ -26,7 +26,8 @@ export type ISilentEchoScriptCallback = (
 export class SilentEchoScript {
     private silentEchoValidator: SilentEchoValidator;
 
-    constructor(token: string, baseURL = "https://silentecho.bespoken.io/process") {
+    constructor(token: string, baseURL?: string) {
+        baseURL = baseURL ? baseURL : "https://silentecho.bespoken.io/process";
         this.silentEchoValidator = new SilentEchoValidator(token, baseURL);
     }
 
@@ -103,7 +104,9 @@ export class SilentEchoScript {
     // prettifyAsPartialHTML prettyfies given validator result items into HTML.
     public prettifyAsPartialHTML(scriptContents: string,
                                  partialResultItems: ISilentEchoValidatorResultItem[],
-                                 includeTimeContent: boolean = true): string {
+                                 includeTimeContent?: boolean): string {
+        includeTimeContent = (typeof includeTimeContent !== "undefined") ? includeTimeContent : true;
+
         const silentEchoTestSequences: ISilentEchoTestSequence[] = this.tests(scriptContents);
         const result: ISilentEchoValidatorResult = {tests: []};
         for (const sequence of silentEchoTestSequences) {
@@ -129,7 +132,8 @@ export class SilentEchoScript {
     }
 
     // prettifyAsHTML prettyfies given validator result into HTML.
-    public prettifyAsHTML(result: ISilentEchoValidatorResult, includeTimeContent: boolean = true): string {
+    public prettifyAsHTML(result: ISilentEchoValidatorResult, includeTimeContent?: boolean): string {
+        includeTimeContent = (typeof includeTimeContent !== "undefined") ? includeTimeContent : true;
         const colorRed = "rgb(244,67,54)";
         const colorGreen = "rgb(76,175,80)";
         const totalTests = result.tests;
