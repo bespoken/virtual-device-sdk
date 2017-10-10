@@ -27,7 +27,8 @@
     "pretest": "npm run tsc && npm run lint",
     "test": "nyc mocha lib/test/*Test.js",
     "posttest": "nyc report --reporter=json && codecov -f coverage/*.json",
-    "typings": "typings install"
+    "typings": "typings install",
+    "preversion": "npm run tsc"
   },
   "devDependencies": {
     "@types/chai": "^4.0.0",
