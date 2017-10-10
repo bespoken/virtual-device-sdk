@@ -174,9 +174,9 @@ export class SilentEchoScript {
         };
         const statusIcon = (test: any): string => {
             if (test.status === "running") {
-                return "<img src='/images/Spinner.svg' height=24>";
+                return "<img src='/assets/Spinner.svg' height=24>";
             } else if (test.status === "scheduled") {
-                return "<img src='/images/Schedule.svg' height=18>";
+                return "<img src='/assets/Schedule.svg' height=18>";
             } else if (test.status === "done" && test.result
                 && test.result === "success") {
                 return "&#10004;";
@@ -225,7 +225,7 @@ export class SilentEchoScript {
         }
         const showHeadingSpinner = (totalTests.length !== succeededTests.length + failedTests.length);
         const headingSpinner = (showHeadingSpinner
-            ? "<img src='/images/Spinner.svg' height=34>" : "");
+            ? "<img src='/assets/Spinner.svg' height=34>" : "");
         return `
             <div>
                 <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
