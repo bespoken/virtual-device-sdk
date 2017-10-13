@@ -8,7 +8,7 @@ export class SilentEcho {
     }
 
     public normalizeMessage(message: string): string {
-        if (message === "no") {
+        if (message.trim().toLowerCase() === "no") {
             return "alexa no";
         }
         return message;
