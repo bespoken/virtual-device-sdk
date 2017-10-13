@@ -7,8 +7,19 @@ export class SilentEcho {
         this.baseURL = "https://silentecho.bespoken.io/process";
     }
 
+    public normalizeMessage(message: string): string {
+        if (message === "no") {
+            return "alexa no";
+        }
+        return message;
+
+    }
+
     public message(message: string, debug?: boolean): Promise<ISilentResult> {
+        message = this.normalizeMessage(message);
+
         let url = this.baseURL + "?message=" + message + "&user_id=" + this.token;
+
         if (debug) {
             url += "&debug=true";
         }
