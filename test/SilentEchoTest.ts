@@ -55,4 +55,10 @@ describe("SilentEcho", function() {
             assert.isDefined((result.debug as any).rawJSON.messageBody);
         });
     });
+    describe("#normalizeMessage()", () => {
+        it("Should transform no to 'alexa no'", async () => {
+            const sdk = new SilentEcho(process.env.TEST_TOKEN as string);
+            assert.equal(sdk.normalizeMessage("No"), "alexa no");
+        });
+    });
 });
