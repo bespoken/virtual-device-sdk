@@ -123,9 +123,10 @@ describe("SilentEchoScript", function() {
 
             let absoluteIndex: number = 0;
             const assertSequenceInfo = (sequence: number, testsQuantity: number) => {
-                const sequenceTests = validatorResult.tests.filter((resultItem) => {
-                    return resultItem.test.sequence === sequence;
-                });
+                const sequenceTests = validatorResult.tests
+                    .filter((resultItem: ISilentEchoValidatorResultItem) => {
+                        return resultItem.test.sequence === sequence;
+                    });
                 const msg = "unexpected sequence tests quantity, " +
                 `expected: ${testsQuantity}, got: ${sequenceTests.length}`;
                 assert.equal(sequenceTests.length, testsQuantity, msg);

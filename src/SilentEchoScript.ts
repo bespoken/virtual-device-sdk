@@ -86,8 +86,9 @@ export class SilentEchoScript {
         return sequences;
     }
 
-    public execute(scriptContents: string): Promise<ISilentEchoValidatorResult> {
-        return this.silentEchoValidator.execute(this.tests(scriptContents));
+    public execute(scriptContents: string): Promise<any> {
+        return this.silentEchoValidator.execute(this.tests(scriptContents),
+            this.detectInvocationName(scriptContents));
     }
 
     // validate validates given script contents syntax
@@ -251,5 +252,14 @@ export class SilentEchoScript {
 
     public on(event: string, cb: ISilentEchoScriptCallback) {
         this.silentEchoValidator.subscribe(event, cb);
+    }
+
+    public checkAuth(scriptContents: string): boolean {
+        return this.silentEchoValidator.checkAuth(
+            this.detectInvocationName(scriptContents));
+    }
+
+    private detectInvocationName(scriptContents: string): string {
+        return "invocation name";
     }
 }

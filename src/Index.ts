@@ -1,13 +1,16 @@
 import {ICard, ISilentResult, SilentEcho} from "./SilentEcho";
 import {SilentEchoScript, SilentEchoScriptSyntaxError} from "./SilentEchoScript";
-import {ISilentEchoValidatorResult, SilentEchoValidator} from "./SilentEchoValidator";
+import {ISilentEchoValidatorResult,
+    SilentEchoScriptUnauthorizedError,
+    SilentEchoValidator} from "./SilentEchoValidator";
 
 export {
-    SilentEcho,
-    ISilentResult,
     ICard,
-    SilentEchoValidator,
+    ISilentEchoValidatorResult,
+    ISilentResult,
+    SilentEcho,
     SilentEchoScript,
     SilentEchoScriptSyntaxError,
-    ISilentEchoValidatorResult,
+    SilentEchoScriptUnauthorizedError,
+    SilentEchoValidator,
 }

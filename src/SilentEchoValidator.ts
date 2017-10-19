@@ -1,9 +1,13 @@
 import {ISilentResult, SilentEcho} from "./SilentEcho";
 
+export const SilentEchoScriptUnauthorizedError = new Error("Security token lacks sufficient " +
+    "information. Please re-authenticate with Amazon here to update your security token.");
+
 interface ISubscribers {
     [index: string]: any[];
     message: any[];
     result: any[];
+    unauthorized: any[];
 }
 
 export class SilentEchoValidator {
@@ -13,7 +17,7 @@ export class SilentEchoValidator {
     constructor(token: string, baseURL?: string) {
         this.silentEcho = new SilentEcho(token);
         this.silentEcho.baseURL = baseURL ? baseURL : "https://silentecho.bespoken.io/process";
-        this.subscribers = {message: [], result: []};
+        this.subscribers = {message: [], result: [], unauthorized: []};
     }
 
     public subscribe(event: string, cb: any) {
@@ -22,11 +26,16 @@ export class SilentEchoValidator {
         }
     }
 
-    public async execute(silentEchoTestSequences: ISilentEchoTestSequence[]): Promise<ISilentEchoValidatorResult> {
+    public async execute(silentEchoTestSequences: ISilentEchoTestSequence[],
+                         invocationName: string): Promise<any> {
         const result: ISilentEchoValidatorResult = {tests: []};
         const totalSequences: number = silentEchoTestSequences.length;
         let currentSequenceIndex: number = 0;
         for (const sequence of silentEchoTestSequences) {
+            if (!this.checkAuth(invocationName)) {
+                this.emit("unauthorized", SilentEchoScriptUnauthorizedError);
+                return Promise.resolve(SilentEchoScriptUnauthorizedError);
+            }
             currentSequenceIndex += 1;
             if (currentSequenceIndex === 1) {
                 await this.silentEcho.message("Alexa, exit");
@@ -67,6 +76,12 @@ export class SilentEchoValidator {
             result.result = "success";
         }
         return Promise.resolve(result);
+    }
+
+    // checkAuth checks whether given invocation name can be invoked
+    // by `this.silentEcho.token`.
+    public checkAuth(invocationName: string): boolean {
+        return true;
     }
 
     private emit(event: string, data: any) {

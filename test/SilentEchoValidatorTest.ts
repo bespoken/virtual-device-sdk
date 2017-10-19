@@ -54,7 +54,7 @@ describe("SilentEchoValidator", function() {
                 },
             ];
             const silentEchoValidator = new SilentEchoValidator(token, BASE_URL);
-            const validatorResult = await silentEchoValidator.execute(sequences);
+            const validatorResult = await silentEchoValidator.execute(sequences, "");
             assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "success", `${JSON.stringify(test)}`);
@@ -74,7 +74,7 @@ describe("SilentEchoValidator", function() {
                 },
             ];
             const silentEchoValidator = new SilentEchoValidator(token, BASE_URL);
-            const validatorResult = await silentEchoValidator.execute(sequences);
+            const validatorResult = await silentEchoValidator.execute(sequences, "");
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
             }
