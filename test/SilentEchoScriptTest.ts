@@ -7,7 +7,9 @@ import {ISilentResult, SilentEcho} from "../src/SilentEcho";
 import {ISilentEchoScriptCallback,
     SilentEchoScript,
     SilentEchoScriptSyntaxError} from "../src/SilentEchoScript";
-import {ISilentEchoValidatorResultItem} from "../src/SilentEchoValidator";
+import {ISilentEchoValidatorResultItem,
+    SilentEchoScriptUnauthorizedError,
+    SilentEchoValidator} from "../src/SilentEchoValidator";
 import * as fixtures from "./fixtures";
 
 chai.use(sinonChai);
@@ -185,6 +187,30 @@ describe("SilentEchoScript", function() {
             }
             expect(messageCallbackSpy).to.have.been.callCount(6);
             expect(resultCallbackSpy).to.have.been.callCount(6);
+        });
+        describe("unauthorized", () => {
+            let checkAuthStub: any;
+            before(() => {
+                checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                    .returns(false);
+            });
+            after(() => {
+                checkAuthStub.restore();
+            });
+            it("returns unauthorized error", async () => {
+                const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+                const unauthorizedCallback: any = (err: any) => {
+                        assert.equal(err, SilentEchoScriptUnauthorizedError);
+                };
+                const unauthorizedCallbackSpy = Sinon.spy(unauthorizedCallback);
+                silentEchoScript.on("unauthorized", unauthorizedCallbackSpy);
+                try {
+                    await silentEchoScript.execute(`"Hi": "*"`);
+                } catch (err) {
+                    assert.equal(err, SilentEchoScriptUnauthorizedError);
+                }
+                expect(unauthorizedCallbackSpy).to.have.been.callCount(1);
+            });
         });
     });
     describe("#validate()", () => {

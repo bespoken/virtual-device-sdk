@@ -34,7 +34,7 @@ export class SilentEchoValidator {
         for (const sequence of silentEchoTestSequences) {
             if (!this.checkAuth(invocationName)) {
                 this.emit("unauthorized", SilentEchoScriptUnauthorizedError);
-                return Promise.resolve(SilentEchoScriptUnauthorizedError);
+                return Promise.reject(SilentEchoScriptUnauthorizedError);
             }
             currentSequenceIndex += 1;
             if (currentSequenceIndex === 1) {
