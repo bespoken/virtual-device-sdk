@@ -7,7 +7,7 @@ export function message(message: string): Promise<ISilentResult> {
             sessionTimeout: 0,
             streamURL: null,
             transcript: "welcome to the simple audio player",
-            transcriptAudioURL: "https://storage.googleapis.com/raw_audio/",
+            transcriptAudioURL: "",
         });
     }
     if (message.includes("hi")) {

@@ -259,7 +259,7 @@ export class SilentEchoScript {
             this.detectInvocationName(scriptContents));
     }
 
-    private detectInvocationName(scriptContents: string): string {
+    public detectInvocationName(scriptContents: string): string {
         return "invocation name";
     }
 }

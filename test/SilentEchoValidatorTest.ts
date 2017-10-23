@@ -80,4 +80,10 @@ describe("SilentEchoValidator", function() {
             }
         });
     });
+    describe("#checkAuth()", () => {
+        it("success", async () => {
+            const silentEchoValidator = new SilentEchoValidator(token, BASE_URL);
+            assert.equal(silentEchoValidator.checkAuth("invocation name"), true);
+        });
+    });
 });

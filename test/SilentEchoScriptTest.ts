@@ -574,4 +574,30 @@ describe("SilentEchoScript", function() {
             assert.equal(silentEchoScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
         });
     });
+    describe("#checkAuth()", () => {
+        let sevCheckAuthSpy: any;
+        let sesDetectInvocationNameSpy: any;
+        before(() => {
+            sevCheckAuthSpy = Sinon.spy(SilentEchoValidator.prototype, "checkAuth");
+            sesDetectInvocationNameSpy = Sinon.spy(SilentEchoScript.prototype, "detectInvocationName");
+        });
+        after(() => {
+            sevCheckAuthSpy.reset();
+            sesDetectInvocationNameSpy.reset();
+        });
+        it("success", async () => {
+            const scripContents = `"Hi": "*"`;
+            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            assert.deepEqual(silentEchoScript.checkAuth(scripContents), true);
+            expect(sevCheckAuthSpy).to.have.been.callCount(1);
+            expect(sesDetectInvocationNameSpy).to.have.been.callCount(1);
+        });
+    });
+    describe("#detectInvocationName()", () => {
+        it("success", async () => {
+            const scripContents = `"Hi": "*"`;
+            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            assert.deepEqual(silentEchoScript.detectInvocationName(scripContents), "invocation name");
+        });
+    });
 });

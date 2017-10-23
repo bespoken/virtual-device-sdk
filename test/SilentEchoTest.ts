@@ -33,7 +33,7 @@ describe("SilentEcho", function() {
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.transcript);
             assert.isDefined(result.transcriptAudioURL);
-            assert.isNull(result.transcriptAudioURL);
+            assert.isEmpty(result.transcriptAudioURL);
         });
 
         it("Should have stream URL", async () => {
