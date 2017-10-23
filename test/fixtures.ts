@@ -28,7 +28,7 @@ export function message(message: string): Promise<ISilentResult> {
             card: null,
             sessionTimeout: 0,
             streamURL: "",
-            transcript: "welcome to the simple audio player",
+            transcript: "welcome to the simple audio player say play to play some audio",
             transcriptAudioURL: "",
         });
     }
@@ -36,12 +36,22 @@ export function message(message: string): Promise<ISilentResult> {
         return Promise.resolve({
             card: null,
             sessionTimeout: 0,
-            streamURL: "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010",
+            streamURL: "https://feeds.soundcloud.com/stream/309340878-user-652822799" +
+                "-episode-010-building-an-alexa-skill-with-flask-ask-with-john-wheeler.mp3",
             transcript: "",
             transcriptAudioURL: "",
         });
     }
     if (message.includes("pause")) {
+        return Promise.resolve({
+            card: null,
+            sessionTimeout: 0,
+            streamURL: "",
+            transcript: "",
+            transcriptAudioURL: "",
+        });
+    }
+    if (message.includes("Alexa, exit")) {
         return Promise.resolve({
             card: null,
             sessionTimeout: 0,
