@@ -31,7 +31,7 @@
     "preversion": "npm run tsc"
   },
   "devDependencies": {
-    "@types/chai": "^4.0.0",
+    "@types/chai": "^4.0.2",
     "@types/dotenv": "^4.0.0",
     "@types/mocha": "^2.2.41",
     "@types/sinon": "^2.3.3",
