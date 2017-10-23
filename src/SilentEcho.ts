@@ -62,7 +62,7 @@ export interface ISilentResult {
     sessionTimeout: number;
     streamURL: string | null;
     transcript: string;
-    transcriptAudioURL: string;
+    transcriptAudioURL: string | null;
 }
 
 export interface ICard {
