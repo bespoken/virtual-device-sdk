@@ -1,3 +1,4 @@
+import * as https from "https";
 import {ISilentResult, SilentEcho} from "./SilentEcho";
 
 export const SilentEchoScriptUnauthorizedError = new Error("Security token lacks sufficient " +
@@ -13,11 +14,13 @@ interface ISubscribers {
 export class SilentEchoValidator {
     private silentEcho: SilentEcho;
     private subscribers: ISubscribers;
+    private sourceAPIBaseURL: string;
 
-    constructor(token: string, baseURL?: string) {
+    constructor(token: string, baseURL?: string, sourceAPIBaseURL?: string) {
         this.silentEcho = new SilentEcho(token);
         this.silentEcho.baseURL = baseURL ? baseURL : "https://silentecho.bespoken.io/process";
         this.subscribers = {message: [], result: [], unauthorized: []};
+        this.sourceAPIBaseURL = sourceAPIBaseURL ? sourceAPIBaseURL : "https://source-api.bespoken.tools";
     }
 
     public subscribe(event: string, cb: any) {
@@ -80,8 +83,27 @@ export class SilentEchoValidator {
 
     // checkAuth checks whether given invocation name can be invoked
     // by `this.silentEcho.token`.
-    public checkAuth(invocationName: string): boolean {
-        return true;
+    public checkAuth(invocationName: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            let data = "";
+            const url = this.sourceAPIBaseURL + "/v1/skillAuthorized";
+            const req = https.get(url as any, (res) => {
+                res.on("data", (chunk) => {
+                    data += chunk;
+                });
+                res.on("end", () => {
+                    if (res.statusCode === 200) {
+                        resolve(data);
+                    } else {
+                        reject(data);
+                    }
+                });
+            });
+            req.on("error", function(error: string) {
+                reject(error);
+            });
+            req.end();
+        });
     }
 
     private emit(event: string, data: any) {

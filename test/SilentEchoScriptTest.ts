@@ -1,6 +1,7 @@
 import {assert} from "chai";
 import * as chai from "chai";
 import * as dotenv from "dotenv";
+import * as nock from "nock";
 import * as Sinon from "sinon";
 import * as sinonChai from "sinon-chai";
 import {ISilentResult, SilentEcho} from "../src/SilentEcho";
@@ -18,6 +19,7 @@ const expect = chai.expect;
 describe("SilentEchoScript", function() {
     this.timeout(120000);
     const BASE_URL = "https://silentecho.bespoken.io/process";
+    const SOURCE_API_BASE_URL = process.env.SOURCE_API_BASE_URL;
 
     let token: string;
     let messageStub: any;
@@ -577,18 +579,25 @@ describe("SilentEchoScript", function() {
     describe("#checkAuth()", () => {
         let sevCheckAuthSpy: any;
         let sesDetectInvocationNameSpy: any;
+        let nockScope: any;
         before(() => {
+            nockScope = nock("https://source-api.bespoken.tools")
+                .get("/v1/skillAuthorized")
+                .reply(200, "AUTHORIZED");
             sevCheckAuthSpy = Sinon.spy(SilentEchoValidator.prototype, "checkAuth");
             sesDetectInvocationNameSpy = Sinon.spy(SilentEchoScript.prototype, "detectInvocationName");
         });
         after(() => {
+            nockScope.done();
+            nock.cleanAll();
             sevCheckAuthSpy.reset();
             sesDetectInvocationNameSpy.reset();
         });
         it("success", async () => {
             const scripContents = `"Hi": "*"`;
-            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
-            assert.deepEqual(silentEchoScript.checkAuth(scripContents), true);
+            const silentEchoScript = new SilentEchoScript(token, BASE_URL, SOURCE_API_BASE_URL);
+            const checkAuthResult = await silentEchoScript.checkAuth(scripContents);
+            assert.deepEqual(checkAuthResult, "AUTHORIZED");
             expect(sevCheckAuthSpy).to.have.been.callCount(1);
             expect(sesDetectInvocationNameSpy).to.have.been.callCount(1);
         });

@@ -1,5 +1,6 @@
 import {assert} from "chai";
 import * as dotenv from "dotenv";
+import * as nock from "nock";
 import * as Sinon from "sinon";
 import {ISilentResult, SilentEcho} from "../src/SilentEcho";
 import {SilentEchoValidator} from "../src/SilentEchoValidator";
@@ -8,6 +9,7 @@ import * as fixtures from "./fixtures";
 describe("SilentEchoValidator", function() {
     this.timeout(60000);
     const BASE_URL = "https://silentecho.bespoken.io/process";
+    const SOURCE_API_BASE_URL = process.env.SOURCE_API_BASE_URL;
 
     let token: string;
     let messageStub: any;
@@ -81,9 +83,20 @@ describe("SilentEchoValidator", function() {
         });
     });
     describe("#checkAuth()", () => {
+        let nockScope: any;
+        before(() => {
+            nockScope = nock("https://source-api.bespoken.tools")
+                .get("/v1/skillAuthorized")
+                .reply(200, "AUTHORIZED");
+        });
+        after(() => {
+            nockScope.done();
+            nock.cleanAll();
+        });
         it("success", async () => {
-            const silentEchoValidator = new SilentEchoValidator(token, BASE_URL);
-            assert.equal(silentEchoValidator.checkAuth("invocation name"), true);
+            const silentEchoValidator = new SilentEchoValidator(token, BASE_URL, SOURCE_API_BASE_URL);
+            const checkAuthResult = await silentEchoValidator.checkAuth("invocation name");
+            assert.equal(checkAuthResult, "AUTHORIZED");
         });
     });
 });
