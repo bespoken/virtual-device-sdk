@@ -35,7 +35,13 @@ export class SilentEchoValidator {
         const totalSequences: number = silentEchoTestSequences.length;
         let currentSequenceIndex: number = 0;
         for (const sequence of silentEchoTestSequences) {
-            if (!this.checkAuth(invocationName)) {
+            let checkAuthResult: string;
+            try {
+                checkAuthResult = await this.checkAuth(invocationName);
+            } catch (err) {
+                return Promise.reject(err);
+            }
+            if (checkAuthResult !== "AUTHORIZED") {
                 this.emit("unauthorized", SilentEchoScriptUnauthorizedError);
                 return Promise.reject(SilentEchoScriptUnauthorizedError);
             }

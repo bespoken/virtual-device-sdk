@@ -36,6 +36,14 @@ describe("SilentEchoValidator", function() {
     });
 
     describe("#execute()", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+        });
+        after(() => {
+            checkAuthStub.restore();
+        });
         it("success", async () => {
             const sequences = [
                 {

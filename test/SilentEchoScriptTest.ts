@@ -85,6 +85,14 @@ describe("SilentEchoScript", function() {
         });
     });
     describe("#execute()", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+        });
+        after(() => {
+            checkAuthStub.restore();
+        });
         it("success", async () => {
             const tests = [
                 `"Hi": "*"`,
@@ -154,6 +162,14 @@ describe("SilentEchoScript", function() {
         });
     });
     describe("#on()", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+        });
+        after(() => {
+            checkAuthStub.restore();
+        });
         it("success ", async () => {
             const tests = [
                 `"Hi": "*"`,
@@ -190,29 +206,29 @@ describe("SilentEchoScript", function() {
             expect(messageCallbackSpy).to.have.been.callCount(6);
             expect(resultCallbackSpy).to.have.been.callCount(6);
         });
-        describe("unauthorized", () => {
-            let checkAuthStub: any;
-            before(() => {
-                checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
-                    .returns(false);
-            });
-            after(() => {
-                checkAuthStub.restore();
-            });
-            it("returns unauthorized error", async () => {
-                const silentEchoScript = new SilentEchoScript(token, BASE_URL);
-                const unauthorizedCallback: any = (err: any) => {
-                        assert.equal(err, SilentEchoScriptUnauthorizedError);
-                };
-                const unauthorizedCallbackSpy = Sinon.spy(unauthorizedCallback);
-                silentEchoScript.on("unauthorized", unauthorizedCallbackSpy);
-                try {
-                    await silentEchoScript.execute(`"Hi": "*"`);
-                } catch (err) {
+    });
+    describe("#on() unauthorized event", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("UNAUTHORIZED"));
+        });
+        after(() => {
+            checkAuthStub.restore();
+        });
+        it("returns unauthorized error", async () => {
+            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const unauthorizedCallback: any = (err: any) => {
                     assert.equal(err, SilentEchoScriptUnauthorizedError);
-                }
-                expect(unauthorizedCallbackSpy).to.have.been.callCount(1);
-            });
+            };
+            const unauthorizedCallbackSpy = Sinon.spy(unauthorizedCallback);
+            silentEchoScript.on("unauthorized", unauthorizedCallbackSpy);
+            try {
+                await silentEchoScript.execute(`"Hi": "*"`);
+            } catch (err) {
+                assert.equal(err, SilentEchoScriptUnauthorizedError);
+            }
+            expect(unauthorizedCallbackSpy).to.have.been.callCount(1);
         });
     });
     describe("#validate()", () => {
@@ -269,6 +285,14 @@ describe("SilentEchoScript", function() {
         });
     });
     describe("#prettifyAsHTML()", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+        });
+        after(() => {
+            checkAuthStub.restore();
+        });
         it("success", async () => {
             const scripContents = `
             "open test player": "welcome to the simple audio player"
@@ -584,13 +608,14 @@ describe("SilentEchoScript", function() {
             nockScope = nock("https://source-api.bespoken.tools")
                 .get("/v1/skillAuthorized")
                 .reply(200, "AUTHORIZED");
-            sevCheckAuthSpy = Sinon.spy(SilentEchoValidator.prototype, "checkAuth");
+            sevCheckAuthSpy = Sinon.spy(SilentEchoScript.prototype, "checkAuth");
             sesDetectInvocationNameSpy = Sinon.spy(SilentEchoScript.prototype, "detectInvocationName");
         });
         after(() => {
             nockScope.done();
             nock.cleanAll();
             sevCheckAuthSpy.reset();
+            sevCheckAuthSpy.restore();
             sesDetectInvocationNameSpy.reset();
         });
         it("success", async () => {
