@@ -13,6 +13,9 @@ describe("SilentEchoValidator", function() {
 
     let token: string;
     let messageStub: any;
+    const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
+        return fixtures.message(message);
+    };
 
     before(() => {
         dotenv.config();
@@ -22,9 +25,7 @@ describe("SilentEchoValidator", function() {
             assert.fail("No TEST_TOKEN defined");
         }
         if (process.env.ENABLE_MESSAGES_MOCK) {
-            const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
-                return fixtures.message(message);
-            };
+
             messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
         }
     });
@@ -117,6 +118,47 @@ describe("SilentEchoValidator", function() {
                 await silentEchoValidator.execute(sequences, "");
             } catch (err) {
                 assert.equal(err, "UNAUTHORIZED");
+            }
+        });
+    });
+
+    describe("#execute() sequence processing failure", () => {
+        const sequences = [
+            {
+                tests: [{
+                    comparison: "contains",
+                    expectedStreamURL: undefined,
+                    expectedTranscript: "welcome to the simple audio player",
+                    input: "open test player",
+                    sequence: 1,
+                }],
+            },
+        ];
+        let checkAuthStub: any;
+        let seMessageStub: any;
+        before(() => {
+            messageStub.restore();
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+            seMessageStub = Sinon.stub(SilentEcho.prototype, "message")
+                .callsFake((message: string): Promise<any> => {
+                    if (message.includes("Alexa")) {
+                        return Promise.resolve();
+                    }
+                    return Promise.reject("something went wrong");
+                });
+        });
+        after(() => {
+            checkAuthStub.restore();
+            seMessageStub.restore();
+            messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+        });
+        it("handles silent echo errors", async () => {
+            const silentEchoValidator = new SilentEchoValidator(token, BASE_URL);
+            const validatorResult = await silentEchoValidator.execute(sequences, "");
+            for (const test of validatorResult.tests) {
+                assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
+                assert.equal(test.status, "done", `${JSON.stringify(test)}`);
             }
         });
     });
