@@ -12,6 +12,7 @@ describe("SilentEchoValidator", function() {
     const SOURCE_API_BASE_URL = process.env.SOURCE_API_BASE_URL;
 
     let token: string;
+    const userID: string = "abc";
     let messageStub: any;
     const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
         return fixtures.message(message);
@@ -64,7 +65,7 @@ describe("SilentEchoValidator", function() {
                     }],
                 },
             ];
-            const silentEchoValidator = new SilentEchoValidator(token, BASE_URL);
+            const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
             const validatorResult = await silentEchoValidator.execute(sequences, "");
             assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
             for (const test of validatorResult.tests) {
@@ -84,7 +85,7 @@ describe("SilentEchoValidator", function() {
                     }],
                 },
             ];
-            const silentEchoValidator = new SilentEchoValidator(token, BASE_URL);
+            const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
             const validatorResult = await silentEchoValidator.execute(sequences, "");
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
@@ -113,7 +114,7 @@ describe("SilentEchoValidator", function() {
             checkAuthStub.restore();
         });
         it("handles #checkAuth() errors", async () => {
-            const silentEchoValidator = new SilentEchoValidator(token, BASE_URL);
+            const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
             try {
                 await silentEchoValidator.execute(sequences, "");
             } catch (err) {
@@ -154,7 +155,7 @@ describe("SilentEchoValidator", function() {
             messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
         });
         it("handles silent echo errors", async () => {
-            const silentEchoValidator = new SilentEchoValidator(token, BASE_URL);
+            const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
             const validatorResult = await silentEchoValidator.execute(sequences, "");
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
@@ -167,7 +168,8 @@ describe("SilentEchoValidator", function() {
         let nockScope: any;
         before(() => {
             nockScope = nock("https://source-api.bespoken.tools")
-                .get("/v1/skillAuthorized")
+                .get("/v1/skillAuthorized?invocation_name=simple%20player" +
+                    `&user_id=${userID}&token=${token}`)
                 .reply(200, "AUTHORIZED");
         });
         after(() => {
@@ -175,8 +177,9 @@ describe("SilentEchoValidator", function() {
             nock.cleanAll();
         });
         it("success", async () => {
-            const silentEchoValidator = new SilentEchoValidator(token, BASE_URL, SOURCE_API_BASE_URL);
-            const checkAuthResult = await silentEchoValidator.checkAuth("invocation name");
+            const silentEchoValidator = new SilentEchoValidator(token, userID,
+                BASE_URL, SOURCE_API_BASE_URL);
+            const checkAuthResult = await silentEchoValidator.checkAuth("simple player");
             assert.equal(checkAuthResult, "AUTHORIZED");
         });
     });

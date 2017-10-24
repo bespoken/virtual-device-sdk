@@ -26,9 +26,9 @@ export type ISilentEchoScriptCallback = (
 export class SilentEchoScript {
     private silentEchoValidator: SilentEchoValidator;
 
-    constructor(token: string, baseURL?: string, sourceAPIBaseURL?: string) {
+    constructor(token: string, userID: string, baseURL?: string, sourceAPIBaseURL?: string) {
         baseURL = baseURL ? baseURL : "https://silentecho.bespoken.io/process";
-        this.silentEchoValidator = new SilentEchoValidator(token, baseURL, sourceAPIBaseURL);
+        this.silentEchoValidator = new SilentEchoValidator(token, userID, baseURL, sourceAPIBaseURL);
     }
 
     public tests(scriptContents: string): ISilentEchoTestSequence[] {
@@ -260,6 +260,6 @@ export class SilentEchoScript {
     }
 
     public detectInvocationName(scriptContents: string): string {
-        return "invocation name";
+        return "simple player";
     }
 }

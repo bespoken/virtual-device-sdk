@@ -15,12 +15,14 @@ export class SilentEchoValidator {
     private silentEcho: SilentEcho;
     private subscribers: ISubscribers;
     private sourceAPIBaseURL: string;
+    private userID: string;
 
-    constructor(token: string, baseURL?: string, sourceAPIBaseURL?: string) {
+    constructor(token: string, userID: string, baseURL?: string, sourceAPIBaseURL?: string) {
         this.silentEcho = new SilentEcho(token);
         this.silentEcho.baseURL = baseURL ? baseURL : "https://silentecho.bespoken.io/process";
         this.subscribers = {message: [], result: [], unauthorized: []};
         this.sourceAPIBaseURL = sourceAPIBaseURL ? sourceAPIBaseURL : "https://source-api.bespoken.tools";
+        this.userID = userID;
     }
 
     public subscribe(event: string, cb: any) {
@@ -92,7 +94,10 @@ export class SilentEchoValidator {
     public checkAuth(invocationName: string): Promise<any> {
         return new Promise((resolve, reject) => {
             let data = "";
-            const url = this.sourceAPIBaseURL + "/v1/skillAuthorized";
+            const params = `?invocation_name=${invocationName}` +
+                `&user_id=${this.userID}` +
+                `&token=${this.silentEcho.token}`;
+            const url = this.sourceAPIBaseURL + "/v1/skillAuthorized" + params;
             const req = https.get(url as any, (res) => {
                 res.on("data", (chunk) => {
                     data += chunk;
