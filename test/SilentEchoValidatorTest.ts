@@ -90,6 +90,37 @@ describe("SilentEchoValidator", function() {
             }
         });
     });
+
+    describe("#execute() invocation permissions", () => {
+        const sequences = [
+            {
+                tests: [{
+                    comparison: "contains",
+                    expectedStreamURL: undefined,
+                    expectedTranscript: "welcome to the simple audio player",
+                    input: "open test player",
+                    sequence: 1,
+                }],
+            },
+        ];
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.reject("UNAUTHORIZED"));
+        });
+        after(() => {
+            checkAuthStub.restore();
+        });
+        it("handles #checkAuth() errors", async () => {
+            const silentEchoValidator = new SilentEchoValidator(token, BASE_URL);
+            try {
+                await silentEchoValidator.execute(sequences, "");
+            } catch (err) {
+                assert.equal(err, "UNAUTHORIZED");
+            }
+        });
+    });
+
     describe("#checkAuth()", () => {
         let nockScope: any;
         before(() => {
