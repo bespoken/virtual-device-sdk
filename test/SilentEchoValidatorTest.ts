@@ -138,7 +138,9 @@ describe("SilentEchoValidator", function() {
         let checkAuthStub: any;
         let seMessageStub: any;
         before(() => {
-            messageStub.restore();
+            if (process.env.ENABLE_MESSAGES_MOCK) {
+                messageStub.restore();
+            }
             checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
             seMessageStub = Sinon.stub(SilentEcho.prototype, "message")
@@ -150,9 +152,11 @@ describe("SilentEchoValidator", function() {
                 });
         });
         after(() => {
-            checkAuthStub.restore();
             seMessageStub.restore();
-            messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+            if (process.env.ENABLE_MESSAGES_MOCK) {
+                messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+            }
+            checkAuthStub.restore();
         });
         it("handles silent echo errors", async () => {
             const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
