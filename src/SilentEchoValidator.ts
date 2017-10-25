@@ -172,9 +172,6 @@ export class Validator {
         if (this.error) {
             return false;
         }
-        if (!this.resultItem) {
-            return false;
-        }
         if (this.resultItem.test.comparison !== "contains") {
             return false;
         }

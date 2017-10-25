@@ -3,7 +3,10 @@ import * as dotenv from "dotenv";
 import * as nock from "nock";
 import * as Sinon from "sinon";
 import {ISilentResult, SilentEcho} from "../src/SilentEcho";
-import {SilentEchoValidator} from "../src/SilentEchoValidator";
+import {ISilentEchoTest,
+    ISilentEchoValidatorResultItem,
+    SilentEchoValidator,
+    Validator} from "../src/SilentEchoValidator";
 import * as fixtures from "./fixtures";
 
 describe("SilentEchoValidator", function() {
@@ -185,6 +188,31 @@ describe("SilentEchoValidator", function() {
                 BASE_URL, SOURCE_API_BASE_URL);
             const checkAuthResult = await silentEchoValidator.checkAuth("simple player");
             assert.equal(checkAuthResult, "AUTHORIZED");
+        });
+    });
+
+    describe("Validator", () => {
+        describe("#check()", () => {
+            it("returns false if error is present", () => {
+                const test: ISilentEchoTest = {
+                    comparison: "contains",
+                    input: "Hi",
+                    sequence: 1,
+                };
+                const resultItem: ISilentEchoValidatorResultItem = {test};
+                const validator = new Validator(resultItem, new Error("test error"));
+                assert.equal(validator.check(), false);
+            });
+            it("returns false if result item comparison is other than 'contains'", () => {
+                const test: ISilentEchoTest = {
+                    comparison: "includes",
+                    input: "Hi",
+                    sequence: 1,
+                };
+                const resultItem: ISilentEchoValidatorResultItem = {test};
+                const validator = new Validator(resultItem, undefined);
+                assert.equal(validator.check(), false);
+            });
         });
     });
 });
