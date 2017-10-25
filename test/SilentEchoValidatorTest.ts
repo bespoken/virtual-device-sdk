@@ -173,21 +173,45 @@ describe("SilentEchoValidator", function() {
 
     describe("#checkAuth()", () => {
         let nockScope: any;
-        before(() => {
-            nockScope = nock("https://source-api.bespoken.tools")
-                .get("/v1/skillAuthorized?invocation_name=simple%20player" +
-                    `&user_id=${userID}&token=${token}`)
-                .reply(200, "AUTHORIZED");
-        });
-        after(() => {
+        afterEach(() => {
             nockScope.done();
             nock.cleanAll();
         });
         it("success", async () => {
+            nockScope = nock("https://source-api.bespoken.tools")
+                .get("/v1/skillAuthorized?invocation_name=simple%20player" +
+                    `&user_id=${userID}&token=${token}`)
+                .reply(200, "AUTHORIZED");
             const silentEchoValidator = new SilentEchoValidator(token, userID,
                 BASE_URL, SOURCE_API_BASE_URL);
             const checkAuthResult = await silentEchoValidator.checkAuth("simple player");
             assert.equal(checkAuthResult, "AUTHORIZED");
+        });
+        it("handles replied errors", async () => {
+            nockScope = nock("https://source-api.bespoken.tools")
+                .get("/v1/skillAuthorized?invocation_name=simple%20player" +
+                    `&user_id=${userID}&token=${token}`)
+                .reply(401, "UNAUTHORIZED");
+            const silentEchoValidator = new SilentEchoValidator(token, userID,
+                BASE_URL, SOURCE_API_BASE_URL);
+            try {
+                await silentEchoValidator.checkAuth("simple player");
+            } catch (err) {
+                assert.equal(err, "UNAUTHORIZED");
+            }
+        });
+        it("handles request errors", async () => {
+            nockScope = nock("https://source-api.bespoken.tools")
+                .get("/v1/skillAuthorized?invocation_name=simple%20player" +
+                    `&user_id=${userID}&token=${token}`)
+                .replyWithError("UNKNOWN ERROR");
+            const silentEchoValidator = new SilentEchoValidator(token, userID,
+                BASE_URL, SOURCE_API_BASE_URL);
+            try {
+                await silentEchoValidator.checkAuth("simple player");
+            } catch (err) {
+                assert.equal(err.message, "UNKNOWN ERROR");
+            }
         });
     });
 
