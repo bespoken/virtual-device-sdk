@@ -47,13 +47,9 @@ export class SilentEchoScript {
                 let matches: RegExpMatchArray | null = [];
                 let input: string | null = "";
                 let output: string | null = "";
-                try {
-                    matches = line.match(ScriptContentRegexp);
-                    input = matches && matches[1];
-                    output = matches && matches[2];
-                } catch (err) {
-                    throw SilentEchoScriptSyntaxError;
-                }
+                matches = line.match(ScriptContentRegexp);
+                input = matches && matches[1];
+                output = matches && matches[2];
                 if (!matches || !input) {
                     throw SilentEchoScriptSyntaxError;
                 }
@@ -177,7 +173,7 @@ export class SilentEchoScript {
             }
             return `style="color:${color};"`;
         };
-        const statusIcon = (test: any): string => {
+        const statusIcon = (test: any): any => {
             if (test.status === "running") {
                 return "<img src='/assets/Spinner.svg' height=24>";
             } else if (test.status === "scheduled") {
@@ -188,8 +184,6 @@ export class SilentEchoScript {
             } else if (test.status === "done" && test.result
                 && test.result !== "success") {
                 return "&#10008;";
-            } else {
-                return "";
             }
         };
         for (const key in sequences) {
@@ -197,9 +191,10 @@ export class SilentEchoScript {
                 const tests = sequences[key];
                 const testsHTML = [];
                 for (const test of tests) {
+                    const icon = statusIcon(test);
                     const html = `
                         <tr${(test.result && trStyles(test.result)) || ""}>
-                            <td style="${tdAndThStyleProps}text-align:center;">${statusIcon(test)}</td>
+                            <td style="${tdAndThStyleProps}text-align:center;">${icon ? icon : ""}</td>
                             <td ${tdStyles}>${test.test.input}</td>
                             <td ${tdStyles}>${test.test.expectedStreamURL
                                 ? test.test.expectedStreamURL
