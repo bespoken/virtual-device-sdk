@@ -41,6 +41,7 @@ export class SilentEchoValidator {
             try {
                 checkAuthResult = await this.checkAuth(invocationName);
             } catch (err) {
+                this.emit("unauthorized", SilentEchoScriptUnauthorizedError);
                 return Promise.reject(err);
             }
             if (checkAuthResult !== "AUTHORIZED") {
