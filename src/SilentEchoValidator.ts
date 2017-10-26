@@ -144,6 +144,7 @@ export interface ISilentEchoTest {
 }
 
 export interface ISilentEchoTestSequence {
+    invocationName: string;
     tests: ISilentEchoTest[];
 }
 

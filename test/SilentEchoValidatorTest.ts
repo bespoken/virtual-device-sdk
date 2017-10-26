@@ -52,6 +52,7 @@ describe("SilentEchoValidator", function() {
         it("success", async () => {
             const sequences = [
                 {
+                    invocationName: "test player",
                     tests: [{
                         comparison: "contains",
                         expectedStreamURL: undefined,
@@ -79,6 +80,7 @@ describe("SilentEchoValidator", function() {
         it("failure", async () => {
             const sequences = [
                 {
+                    invocationName: "test player",
                     tests: [{
                         comparison: "contains",
                         expectedStreamURL: undefined,
@@ -99,6 +101,7 @@ describe("SilentEchoValidator", function() {
     describe("#execute() invocation permissions", () => {
         const sequences = [
             {
+                invocationName: "test player",
                 tests: [{
                     comparison: "contains",
                     expectedStreamURL: undefined,
@@ -129,6 +132,7 @@ describe("SilentEchoValidator", function() {
     describe("#execute() sequence processing failure", () => {
         const sequences = [
             {
+                invocationName: "test player",
                 tests: [{
                     comparison: "contains",
                     expectedStreamURL: undefined,

@@ -13,6 +13,9 @@ const URLRegexp = /^https?:\/\//i;
 // "match #1": "match #2"
 const ScriptContentRegexp = /\"([^"]*)\"\:\s?\"([^"]*)\"/;
 
+// InvocationNameRegexp matches a skill's invocation name.
+const InvocationNameRegexp = /open(.*)$/;
+
 export const SilentEchoScriptSyntaxError = new Error("Invalid script syntax, please " +
     "provide a script with the following sctructure, each block is a sequence:" + `
     "<Input>": "<ExpectedOutput>"
@@ -33,7 +36,7 @@ export class SilentEchoScript {
 
     public tests(scriptContents: string): ISilentEchoTestSequence[] {
         const sequences: ISilentEchoTestSequence[] = [];
-        let currentSequence: ISilentEchoTestSequence = {tests: []};
+        let currentSequence: ISilentEchoTestSequence = {tests: [], invocationName: ""};
         let sequence: number = 1;
         let sequenceIndex: number = 1;
         let absoluteIndex: number = 0;
@@ -73,8 +76,14 @@ export class SilentEchoScript {
             if (line === "" || currentLineIndex === lines.length) {
                 if (currentSequence.tests.length) {
                     sequence += 1;
+                    const firstInput = (currentSequence.tests
+                        && currentSequence.tests.length > 0
+                        && currentSequence.tests[0]
+                        && currentSequence.tests[0].input) || "";
+                    currentSequence.invocationName = this.detectInvocationName(
+                        firstInput);
                     sequences.push({...currentSequence});
-                    currentSequence = {tests: []};
+                    currentSequence = {tests: [], invocationName: ""};
                     sequenceIndex = 1;
                 }
             }
@@ -250,11 +259,34 @@ export class SilentEchoScript {
     }
 
     public checkAuth(scriptContents: string): Promise<any> {
-        return this.silentEchoValidator.checkAuth(
-            this.detectInvocationName(scriptContents));
+        const sequences: ISilentEchoTestSequence[] = this.tests(scriptContents);
+        const promises = [];
+        for (const sequence of sequences) {
+            promises.push(this.silentEchoValidator.checkAuth(sequence.invocationName));
+        }
+        return Promise.all(promises)
+            .then((values: any) => {
+                if (!values || values.length === 0) {
+                    return "UNAUTHORIZED";
+                }
+                let checkOK = true;
+                for (const value of values) {
+                    if (value !== "AUTHORIZED") {
+                        checkOK = false;
+                    }
+                }
+                if (checkOK) {
+                    return "AUTHORIZED";
+                }
+                return "UNAUTHORIZED";
+            });
     }
 
-    public detectInvocationName(scriptContents: string): string {
-        return "simple player";
+    private detectInvocationName(input: string): string {
+        const matches: RegExpMatchArray | null = input.match(InvocationNameRegexp);
+        if (!matches || matches.length === 1) {
+            return "";
+        }
+        return matches[1].trim();
     }
 }

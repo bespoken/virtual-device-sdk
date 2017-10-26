@@ -46,18 +46,19 @@ describe("SilentEchoScript", function() {
     describe("#tests()", () => {
         it("success", async () => {
             const scripContents = `
-            "Hi": "welcome to the simple audio player"
             "open test player": "welcome to the simple audio player"
+            "Hi": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const expected = [
                 {
+                    invocationName: "test player",
                     tests: [{
                         absoluteIndex: 1,
                         comparison: "contains",
                         expectedStreamURL: undefined,
                         expectedTranscript: "welcome to the simple audio player",
-                        input: "Hi",
+                        input: "open test player",
                         sequence: 1,
                         sequenceIndex: 1,
                     },
@@ -66,7 +67,7 @@ describe("SilentEchoScript", function() {
                         comparison: "contains",
                         expectedStreamURL: undefined,
                         expectedTranscript: "welcome to the simple audio player",
-                        input: "open test player",
+                        input: "Hi",
                         sequence: 1,
                         sequenceIndex: 2,
                     },
@@ -603,38 +604,26 @@ describe("SilentEchoScript", function() {
     });
     describe("#checkAuth()", () => {
         let sevCheckAuthSpy: any;
-        let sesDetectInvocationNameSpy: any;
         let nockScope: any;
         before(() => {
             nockScope = nock("https://source-api.bespoken.tools")
-                .get("/v1/skillAuthorized?invocation_name=simple%20player" +
+                .get("/v1/skillAuthorized?invocation_name=test%20player" +
                     `&user_id=${userID}&token=${token}`)
                 .reply(200, "AUTHORIZED");
             sevCheckAuthSpy = Sinon.spy(SilentEchoScript.prototype, "checkAuth");
-            sesDetectInvocationNameSpy = Sinon.spy(SilentEchoScript.prototype, "detectInvocationName");
         });
         after(() => {
             nockScope.done();
             nock.cleanAll();
             sevCheckAuthSpy.reset();
             sevCheckAuthSpy.restore();
-            sesDetectInvocationNameSpy.reset();
         });
         it("success", async () => {
-            const scripContents = `"Hi": "*"`;
+            const scripContents = `"open test player": "*"`;
             const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL, SOURCE_API_BASE_URL);
             const checkAuthResult = await silentEchoScript.checkAuth(scripContents);
             assert.deepEqual(checkAuthResult, "AUTHORIZED");
             expect(sevCheckAuthSpy).to.have.been.callCount(1);
-            expect(sesDetectInvocationNameSpy).to.have.been.callCount(1);
-        });
-    });
-    describe("#detectInvocationName()", () => {
-        it("success", async () => {
-            const scripContents = `"Hi": "*"`;
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
-            assert.deepEqual(silentEchoScript.detectInvocationName(
-                scripContents), "simple player");
         });
     });
 });
