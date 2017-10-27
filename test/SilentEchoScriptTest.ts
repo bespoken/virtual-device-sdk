@@ -608,7 +608,7 @@ describe("SilentEchoScript", function() {
         before(() => {
             nockScope = nock("https://source-api.bespoken.tools")
                 .get("/v1/skillAuthorized?invocation_name=test%20player" +
-                    `&user_id=${userID}&token=${token}`)
+                    `&user_id=${userID}`)
                 .reply(200, "AUTHORIZED");
             sevCheckAuthSpy = Sinon.spy(SilentEchoScript.prototype, "checkAuth");
         });

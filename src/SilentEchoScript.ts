@@ -92,8 +92,7 @@ export class SilentEchoScript {
     }
 
     public execute(scriptContents: string): Promise<any> {
-        return this.silentEchoValidator.execute(this.tests(scriptContents),
-            this.detectInvocationName(scriptContents));
+        return this.silentEchoValidator.execute(this.tests(scriptContents));
     }
 
     // validate validates given script contents syntax

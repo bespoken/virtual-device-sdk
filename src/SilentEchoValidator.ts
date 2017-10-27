@@ -36,15 +36,14 @@ export class SilentEchoValidator {
         }
     }
 
-    public async execute(silentEchoTestSequences: ISilentEchoTestSequence[],
-                         invocationName: string): Promise<any> {
+    public async execute(silentEchoTestSequences: ISilentEchoTestSequence[]): Promise<any> {
         const result: ISilentEchoValidatorResult = {tests: []};
         const totalSequences: number = silentEchoTestSequences.length;
         let currentSequenceIndex: number = 0;
         for (const sequence of silentEchoTestSequences) {
             let checkAuthResult: string;
             try {
-                checkAuthResult = await this.checkAuth(invocationName);
+                checkAuthResult = await this.checkAuth(sequence.invocationName);
             } catch (err) {
                 this.emit("unauthorized", SilentEchoScriptUnauthorizedError);
                 return Promise.reject(err);

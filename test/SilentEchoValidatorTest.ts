@@ -71,7 +71,7 @@ describe("SilentEchoValidator", function() {
                 },
             ];
             const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
-            const validatorResult = await silentEchoValidator.execute(sequences, "");
+            const validatorResult = await silentEchoValidator.execute(sequences);
             assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "success", `${JSON.stringify(test)}`);
@@ -92,7 +92,7 @@ describe("SilentEchoValidator", function() {
                 },
             ];
             const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
-            const validatorResult = await silentEchoValidator.execute(sequences, "");
+            const validatorResult = await silentEchoValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
             }
@@ -123,7 +123,7 @@ describe("SilentEchoValidator", function() {
         it("handles #checkAuth() errors", async () => {
             const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
             try {
-                await silentEchoValidator.execute(sequences, "");
+                await silentEchoValidator.execute(sequences);
             } catch (err) {
                 assert.equal(err, "UNAUTHORIZED");
             }
@@ -168,7 +168,7 @@ describe("SilentEchoValidator", function() {
         });
         it("handles silent echo errors", async () => {
             const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
-            const validatorResult = await silentEchoValidator.execute(sequences, "");
+            const validatorResult = await silentEchoValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
                 assert.equal(test.status, "done", `${JSON.stringify(test)}`);
@@ -185,7 +185,7 @@ describe("SilentEchoValidator", function() {
         it("success", async () => {
             nockScope = nock("https://source-api.bespoken.tools")
                 .get("/v1/skillAuthorized?invocation_name=simple%20player" +
-                    `&user_id=${userID}&token=${token}`)
+                    `&user_id=${userID}`)
                 .reply(200, "AUTHORIZED");
             const silentEchoValidator = new SilentEchoValidator(token, userID,
                 BASE_URL, SOURCE_API_BASE_URL);
@@ -195,7 +195,7 @@ describe("SilentEchoValidator", function() {
         it("handles replied errors", async () => {
             nockScope = nock("https://source-api.bespoken.tools")
                 .get("/v1/skillAuthorized?invocation_name=simple%20player" +
-                    `&user_id=${userID}&token=${token}`)
+                    `&user_id=${userID}`)
                 .reply(401, "UNAUTHORIZED");
             const silentEchoValidator = new SilentEchoValidator(token, userID,
                 BASE_URL, SOURCE_API_BASE_URL);
@@ -209,7 +209,7 @@ describe("SilentEchoValidator", function() {
         it("handles request errors", async () => {
             nockScope = nock("https://source-api.bespoken.tools")
                 .get("/v1/skillAuthorized?invocation_name=simple%20player" +
-                    `&user_id=${userID}&token=${token}`)
+                    `&user_id=${userID}`)
                 .replyWithError("UNKNOWN ERROR");
             const silentEchoValidator = new SilentEchoValidator(token, userID,
                 BASE_URL, SOURCE_API_BASE_URL);
