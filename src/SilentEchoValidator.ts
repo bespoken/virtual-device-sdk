@@ -96,13 +96,12 @@ export class SilentEchoValidator {
     }
 
     // checkAuth checks whether given invocation name can be invoked
-    // by `this.silentEcho.token`.
+    // by `this.userID`.
     public checkAuth(invocationName: string): Promise<any> {
         return new Promise((resolve, reject) => {
             let data = "";
             const params = `?invocation_name=${invocationName}` +
-                `&user_id=${this.userID}` +
-                `&token=${this.silentEcho.token}`;
+                `&user_id=${this.userID}`;
             const url = this.sourceAPIBaseURL + "/v1/skillAuthorized" + params;
             const req = https.get(url as any, (res) => {
                 res.on("data", (chunk) => {
