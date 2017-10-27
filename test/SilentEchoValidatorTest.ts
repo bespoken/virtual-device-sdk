@@ -6,6 +6,7 @@ import {ISilentResult, SilentEcho} from "../src/SilentEcho";
 import {ISilentEchoTest,
     ISilentEchoValidatorResultItem,
     SilentEchoValidator,
+    SilentEchoValidatorUnauthorizedMessage,
     Validator} from "../src/SilentEchoValidator";
 import * as fixtures from "./fixtures";
 
@@ -201,7 +202,8 @@ describe("SilentEchoValidator", function() {
             try {
                 await silentEchoValidator.checkAuth("simple player");
             } catch (err) {
-                assert.equal(err, "UNAUTHORIZED");
+                assert.equal(err,
+                    SilentEchoValidatorUnauthorizedMessage("simple player"));
             }
         });
         it("handles request errors", async () => {
@@ -214,7 +216,7 @@ describe("SilentEchoValidator", function() {
             try {
                 await silentEchoValidator.checkAuth("simple player");
             } catch (err) {
-                assert.equal(err.message, "UNKNOWN ERROR");
+                assert.equal(err, "UNKNOWN ERROR");
             }
         });
     });

@@ -262,24 +262,10 @@ export class SilentEchoScript {
         const sequences: ISilentEchoTestSequence[] = this.tests(scriptContents);
         const promises = [];
         for (const sequence of sequences) {
-            promises.push(this.silentEchoValidator.checkAuth(sequence.invocationName));
+            const promise = this.silentEchoValidator.checkAuth(sequence.invocationName);
+            promises.push(promise);
         }
-        return Promise.all(promises)
-            .then((values: any) => {
-                if (!values || values.length === 0) {
-                    return "UNAUTHORIZED";
-                }
-                let checkOK = true;
-                for (const value of values) {
-                    if (value !== "AUTHORIZED") {
-                        checkOK = false;
-                    }
-                }
-                if (checkOK) {
-                    return "AUTHORIZED";
-                }
-                return "UNAUTHORIZED";
-            });
+        return Promise.all(promises).then(() => "AUTHORIZED");
     }
 
     private detectInvocationName(input: string): string {

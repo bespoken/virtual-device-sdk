@@ -4,6 +4,11 @@ import {ISilentResult, SilentEcho} from "./SilentEcho";
 export const SilentEchoScriptUnauthorizedError = new Error("Security token lacks sufficient " +
     "information. Please re-authenticate with Amazon here to update your security token.");
 
+export const SilentEchoValidatorUnauthorizedMessage = (invocationName: string): string => {
+    return "Security token lacks sufficient " +
+        `permissions to invoke "${invocationName}" skill.`;
+};
+
 interface ISubscribers {
     [index: string]: any[];
     message: any[];
@@ -104,15 +109,15 @@ export class SilentEchoValidator {
                     data += chunk;
                 });
                 res.on("end", () => {
-                    if (res.statusCode === 200) {
+                    if (res.statusCode === 200 && data === "AUTHORIZED") {
                         resolve(data);
                     } else {
-                        reject(data);
+                        reject(SilentEchoValidatorUnauthorizedMessage(invocationName));
                     }
                 });
             });
-            req.on("error", function(error: string) {
-                reject(error);
+            req.on("error", function(error: Error) {
+                reject(error.message);
             });
             req.end();
         });
