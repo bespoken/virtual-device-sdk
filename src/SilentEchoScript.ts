@@ -257,6 +257,10 @@ export class SilentEchoScript {
         this.silentEchoValidator.subscribe(event, cb);
     }
 
+    public off(event: string) {
+        this.silentEchoValidator.unsubscribe(event);
+    }
+
     public checkAuth(scriptContents: string): Promise<any> {
         const sequences: ISilentEchoTestSequence[] = this.tests(scriptContents);
         const promises = [];

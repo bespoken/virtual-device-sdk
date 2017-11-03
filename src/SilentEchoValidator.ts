@@ -36,6 +36,10 @@ export class SilentEchoValidator {
         }
     }
 
+    public unsubscribe(event: string) {
+        this.subscribers[event] = [];
+    }
+
     public async execute(silentEchoTestSequences: ISilentEchoTestSequence[]): Promise<any> {
         const result: ISilentEchoValidatorResult = {tests: []};
         const totalSequences: number = silentEchoTestSequences.length;
