@@ -626,4 +626,34 @@ describe("SilentEchoScript", function() {
             expect(sevCheckAuthSpy).to.have.been.callCount(1);
         });
     });
+    describe("#off()", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+        });
+        after(() => {
+            checkAuthStub.restore();
+        });
+        it("success", async () => {
+            const scripContents = `"open test player": "*"`;
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL,
+                SOURCE_API_BASE_URL);
+            const events = ["message", "result", "unauthorized"];
+            const spies = [];
+            for (const e of events) {
+                const cb: ISilentEchoScriptCallback = (
+                    resultItem: ISilentEchoValidatorResultItem) => undefined;
+                const callbackSpy = Sinon.spy(cb);
+                spies.push(callbackSpy);
+                silentEchoScript.on(e, callbackSpy);
+                silentEchoScript.off(e);
+            }
+            const validatorResult = await silentEchoScript.execute(scripContents);
+            assert.equal(validatorResult.result, "success");
+            for (const spy of spies) {
+                expect(spy).to.have.been.callCount(0);
+            }
+        });
+    });
 });
