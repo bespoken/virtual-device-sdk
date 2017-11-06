@@ -1,13 +1,16 @@
 import {assert} from "chai";
 import * as chai from "chai";
 import * as dotenv from "dotenv";
+import * as nock from "nock";
 import * as Sinon from "sinon";
 import * as sinonChai from "sinon-chai";
 import {ISilentResult, SilentEcho} from "../src/SilentEcho";
 import {ISilentEchoScriptCallback,
     SilentEchoScript,
     SilentEchoScriptSyntaxError} from "../src/SilentEchoScript";
-import {ISilentEchoValidatorResultItem} from "../src/SilentEchoValidator";
+import {ISilentEchoValidatorResultItem,
+    SilentEchoScriptUnauthorizedError,
+    SilentEchoValidator} from "../src/SilentEchoValidator";
 import * as fixtures from "./fixtures";
 
 chai.use(sinonChai);
@@ -16,8 +19,10 @@ const expect = chai.expect;
 describe("SilentEchoScript", function() {
     this.timeout(120000);
     const BASE_URL = "https://silentecho.bespoken.io/process";
+    const SOURCE_API_BASE_URL = process.env.SOURCE_API_BASE_URL;
 
     let token: string;
+    const userID: string = "abc";
     let messageStub: any;
     before(() => {
         dotenv.config();
@@ -41,18 +46,19 @@ describe("SilentEchoScript", function() {
     describe("#tests()", () => {
         it("success", async () => {
             const scripContents = `
-            "Hi": "welcome to the simple audio player"
             "open test player": "welcome to the simple audio player"
+            "Hi": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const expected = [
                 {
+                    invocationName: "test player",
                     tests: [{
                         absoluteIndex: 1,
                         comparison: "contains",
                         expectedStreamURL: undefined,
                         expectedTranscript: "welcome to the simple audio player",
-                        input: "Hi",
+                        input: "open test player",
                         sequence: 1,
                         sequenceIndex: 1,
                     },
@@ -61,7 +67,7 @@ describe("SilentEchoScript", function() {
                         comparison: "contains",
                         expectedStreamURL: undefined,
                         expectedTranscript: "welcome to the simple audio player",
-                        input: "open test player",
+                        input: "Hi",
                         sequence: 1,
                         sequenceIndex: 2,
                     },
@@ -76,11 +82,19 @@ describe("SilentEchoScript", function() {
                     }],
                 },
             ];
-            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
             assert.deepEqual(silentEchoScript.tests(scripContents), expected);
         });
     });
     describe("#execute()", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+        });
+        after(() => {
+            checkAuthStub.restore();
+        });
         it("success", async () => {
             const tests = [
                 `"Hi": "*"`,
@@ -94,7 +108,7 @@ describe("SilentEchoScript", function() {
                 "tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
             ];
-            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
             for (const test of tests) {
                 const validatorResult = await silentEchoScript.execute(test);
                 assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
@@ -114,7 +128,7 @@ describe("SilentEchoScript", function() {
             "Hi": "*"
             "open test player": "welcome to the simple audio player"
 	        `;
-            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
             const validatorResult = await silentEchoScript.execute(scripContents);
             assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
             for (const test of validatorResult.tests) {
@@ -123,9 +137,10 @@ describe("SilentEchoScript", function() {
 
             let absoluteIndex: number = 0;
             const assertSequenceInfo = (sequence: number, testsQuantity: number) => {
-                const sequenceTests = validatorResult.tests.filter((resultItem) => {
-                    return resultItem.test.sequence === sequence;
-                });
+                const sequenceTests = validatorResult.tests
+                    .filter((resultItem: ISilentEchoValidatorResultItem) => {
+                        return resultItem.test.sequence === sequence;
+                    });
                 const msg = "unexpected sequence tests quantity, " +
                 `expected: ${testsQuantity}, got: ${sequenceTests.length}`;
                 assert.equal(sequenceTests.length, testsQuantity, msg);
@@ -149,6 +164,14 @@ describe("SilentEchoScript", function() {
         });
     });
     describe("#on()", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+        });
+        after(() => {
+            checkAuthStub.restore();
+        });
         it("success ", async () => {
             const tests = [
                 `"Hi": "*"`,
@@ -162,7 +185,7 @@ describe("SilentEchoScript", function() {
                 "tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
             ];
-            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
             const messageCallback: ISilentEchoScriptCallback = (
                 resultItem: ISilentEchoValidatorResultItem) => {
                     assert.equal(resultItem.status, "running");
@@ -186,6 +209,30 @@ describe("SilentEchoScript", function() {
             expect(resultCallbackSpy).to.have.been.callCount(6);
         });
     });
+    describe("#on() unauthorized event", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("UNAUTHORIZED"));
+        });
+        after(() => {
+            checkAuthStub.restore();
+        });
+        it("returns unauthorized error", async () => {
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
+            const unauthorizedCallback: any = (err: any) => {
+                    assert.equal(err, SilentEchoScriptUnauthorizedError);
+            };
+            const unauthorizedCallbackSpy = Sinon.spy(unauthorizedCallback);
+            silentEchoScript.on("unauthorized", unauthorizedCallbackSpy);
+            try {
+                await silentEchoScript.execute(`"Hi": "*"`);
+            } catch (err) {
+                assert.equal(err, SilentEchoScriptUnauthorizedError);
+            }
+            expect(unauthorizedCallbackSpy).to.have.been.callCount(1);
+        });
+    });
     describe("#validate()", () => {
         it("returns undefined", async () => {
             const tests = [
@@ -197,7 +244,7 @@ describe("SilentEchoScript", function() {
                 `,
                 }];
             for (const test of tests) {
-                const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+                const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
                 assert.equal(silentEchoScript.validate(test.scriptContents), test.expected);
             }
         });
@@ -233,19 +280,27 @@ describe("SilentEchoScript", function() {
                 },
                 ];
             for (const test of tests) {
-                const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+                const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
                 assert.equal(silentEchoScript.validate(test.scriptContents),
                     test.expected, `test: ${JSON.stringify(test)}`);
             }
         });
     });
     describe("#prettifyAsHTML()", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+        });
+        after(() => {
+            checkAuthStub.restore();
+        });
         it("success", async () => {
             const scripContents = `
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
             const validatorResult = await silentEchoScript.execute(scripContents);
             // tslint:disable:max-line-length
             const expected = `
@@ -301,7 +356,7 @@ describe("SilentEchoScript", function() {
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
             // tslint:disable:max-line-length
             const expected = `
             <div>
@@ -354,7 +409,7 @@ describe("SilentEchoScript", function() {
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
             // tslint:disable:max-line-length
             const expected = `
             <div>
@@ -419,7 +474,7 @@ describe("SilentEchoScript", function() {
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
             // tslint:disable:max-line-length
             const expected = `
             <div>
@@ -485,7 +540,7 @@ describe("SilentEchoScript", function() {
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const silentEchoScript = new SilentEchoScript(token, BASE_URL);
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
             // tslint:disable:max-line-length
             const expected = `
             <div>
@@ -545,6 +600,60 @@ describe("SilentEchoScript", function() {
             };
             const resultItems = [resultItem];
             assert.equal(silentEchoScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
+        });
+    });
+    describe("#checkAuth()", () => {
+        let sevCheckAuthSpy: any;
+        let nockScope: any;
+        before(() => {
+            nockScope = nock("https://source-api.bespoken.tools")
+                .get("/v1/skillAuthorized?invocation_name=test%20player" +
+                    `&user_id=${userID}`)
+                .reply(200, "AUTHORIZED");
+            sevCheckAuthSpy = Sinon.spy(SilentEchoScript.prototype, "checkAuth");
+        });
+        after(() => {
+            nockScope.done();
+            nock.cleanAll();
+            sevCheckAuthSpy.reset();
+            sevCheckAuthSpy.restore();
+        });
+        it("success", async () => {
+            const scripContents = `"open test player": "*"`;
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL, SOURCE_API_BASE_URL);
+            const checkAuthResult = await silentEchoScript.checkAuth(scripContents);
+            assert.deepEqual(checkAuthResult, "AUTHORIZED");
+            expect(sevCheckAuthSpy).to.have.been.callCount(1);
+        });
+    });
+    describe("#off()", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+        });
+        after(() => {
+            checkAuthStub.restore();
+        });
+        it("success", async () => {
+            const scripContents = `"open test player": "*"`;
+            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL,
+                SOURCE_API_BASE_URL);
+            const events = ["message", "result", "unauthorized"];
+            const spies = [];
+            for (const e of events) {
+                const cb: ISilentEchoScriptCallback = (
+                    resultItem: ISilentEchoValidatorResultItem) => undefined;
+                const callbackSpy = Sinon.spy(cb);
+                spies.push(callbackSpy);
+                silentEchoScript.on(e, callbackSpy);
+                silentEchoScript.off(e);
+            }
+            const validatorResult = await silentEchoScript.execute(scripContents);
+            assert.equal(validatorResult.result, "success");
+            for (const spy of spies) {
+                expect(spy).to.have.been.callCount(0);
+            }
         });
     });
 });

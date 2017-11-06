@@ -1,19 +1,33 @@
+import * as https from "https";
 import {ISilentResult, SilentEcho} from "./SilentEcho";
+
+export const SilentEchoScriptUnauthorizedError = new Error("Security token lacks sufficient " +
+    "information. Please re-authenticate with Amazon here to update your security token.");
+
+export const SilentEchoValidatorUnauthorizedMessage = (invocationName: string): string => {
+    return "Security token lacks sufficient " +
+        `permissions to invoke "${invocationName}" skill.`;
+};
 
 interface ISubscribers {
     [index: string]: any[];
     message: any[];
     result: any[];
+    unauthorized: any[];
 }
 
 export class SilentEchoValidator {
     private silentEcho: SilentEcho;
     private subscribers: ISubscribers;
+    private sourceAPIBaseURL: string;
+    private userID: string;
 
-    constructor(token: string, baseURL?: string) {
+    constructor(token: string, userID: string, baseURL?: string, sourceAPIBaseURL?: string) {
         this.silentEcho = new SilentEcho(token);
         this.silentEcho.baseURL = baseURL ? baseURL : "https://silentecho.bespoken.io/process";
-        this.subscribers = {message: [], result: []};
+        this.subscribers = {message: [], result: [], unauthorized: []};
+        this.sourceAPIBaseURL = sourceAPIBaseURL ? sourceAPIBaseURL : "https://source-api.bespoken.tools";
+        this.userID = userID;
     }
 
     public subscribe(event: string, cb: any) {
@@ -22,11 +36,26 @@ export class SilentEchoValidator {
         }
     }
 
-    public async execute(silentEchoTestSequences: ISilentEchoTestSequence[]): Promise<ISilentEchoValidatorResult> {
+    public unsubscribe(event: string) {
+        this.subscribers[event] = [];
+    }
+
+    public async execute(silentEchoTestSequences: ISilentEchoTestSequence[]): Promise<any> {
         const result: ISilentEchoValidatorResult = {tests: []};
         const totalSequences: number = silentEchoTestSequences.length;
         let currentSequenceIndex: number = 0;
         for (const sequence of silentEchoTestSequences) {
+            let checkAuthResult: string;
+            try {
+                checkAuthResult = await this.checkAuth(sequence.invocationName);
+            } catch (err) {
+                this.emit("unauthorized", SilentEchoScriptUnauthorizedError);
+                return Promise.reject(err);
+            }
+            if (checkAuthResult !== "AUTHORIZED") {
+                this.emit("unauthorized", SilentEchoScriptUnauthorizedError);
+                return Promise.reject(SilentEchoScriptUnauthorizedError);
+            }
             currentSequenceIndex += 1;
             if (currentSequenceIndex === 1) {
                 await this.silentEcho.message("Alexa, exit");
@@ -69,6 +98,33 @@ export class SilentEchoValidator {
         return Promise.resolve(result);
     }
 
+    // checkAuth checks whether given invocation name can be invoked
+    // by `this.userID`.
+    public checkAuth(invocationName: string): Promise<any> {
+        return new Promise((resolve, reject) => {
+            let data = "";
+            const params = `?invocation_name=${invocationName}` +
+                `&user_id=${this.userID}`;
+            const url = this.sourceAPIBaseURL + "/v1/skillAuthorized" + params;
+            const req = https.get(url as any, (res) => {
+                res.on("data", (chunk) => {
+                    data += chunk;
+                });
+                res.on("end", () => {
+                    if (res.statusCode === 200 && data === "AUTHORIZED") {
+                        resolve(data);
+                    } else {
+                        reject(SilentEchoValidatorUnauthorizedMessage(invocationName));
+                    }
+                });
+            });
+            req.on("error", function(error: Error) {
+                reject(error.message);
+            });
+            req.end();
+        });
+    }
+
     private emit(event: string, data: any) {
         if (event in this.subscribers) {
             this.subscribers[event].forEach((subscriber) => {
@@ -95,6 +151,7 @@ export interface ISilentEchoTest {
 }
 
 export interface ISilentEchoTestSequence {
+    invocationName: string;
     tests: ISilentEchoTest[];
 }
 
@@ -122,9 +179,6 @@ export class Validator {
     // check checks whether validation checks success or fails.
     public check(): boolean {
         if (this.error) {
-            return false;
-        }
-        if (!this.resultItem) {
             return false;
         }
         if (this.resultItem.test.comparison !== "contains") {

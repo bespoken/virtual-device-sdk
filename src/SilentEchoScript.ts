@@ -13,6 +13,9 @@ const URLRegexp = /^https?:\/\//i;
 // "match #1": "match #2"
 const ScriptContentRegexp = /\"([^"]*)\"\:\s?\"([^"]*)\"/;
 
+// InvocationNameRegexp matches a skill's invocation name.
+const InvocationNameRegexp = /open(.*)$/;
+
 export const SilentEchoScriptSyntaxError = new Error("Invalid script syntax, please " +
     "provide a script with the following sctructure, each block is a sequence:" + `
     "<Input>": "<ExpectedOutput>"
@@ -26,14 +29,14 @@ export type ISilentEchoScriptCallback = (
 export class SilentEchoScript {
     private silentEchoValidator: SilentEchoValidator;
 
-    constructor(token: string, baseURL?: string) {
+    constructor(token: string, userID: string, baseURL?: string, sourceAPIBaseURL?: string) {
         baseURL = baseURL ? baseURL : "https://silentecho.bespoken.io/process";
-        this.silentEchoValidator = new SilentEchoValidator(token, baseURL);
+        this.silentEchoValidator = new SilentEchoValidator(token, userID, baseURL, sourceAPIBaseURL);
     }
 
     public tests(scriptContents: string): ISilentEchoTestSequence[] {
         const sequences: ISilentEchoTestSequence[] = [];
-        let currentSequence: ISilentEchoTestSequence = {tests: []};
+        let currentSequence: ISilentEchoTestSequence = {tests: [], invocationName: ""};
         let sequence: number = 1;
         let sequenceIndex: number = 1;
         let absoluteIndex: number = 0;
@@ -47,13 +50,9 @@ export class SilentEchoScript {
                 let matches: RegExpMatchArray | null = [];
                 let input: string | null = "";
                 let output: string | null = "";
-                try {
-                    matches = line.match(ScriptContentRegexp);
-                    input = matches && matches[1];
-                    output = matches && matches[2];
-                } catch (err) {
-                    throw SilentEchoScriptSyntaxError;
-                }
+                matches = line.match(ScriptContentRegexp);
+                input = matches && matches[1];
+                output = matches && matches[2];
                 if (!matches || !input) {
                     throw SilentEchoScriptSyntaxError;
                 }
@@ -77,8 +76,14 @@ export class SilentEchoScript {
             if (line === "" || currentLineIndex === lines.length) {
                 if (currentSequence.tests.length) {
                     sequence += 1;
+                    const firstInput = (currentSequence.tests
+                        && currentSequence.tests.length > 0
+                        && currentSequence.tests[0]
+                        && currentSequence.tests[0].input) || "";
+                    currentSequence.invocationName = this.detectInvocationName(
+                        firstInput);
                     sequences.push({...currentSequence});
-                    currentSequence = {tests: []};
+                    currentSequence = {tests: [], invocationName: ""};
                     sequenceIndex = 1;
                 }
             }
@@ -86,7 +91,7 @@ export class SilentEchoScript {
         return sequences;
     }
 
-    public execute(scriptContents: string): Promise<ISilentEchoValidatorResult> {
+    public execute(scriptContents: string): Promise<any> {
         return this.silentEchoValidator.execute(this.tests(scriptContents));
     }
 
@@ -176,7 +181,7 @@ export class SilentEchoScript {
             }
             return `style="color:${color};"`;
         };
-        const statusIcon = (test: any): string => {
+        const statusIcon = (test: any): any => {
             if (test.status === "running") {
                 return "<img src='/assets/Spinner.svg' height=24>";
             } else if (test.status === "scheduled") {
@@ -187,8 +192,6 @@ export class SilentEchoScript {
             } else if (test.status === "done" && test.result
                 && test.result !== "success") {
                 return "&#10008;";
-            } else {
-                return "";
             }
         };
         for (const key in sequences) {
@@ -196,9 +199,10 @@ export class SilentEchoScript {
                 const tests = sequences[key];
                 const testsHTML = [];
                 for (const test of tests) {
+                    const icon = statusIcon(test);
                     const html = `
                         <tr${(test.result && trStyles(test.result)) || ""}>
-                            <td style="${tdAndThStyleProps}text-align:center;">${statusIcon(test)}</td>
+                            <td style="${tdAndThStyleProps}text-align:center;">${icon ? icon : ""}</td>
                             <td ${tdStyles}>${test.test.input}</td>
                             <td ${tdStyles}>${test.test.expectedStreamURL
                                 ? test.test.expectedStreamURL
@@ -251,5 +255,27 @@ export class SilentEchoScript {
 
     public on(event: string, cb: ISilentEchoScriptCallback) {
         this.silentEchoValidator.subscribe(event, cb);
+    }
+
+    public off(event: string) {
+        this.silentEchoValidator.unsubscribe(event);
+    }
+
+    public checkAuth(scriptContents: string): Promise<any> {
+        const sequences: ISilentEchoTestSequence[] = this.tests(scriptContents);
+        const promises = [];
+        for (const sequence of sequences) {
+            const promise = this.silentEchoValidator.checkAuth(sequence.invocationName);
+            promises.push(promise);
+        }
+        return Promise.all(promises).then(() => "AUTHORIZED");
+    }
+
+    private detectInvocationName(input: string): string {
+        const matches: RegExpMatchArray | null = input.match(InvocationNameRegexp);
+        if (!matches || matches.length === 1) {
+            return "";
+        }
+        return matches[1].trim();
     }
 }
