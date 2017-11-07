@@ -24,7 +24,9 @@ export const SilentEchoScriptSyntaxError = new Error("Invalid script syntax, ple
     "<Input>": "<ExpectedOutput>"`);
 
 export type ISilentEchoScriptCallback = (
-    resultItem: ISilentEchoValidatorResultItem) => void;
+    error: Error,
+    resultItem: ISilentEchoValidatorResultItem,
+    context?: any) => void;
 
 export class SilentEchoScript {
     private silentEchoValidator: SilentEchoValidator;
@@ -91,8 +93,8 @@ export class SilentEchoScript {
         return sequences;
     }
 
-    public execute(scriptContents: string): Promise<any> {
-        return this.silentEchoValidator.execute(this.tests(scriptContents));
+    public execute(scriptContents: string, context?: any): Promise<any> {
+        return this.silentEchoValidator.execute(this.tests(scriptContents), context);
     }
 
     // validate validates given script contents syntax

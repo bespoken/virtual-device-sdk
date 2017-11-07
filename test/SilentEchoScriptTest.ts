@@ -187,12 +187,16 @@ describe("SilentEchoScript", function() {
             ];
             const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
             const messageCallback: ISilentEchoScriptCallback = (
-                resultItem: ISilentEchoValidatorResultItem) => {
+                error: Error,
+                resultItem: ISilentEchoValidatorResultItem,
+                context?: any) => {
                     assert.equal(resultItem.status, "running");
                 };
             const messageCallbackSpy = Sinon.spy(messageCallback);
             const resultCallback: ISilentEchoScriptCallback = (
-                resultItem: ISilentEchoValidatorResultItem) => {
+                error: Error,
+                resultItem: ISilentEchoValidatorResultItem,
+                context?: any) => {
                     assert.equal(resultItem.status, "done");
                 };
             const resultCallbackSpy = Sinon.spy(resultCallback);
@@ -220,8 +224,9 @@ describe("SilentEchoScript", function() {
         });
         it("returns unauthorized error", async () => {
             const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
-            const unauthorizedCallback: any = (err: any) => {
-                    assert.equal(err, SilentEchoScriptUnauthorizedError);
+            const unauthorizedCallback: any = (error: Error,
+                resultItem: ISilentEchoValidatorResultItem, context?: any) => {
+                    assert.equal(error, SilentEchoScriptUnauthorizedError);
             };
             const unauthorizedCallbackSpy = Sinon.spy(unauthorizedCallback);
             silentEchoScript.on("unauthorized", unauthorizedCallbackSpy);
@@ -643,7 +648,9 @@ describe("SilentEchoScript", function() {
             const spies = [];
             for (const e of events) {
                 const cb: ISilentEchoScriptCallback = (
-                    resultItem: ISilentEchoValidatorResultItem) => undefined;
+                    error: Error,
+                    resultItem: ISilentEchoValidatorResultItem,
+                    context?: any) => undefined;
                 const callbackSpy = Sinon.spy(cb);
                 spies.push(callbackSpy);
                 silentEchoScript.on(e, callbackSpy);
