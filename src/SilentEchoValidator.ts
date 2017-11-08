@@ -40,7 +40,8 @@ export class SilentEchoValidator {
         this.subscribers[event] = [];
     }
 
-    public async execute(silentEchoTestSequences: ISilentEchoTestSequence[]): Promise<any> {
+    public async execute(silentEchoTestSequences: ISilentEchoTestSequence[],
+                         context?: any): Promise<any> {
         const result: ISilentEchoValidatorResult = {tests: []};
         const totalSequences: number = silentEchoTestSequences.length;
         let currentSequenceIndex: number = 0;
@@ -49,11 +50,13 @@ export class SilentEchoValidator {
             try {
                 checkAuthResult = await this.checkAuth(sequence.invocationName);
             } catch (err) {
-                this.emit("unauthorized", SilentEchoScriptUnauthorizedError);
+                this.emit("unauthorized", SilentEchoScriptUnauthorizedError,
+                    undefined, context);
                 return Promise.reject(err);
             }
             if (checkAuthResult !== "AUTHORIZED") {
-                this.emit("unauthorized", SilentEchoScriptUnauthorizedError);
+                this.emit("unauthorized", SilentEchoScriptUnauthorizedError,
+                    undefined, context);
                 return Promise.reject(SilentEchoScriptUnauthorizedError);
             }
             currentSequenceIndex += 1;
@@ -65,7 +68,7 @@ export class SilentEchoValidator {
                     const resultItem: ISilentEchoValidatorResultItem = {test};
                     resultItem.status = "running";
                     const validator: Validator = new Validator(resultItem, undefined);
-                    this.emit("message", validator.resultItem);
+                    this.emit("message", undefined, validator.resultItem, context);
                     const actual: ISilentResult = await this.silentEcho.message(test.input);
                     resultItem.actual = actual;
                     if (validator.resultItem && validator.check()) {
@@ -75,14 +78,14 @@ export class SilentEchoValidator {
                     }
                     validator.resultItem.status = "done";
                     result.tests.push(validator.resultItem);
-                    this.emit("result", validator.resultItem);
+                    this.emit("result", undefined, validator.resultItem, context);
                 } catch (err) {
                     const resultItem: ISilentEchoValidatorResultItem = {test};
                     const validator: Validator = new Validator(resultItem, err);
                     validator.resultItem.result = "failure";
                     validator.resultItem.status = "done";
                     result.tests.push(validator.resultItem);
-                    this.emit("result", validator.resultItem);
+                    this.emit("result", undefined, validator.resultItem, context);
                 }
             }
             if (totalSequences > currentSequenceIndex) {
@@ -125,10 +128,10 @@ export class SilentEchoValidator {
         });
     }
 
-    private emit(event: string, data: any) {
+    private emit(event: string, error: any, data: any, context?: any) {
         if (event in this.subscribers) {
             this.subscribers[event].forEach((subscriber) => {
-                subscriber(data);
+                subscriber(error, data, context);
             });
         }
     }
