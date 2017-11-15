@@ -6,7 +6,12 @@ export const SilentEchoScriptUnauthorizedError = new Error("Security token lacks
 
 export const SilentEchoValidatorUnauthorizedMessage = (invocationName: string): string => {
     return "Security token lacks sufficient " +
-        `permissions to invoke "${invocationName}" skill.`;
+        `permissions to invoke "${invocationName}" skill.<br><br>` +
+        "To correct this, make sure in the " +
+        `<a href="https://developer.amazon.com/edw/home.html#/" target="_blank">` +
+        "Alexa developer console</a> that the skill is associated with your account.<br><br>" +
+        "If you are still having issues, contact us " +
+        `<a href="mailto:support@bespoken.io">support@bespoken.io</a>.`;
 };
 
 interface ISubscribers {
