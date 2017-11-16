@@ -1,6 +1,6 @@
-import {ISilentResult} from "../src/SilentEcho";
+import {IVirtualDeviceResult} from "../src/VirtualDevice";
 
-export function message(message: string): Promise<ISilentResult> {
+export function message(message: string): Promise<IVirtualDeviceResult> {
     if (message.includes("Hi")) {
         return Promise.resolve({
             card: null,

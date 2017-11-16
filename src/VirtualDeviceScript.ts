@@ -1,11 +1,11 @@
 import {
-    ISilentEchoTest,
-    ISilentEchoTestSequence,
-    ISilentEchoValidatorResult,
-    ISilentEchoValidatorResultItem,
-    SilentEchoValidator,
+    IVirtualDeviceTest,
+    IVirtualDeviceTestSequence,
+    IVirtualDeviceValidatorResult,
+    IVirtualDeviceValidatorResultItem,
     Validator,
-} from "./SilentEchoValidator";
+    VirtualDeviceValidator,
+} from "./VirtualDeviceValidator";
 
 const URLRegexp = /^https?:\/\//i;
 
@@ -16,29 +16,29 @@ const ScriptContentRegexp = /\"([^"]*)\"\:\s?\"([^"]*)\"/;
 // InvocationNameRegexp matches a skill's invocation name.
 const InvocationNameRegexp = /open(.*)$/;
 
-export const SilentEchoScriptSyntaxError = new Error("Invalid script syntax, please " +
+export const VirtualDeviceScriptSyntaxError = new Error("Invalid script syntax, please " +
     "provide a script with the following sctructure, each block is a sequence:" + `
     "<Input>": "<ExpectedOutput>"
     "<Input>": "<ExpectedOutput>"
 
     "<Input>": "<ExpectedOutput>"`);
 
-export type ISilentEchoScriptCallback = (
+export type IVirtualDeviceScriptCallback = (
     error: Error,
-    resultItem: ISilentEchoValidatorResultItem,
+    resultItem: IVirtualDeviceValidatorResultItem,
     context?: any) => void;
 
-export class SilentEchoScript {
-    private silentEchoValidator: SilentEchoValidator;
+export class VirtualDeviceScript {
+    private virtualDeviceValidator: VirtualDeviceValidator;
 
     constructor(token: string, userID: string, baseURL?: string, sourceAPIBaseURL?: string) {
-        baseURL = baseURL ? baseURL : "https://silentecho.bespoken.io/process";
-        this.silentEchoValidator = new SilentEchoValidator(token, userID, baseURL, sourceAPIBaseURL);
+        baseURL = baseURL ? baseURL : "https://virtual-device.bespoken.io/process";
+        this.virtualDeviceValidator = new VirtualDeviceValidator(token, userID, baseURL, sourceAPIBaseURL);
     }
 
-    public tests(scriptContents: string): ISilentEchoTestSequence[] {
-        const sequences: ISilentEchoTestSequence[] = [];
-        let currentSequence: ISilentEchoTestSequence = {tests: [], invocationName: ""};
+    public tests(scriptContents: string): IVirtualDeviceTestSequence[] {
+        const sequences: IVirtualDeviceTestSequence[] = [];
+        let currentSequence: IVirtualDeviceTestSequence = {tests: [], invocationName: ""};
         let sequence: number = 1;
         let sequenceIndex: number = 1;
         let absoluteIndex: number = 0;
@@ -56,9 +56,9 @@ export class SilentEchoScript {
                 input = matches && matches[1];
                 output = matches && matches[2];
                 if (!matches || !input) {
-                    throw SilentEchoScriptSyntaxError;
+                    throw VirtualDeviceScriptSyntaxError;
                 }
-                const test: ISilentEchoTest = {
+                const test: IVirtualDeviceTest = {
                     absoluteIndex,
                     comparison: "contains",
                     expectedStreamURL: undefined,
@@ -94,7 +94,7 @@ export class SilentEchoScript {
     }
 
     public execute(scriptContents: string, context?: any): Promise<any> {
-        return this.silentEchoValidator.execute(this.tests(scriptContents), context);
+        return this.virtualDeviceValidator.execute(this.tests(scriptContents), context);
     }
 
     // validate validates given script contents syntax
@@ -110,15 +110,15 @@ export class SilentEchoScript {
 
     // prettifyAsPartialHTML prettyfies given validator result items into HTML.
     public prettifyAsPartialHTML(scriptContents: string,
-                                 partialResultItems: ISilentEchoValidatorResultItem[],
+                                 partialResultItems: IVirtualDeviceValidatorResultItem[],
                                  includeTimeContent?: boolean): string {
         includeTimeContent = (typeof includeTimeContent !== "undefined") ? includeTimeContent : true;
 
-        const silentEchoTestSequences: ISilentEchoTestSequence[] = this.tests(scriptContents);
-        const result: ISilentEchoValidatorResult = {tests: []};
-        for (const sequence of silentEchoTestSequences) {
+        const virtualDeviceTestSequences: IVirtualDeviceTestSequence[] = this.tests(scriptContents);
+        const result: IVirtualDeviceValidatorResult = {tests: []};
+        for (const sequence of virtualDeviceTestSequences) {
             for (const test of sequence.tests) {
-                const resultItem: ISilentEchoValidatorResultItem = {test};
+                const resultItem: IVirtualDeviceValidatorResultItem = {test};
                 resultItem.status = "scheduled";
                 const validator: Validator = new Validator(resultItem, undefined);
                 result.tests.push(validator.resultItem);
@@ -139,7 +139,7 @@ export class SilentEchoScript {
     }
 
     // prettifyAsHTML prettyfies given validator result into HTML.
-    public prettifyAsHTML(result: ISilentEchoValidatorResult, includeTimeContent?: boolean): string {
+    public prettifyAsHTML(result: IVirtualDeviceValidatorResult, includeTimeContent?: boolean): string {
         includeTimeContent = (typeof includeTimeContent !== "undefined") ? includeTimeContent : true;
         const colorRed = "rgb(244,67,54)";
         const colorGreen = "rgb(76,175,80)";
@@ -255,19 +255,19 @@ export class SilentEchoScript {
             </div>`;
     }
 
-    public on(event: string, cb: ISilentEchoScriptCallback) {
-        this.silentEchoValidator.subscribe(event, cb);
+    public on(event: string, cb: IVirtualDeviceScriptCallback) {
+        this.virtualDeviceValidator.subscribe(event, cb);
     }
 
     public off(event: string) {
-        this.silentEchoValidator.unsubscribe(event);
+        this.virtualDeviceValidator.unsubscribe(event);
     }
 
     public checkAuth(scriptContents: string): Promise<any> {
-        const sequences: ISilentEchoTestSequence[] = this.tests(scriptContents);
+        const sequences: IVirtualDeviceTestSequence[] = this.tests(scriptContents);
         const promises = [];
         for (const sequence of sequences) {
-            const promise = this.silentEchoValidator.checkAuth(sequence.invocationName);
+            const promise = this.virtualDeviceValidator.checkAuth(sequence.invocationName);
             promises.push(promise);
         }
         return Promise.all(promises).then(() => "AUTHORIZED");
