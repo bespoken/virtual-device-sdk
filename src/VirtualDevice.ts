@@ -1,10 +1,10 @@
 import {IncomingMessage} from "http";
 import * as https from "https";
 
-export class SilentEcho {
+export class VirtualDevice {
     public baseURL: string;
     public constructor(public token: string) {
-        this.baseURL = "https://silentecho.bespoken.io/process";
+        this.baseURL = "https://virtual-device.bespoken.io/process";
     }
 
     public normalizeMessage(message: string): string {
@@ -15,7 +15,7 @@ export class SilentEcho {
 
     }
 
-    public message(message: string, debug?: boolean): Promise<ISilentResult> {
+    public message(message: string, debug?: boolean): Promise<IVirtualDeviceResult> {
         message = this.normalizeMessage(message);
 
         let url = this.baseURL + "?message=" + message + "&user_id=" + this.token;
@@ -24,7 +24,7 @@ export class SilentEcho {
             url += "&debug=true";
         }
 
-        const promise = new Promise<ISilentResult>((resolve, reject) => {
+        const promise = new Promise<IVirtualDeviceResult>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
 
@@ -34,7 +34,7 @@ export class SilentEcho {
 
                 response.on("end", () => {
                     if (response.statusCode === 200) {
-                        const result: ISilentResult = JSON.parse(data);
+                        const result: IVirtualDeviceResult = JSON.parse(data);
                         resolve(result);
                     } else {
                         reject(data);
@@ -54,7 +54,7 @@ export class SilentEcho {
     }
 }
 
-export interface ISilentResult {
+export interface IVirtualDeviceResult {
     card: ICard | null;
     debug?: {
         rawJSON: any;

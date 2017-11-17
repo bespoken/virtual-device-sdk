@@ -4,21 +4,21 @@ import * as dotenv from "dotenv";
 import * as nock from "nock";
 import * as Sinon from "sinon";
 import * as sinonChai from "sinon-chai";
-import {ISilentResult, SilentEcho} from "../src/SilentEcho";
-import {ISilentEchoScriptCallback,
-    SilentEchoScript,
-    SilentEchoScriptSyntaxError} from "../src/SilentEchoScript";
-import {ISilentEchoValidatorResultItem,
-    SilentEchoScriptUnauthorizedError,
-    SilentEchoValidator} from "../src/SilentEchoValidator";
+import {IVirtualDeviceResult, VirtualDevice} from "../src/VirtualDevice";
+import {IVirtualDeviceScriptCallback,
+    VirtualDeviceScript,
+    VirtualDeviceScriptSyntaxError} from "../src/VirtualDeviceScript";
+import {IVirtualDeviceValidatorResultItem,
+    VirtualDeviceScriptUnauthorizedError,
+    VirtualDeviceValidator} from "../src/VirtualDeviceValidator";
 import * as fixtures from "./fixtures";
 
 chai.use(sinonChai);
 const expect = chai.expect;
 
-describe("SilentEchoScript", function() {
+describe("VirtualDeviceScript", function() {
     this.timeout(120000);
-    const BASE_URL = "https://silentecho.bespoken.io/process";
+    const BASE_URL = "https://virtual-device.bespoken.io/process";
     const SOURCE_API_BASE_URL = process.env.SOURCE_API_BASE_URL;
 
     let token: string;
@@ -32,10 +32,10 @@ describe("SilentEchoScript", function() {
             assert.fail("No TEST_TOKEN defined");
         }
         if (process.env.ENABLE_MESSAGES_MOCK) {
-            const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
+            const messageMock = (message: string, debug: boolean = false): Promise<IVirtualDeviceResult> => {
                 return fixtures.message(message);
             };
-            messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+            messageStub = Sinon.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
         }
     });
     after(() => {
@@ -82,14 +82,14 @@ describe("SilentEchoScript", function() {
                     }],
                 },
             ];
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
-            assert.deepEqual(silentEchoScript.tests(scripContents), expected);
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            assert.deepEqual(virtualDeviceScript.tests(scripContents), expected);
         });
     });
     describe("#execute()", () => {
         let checkAuthStub: any;
         before(() => {
-            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+            checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
         });
         after(() => {
@@ -108,9 +108,9 @@ describe("SilentEchoScript", function() {
                 "tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
             ];
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             for (const test of tests) {
-                const validatorResult = await silentEchoScript.execute(test);
+                const validatorResult = await virtualDeviceScript.execute(test);
                 assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
                 for (const t of validatorResult.tests) {
                     assert.equal(t.result, "success", `${JSON.stringify(t)}`);
@@ -128,8 +128,8 @@ describe("SilentEchoScript", function() {
             "Hi": "*"
             "open test player": "welcome to the simple audio player"
 	        `;
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
-            const validatorResult = await silentEchoScript.execute(scripContents);
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const validatorResult = await virtualDeviceScript.execute(scripContents);
             assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "success", `${JSON.stringify(test)}`);
@@ -138,7 +138,7 @@ describe("SilentEchoScript", function() {
             let absoluteIndex: number = 0;
             const assertSequenceInfo = (sequence: number, testsQuantity: number) => {
                 const sequenceTests = validatorResult.tests
-                    .filter((resultItem: ISilentEchoValidatorResultItem) => {
+                    .filter((resultItem: IVirtualDeviceValidatorResultItem) => {
                         return resultItem.test.sequence === sequence;
                     });
                 const msg = "unexpected sequence tests quantity, " +
@@ -166,7 +166,7 @@ describe("SilentEchoScript", function() {
     describe("#on()", () => {
         let checkAuthStub: any;
         before(() => {
-            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+            checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
         });
         after(() => {
@@ -185,25 +185,25 @@ describe("SilentEchoScript", function() {
                 "tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
             ];
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
-            const messageCallback: ISilentEchoScriptCallback = (
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const messageCallback: IVirtualDeviceScriptCallback = (
                 error: Error,
-                resultItem: ISilentEchoValidatorResultItem,
+                resultItem: IVirtualDeviceValidatorResultItem,
                 context?: any) => {
                     assert.equal(resultItem.status, "running");
                 };
             const messageCallbackSpy = Sinon.spy(messageCallback);
-            const resultCallback: ISilentEchoScriptCallback = (
+            const resultCallback: IVirtualDeviceScriptCallback = (
                 error: Error,
-                resultItem: ISilentEchoValidatorResultItem,
+                resultItem: IVirtualDeviceValidatorResultItem,
                 context?: any) => {
                     assert.equal(resultItem.status, "done");
                 };
             const resultCallbackSpy = Sinon.spy(resultCallback);
-            silentEchoScript.on("message", messageCallbackSpy);
-            silentEchoScript.on("result", resultCallbackSpy);
+            virtualDeviceScript.on("message", messageCallbackSpy);
+            virtualDeviceScript.on("result", resultCallbackSpy);
             for (const test of tests) {
-                const validatorResult = await silentEchoScript.execute(test);
+                const validatorResult = await virtualDeviceScript.execute(test);
                 assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
                 for (const t of validatorResult.tests) {
                     assert.equal(t.result, "success", `${JSON.stringify(t)}`);
@@ -216,24 +216,24 @@ describe("SilentEchoScript", function() {
     describe("#on() unauthorized event", () => {
         let checkAuthStub: any;
         before(() => {
-            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+            checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("UNAUTHORIZED"));
         });
         after(() => {
             checkAuthStub.restore();
         });
         it("returns unauthorized error", async () => {
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             const unauthorizedCallback: any = (error: Error,
-                resultItem: ISilentEchoValidatorResultItem, context?: any) => {
-                    assert.equal(error, SilentEchoScriptUnauthorizedError);
+                resultItem: IVirtualDeviceValidatorResultItem, context?: any) => {
+                    assert.equal(error, VirtualDeviceScriptUnauthorizedError);
             };
             const unauthorizedCallbackSpy = Sinon.spy(unauthorizedCallback);
-            silentEchoScript.on("unauthorized", unauthorizedCallbackSpy);
+            virtualDeviceScript.on("unauthorized", unauthorizedCallbackSpy);
             try {
-                await silentEchoScript.execute(`"Hi": "*"`);
+                await virtualDeviceScript.execute(`"Hi": "*"`);
             } catch (err) {
-                assert.equal(err, SilentEchoScriptUnauthorizedError);
+                assert.equal(err, VirtualDeviceScriptUnauthorizedError);
             }
             expect(unauthorizedCallbackSpy).to.have.been.callCount(1);
         });
@@ -249,35 +249,35 @@ describe("SilentEchoScript", function() {
                 `,
                 }];
             for (const test of tests) {
-                const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
-                assert.equal(silentEchoScript.validate(test.scriptContents), test.expected);
+                const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+                assert.equal(virtualDeviceScript.validate(test.scriptContents), test.expected);
             }
         });
         it("returns syntax error", async () => {
             const tests = [
-                {expected: SilentEchoScriptSyntaxError,
+                {expected: VirtualDeviceScriptSyntaxError,
                 scriptContents: `wrong contents`,
                 },
-                {expected: SilentEchoScriptSyntaxError,
+                {expected: VirtualDeviceScriptSyntaxError,
                 scriptContents: `open test player`,
                 },
-                {expected: SilentEchoScriptSyntaxError,
+                {expected: VirtualDeviceScriptSyntaxError,
                 scriptContents: `"open test player":`,
                 },
-                {expected: SilentEchoScriptSyntaxError,
+                {expected: VirtualDeviceScriptSyntaxError,
                 scriptContents: `"open test player": welcome to the simple audio player`,
                 },
-                {expected: SilentEchoScriptSyntaxError,
+                {expected: VirtualDeviceScriptSyntaxError,
                 scriptContents: `"open test player": "welcome to the simple audio player`,
                 },
-                {expected: SilentEchoScriptSyntaxError,
+                {expected: VirtualDeviceScriptSyntaxError,
                 scriptContents: `
                     "open test player": "welcome to the simple audio player"
                     "tell test player to play"
                 `,
                 },
                 {
-                expected: SilentEchoScriptSyntaxError,
+                expected: VirtualDeviceScriptSyntaxError,
                 scriptContents: `
                     "open test player": "welcome to the simple audio player"
                     "tell test player to play": https://feeds.soundcloud.com/stream/"
@@ -285,8 +285,8 @@ describe("SilentEchoScript", function() {
                 },
                 ];
             for (const test of tests) {
-                const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
-                assert.equal(silentEchoScript.validate(test.scriptContents),
+                const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+                assert.equal(virtualDeviceScript.validate(test.scriptContents),
                     test.expected, `test: ${JSON.stringify(test)}`);
             }
         });
@@ -294,7 +294,7 @@ describe("SilentEchoScript", function() {
     describe("#prettifyAsHTML()", () => {
         let checkAuthStub: any;
         before(() => {
-            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+            checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
         });
         after(() => {
@@ -305,8 +305,8 @@ describe("SilentEchoScript", function() {
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
-            const validatorResult = await silentEchoScript.execute(scripContents);
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const validatorResult = await virtualDeviceScript.execute(scripContents);
             // tslint:disable:max-line-length
             const expected = `
             <div>
@@ -352,7 +352,7 @@ describe("SilentEchoScript", function() {
                     </div>
             </div>`;
             // tslint:enable:max-line-length
-            assert.equal(silentEchoScript.prettifyAsHTML(validatorResult, false), expected);
+            assert.equal(virtualDeviceScript.prettifyAsHTML(validatorResult, false), expected);
         });
     });
     describe("#prettifyAsPartialHTML()", () => {
@@ -361,7 +361,7 @@ describe("SilentEchoScript", function() {
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             // tslint:disable:max-line-length
             const expected = `
             <div>
@@ -407,14 +407,14 @@ describe("SilentEchoScript", function() {
                     </div>
             </div>`;
             // tslint:enable:max-line-length
-            assert.equal(silentEchoScript.prettifyAsPartialHTML(scripContents, [], false), expected);
+            assert.equal(virtualDeviceScript.prettifyAsPartialHTML(scripContents, [], false), expected);
         });
         it("renders correctly running result items", async () => {
             const scripContents = `
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             // tslint:disable:max-line-length
             const expected = `
             <div>
@@ -460,7 +460,7 @@ describe("SilentEchoScript", function() {
                     </div>
             </div>`;
             // tslint:enable:max-line-length
-            const resultItem: ISilentEchoValidatorResultItem  = {
+            const resultItem: IVirtualDeviceValidatorResultItem  = {
                 status: "running",
                 test: {
                     absoluteIndex: 1,
@@ -472,14 +472,14 @@ describe("SilentEchoScript", function() {
                 },
             };
             const resultItems = [resultItem];
-            assert.equal(silentEchoScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
+            assert.equal(virtualDeviceScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
         });
         it("renders correctly done result items", async () => {
             const scripContents = `
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             // tslint:disable:max-line-length
             const expected = `
             <div>
@@ -525,7 +525,7 @@ describe("SilentEchoScript", function() {
                     </div>
             </div>`;
             // tslint:enable:max-line-length
-            const resultItem: ISilentEchoValidatorResultItem  = {
+            const resultItem: IVirtualDeviceValidatorResultItem  = {
                 result: "success",
                 status: "done",
                 test: {
@@ -538,14 +538,14 @@ describe("SilentEchoScript", function() {
                 },
             };
             const resultItems = [resultItem];
-            assert.equal(silentEchoScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
+            assert.equal(virtualDeviceScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
         });
         it("renders correctly failed result items", async () => {
             const scripContents = `
             "open test player": "welcome to the simple audio player"
             "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             // tslint:disable:max-line-length
             const expected = `
             <div>
@@ -591,7 +591,7 @@ describe("SilentEchoScript", function() {
                     </div>
             </div>`;
             // tslint:enable:max-line-length
-            const resultItem: ISilentEchoValidatorResultItem  = {
+            const resultItem: IVirtualDeviceValidatorResultItem  = {
                 result: "failure",
                 status: "done",
                 test: {
@@ -604,7 +604,7 @@ describe("SilentEchoScript", function() {
                 },
             };
             const resultItems = [resultItem];
-            assert.equal(silentEchoScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
+            assert.equal(virtualDeviceScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
         });
     });
     describe("#checkAuth()", () => {
@@ -615,7 +615,7 @@ describe("SilentEchoScript", function() {
                 .get("/v1/skillAuthorized?invocation_name=test%20player" +
                     `&user_id=${userID}`)
                 .reply(200, "AUTHORIZED");
-            sevCheckAuthSpy = Sinon.spy(SilentEchoScript.prototype, "checkAuth");
+            sevCheckAuthSpy = Sinon.spy(VirtualDeviceScript.prototype, "checkAuth");
         });
         after(() => {
             nockScope.done();
@@ -625,8 +625,8 @@ describe("SilentEchoScript", function() {
         });
         it("success", async () => {
             const scripContents = `"open test player": "*"`;
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL, SOURCE_API_BASE_URL);
-            const checkAuthResult = await silentEchoScript.checkAuth(scripContents);
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL, SOURCE_API_BASE_URL);
+            const checkAuthResult = await virtualDeviceScript.checkAuth(scripContents);
             assert.deepEqual(checkAuthResult, "AUTHORIZED");
             expect(sevCheckAuthSpy).to.have.been.callCount(1);
         });
@@ -634,7 +634,7 @@ describe("SilentEchoScript", function() {
     describe("#off()", () => {
         let checkAuthStub: any;
         before(() => {
-            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+            checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
         });
         after(() => {
@@ -642,21 +642,21 @@ describe("SilentEchoScript", function() {
         });
         it("success", async () => {
             const scripContents = `"open test player": "*"`;
-            const silentEchoScript = new SilentEchoScript(token, userID, BASE_URL,
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL,
                 SOURCE_API_BASE_URL);
             const events = ["message", "result", "unauthorized"];
             const spies = [];
             for (const e of events) {
-                const cb: ISilentEchoScriptCallback = (
+                const cb: IVirtualDeviceScriptCallback = (
                     error: Error,
-                    resultItem: ISilentEchoValidatorResultItem,
+                    resultItem: IVirtualDeviceValidatorResultItem,
                     context?: any) => undefined;
                 const callbackSpy = Sinon.spy(cb);
                 spies.push(callbackSpy);
-                silentEchoScript.on(e, callbackSpy);
-                silentEchoScript.off(e);
+                virtualDeviceScript.on(e, callbackSpy);
+                virtualDeviceScript.off(e);
             }
-            const validatorResult = await silentEchoScript.execute(scripContents);
+            const validatorResult = await virtualDeviceScript.execute(scripContents);
             assert.equal(validatorResult.result, "success");
             for (const spy of spies) {
                 expect(spy).to.have.been.callCount(0);

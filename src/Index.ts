@@ -1,18 +1,18 @@
-import {ICard, ISilentResult, SilentEcho} from "./SilentEcho";
-import {SilentEchoScript, SilentEchoScriptSyntaxError} from "./SilentEchoScript";
-import {ISilentEchoValidatorResult,
-    ISilentEchoValidatorResultItem,
-    SilentEchoScriptUnauthorizedError,
-    SilentEchoValidator} from "./SilentEchoValidator";
+import {ICard, IVirtualDeviceResult, VirtualDevice} from "./VirtualDevice";
+import {VirtualDeviceScript, VirtualDeviceScriptSyntaxError} from "./VirtualDeviceScript";
+import {IVirtualDeviceValidatorResult,
+    IVirtualDeviceValidatorResultItem,
+    VirtualDeviceScriptUnauthorizedError,
+    VirtualDeviceValidator} from "./VirtualDeviceValidator";
 
 export {
     ICard,
-    ISilentEchoValidatorResult,
-    ISilentResult,
-    SilentEcho,
-    SilentEchoScript,
-    SilentEchoScriptSyntaxError,
-    SilentEchoScriptUnauthorizedError,
-    SilentEchoValidator,
-    ISilentEchoValidatorResultItem,
+    IVirtualDeviceValidatorResult,
+    IVirtualDeviceResult,
+    VirtualDevice,
+    VirtualDeviceScript,
+    VirtualDeviceScriptSyntaxError,
+    VirtualDeviceScriptUnauthorizedError,
+    VirtualDeviceValidator,
+    IVirtualDeviceValidatorResultItem,
 }

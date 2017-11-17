@@ -1,32 +1,29 @@
 [![CircleCI](https://circleci.com/gh/bespoken/silent-echo-sdk.svg?style=svg)](https://circleci.com/gh/bespoken/silent-echo-sdk)
 [![codecov](https://codecov.io/gh/bespoken/silent-echo-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/bespoken/silent-echo-sdk)
-[![npm](https://img.shields.io/npm/v/silent-echo-sdk.svg)](https://www.npmjs.com/package/silent-echo-sdk)
+[![npm](https://img.shields.io/npm/v/virtual-device-sdk.svg)](https://www.npmjs.com/package/virtual-device-sdk)
 
-# Silent Echo SDK
-Use the Silent Echo SDK to build UIs and bots that interact with Alexa via text.
-
-Check out our first example project to use it - [SilentEchoBot](https://github.com/bespoken/silent-echo-bot)!  
-Add SilentEcho to your Slack - [try it here](https://silentechobot.bespoken.io/slack_auth).
+# Virtual Device SDK
+Use the Virtual Device SDK to test Alexa without using our voice.
 
 The SDK can be used via [NodeJS](#nodejs-sdk) or [HTTP](#http-sdk).
 
 # NodeJS SDK
 ## Installation
-Add the Silent Echo SDK to your project:  
+Add the Virtual Device SDK to your project:
 ```bash
-npm install silent-echo-sdk --save
+npm install virtual-device-sdk --save
 ```
 Get your token:  
-[https://silentecho.bespoken.io/link_account?token=true](https://silentecho.bespoken.io/link_account?token=true)
+[https://virtual-device.bespoken.io/link_account?token=true](https://virtual-device.bespoken.io/link_account?token=true)
 
 Save the token that is generated - you will use it in the step below.
 
 ## Sending a Message
 Here is a simple example in Javascript:
 ```javascript
-const echoSDK = require("silent-echo-sdk");
-const silentEcho = new echoSDK.SilentEcho("<PUT_YOUR_TOKEN_HERE>");
-silentEcho.message(message).then((result) => {
+const vdSDK = require("virtual-device-sdk");
+const virtualDevice = new vdSDK.VirtualDevice("<PUT_YOUR_TOKEN_HERE>");
+virtualDevice.message(message).then((result) => {
     console.log("Reply Transcript: " + result.transcript);
     console.log("Reply Audio: " + result.transcript_audio_url);
 });
@@ -35,7 +32,7 @@ silentEcho.message(message).then((result) => {
 ## Result Payload
 Here is the full result payload:
 ```
-export interface ISilentResult {
+export interface IVirtualDeviceResult {
     card: ICard | null;
     debug?: {
         rawJSON: any;
@@ -56,23 +53,24 @@ export interface ICard {
 ```
 
 # HTTP SDK
-The SilentEcho service can also be called directly via HTTP.
+The VirtualDevice service can also be called directly via HTTP.
 
 ## Pre-Requisites
-Get a SilentEcho Token:  
-[https://silentecho.bespoken.io/link_account?token=true](https://silentecho.bespoken.io/link_account?token=true)
+* Sign into the [Bespoken Dashboard](https://apps.bespoken.io/dashboard)
+* Create a source
+* Select the Validation tab and follow the instructions there
 
 Save the token - you will use it when call the HTTP interface.
 
 ## Requests
 The Base URL is:  
-https://silentecho.bespoken.io
+https://virtual-device.bespoken.io
 
 * /process
   * Method: GET
   * Parameters:
-    * user_id: string - SilentEcho token
-    * message: string - The message to send to Echo
+    * user_id: string - VirtualDevice token
+    * message: string - The message to send to VirtualDevice
     * debug: string [Optional] - If set, returns debug output
   * Response:
     * Status: 200 (If successful)
@@ -81,7 +79,7 @@ https://silentecho.bespoken.io
 ## Example
 HTTP Request:
 ```
-https://silentecho.bespoken.io/process
+https://virtual-device.bespoken.io/process
     ?user_id=<TOKEN>
     &message=hello there
 ```

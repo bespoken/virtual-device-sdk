@@ -1,21 +1,21 @@
 import {assert} from "chai";
 import * as dotenv from "dotenv";
 import * as Sinon from "sinon";
-import {ISilentResult, SilentEcho} from "../src/SilentEcho";
+import {IVirtualDeviceResult, VirtualDevice} from "../src/VirtualDevice";
 import * as fixtures from "./fixtures";
 
-describe("SilentEcho", function() {
+describe("VirtualDevice", function() {
     this.timeout(60000);
-    const BASE_URL = "https://silentecho.bespoken.io/process";
+    const BASE_URL = "https://virtual-device.bespoken.io/process";
     let messageStub: any;
 
     before(() => {
         dotenv.config();
         if (process.env.ENABLE_MESSAGES_MOCK) {
-            const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
+            const messageMock = (message: string, debug: boolean = false): Promise<IVirtualDeviceResult> => {
                 return fixtures.message(message);
             };
-            messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+            messageStub = Sinon.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
         }
     });
 
@@ -27,7 +27,7 @@ describe("SilentEcho", function() {
 
     describe("#message()", () => {
         it("Should return a transcript", async () => {
-            const sdk = new SilentEcho(process.env.TEST_TOKEN as string);
+            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
             sdk.baseURL = BASE_URL;
             const result = await sdk.message("Hi");
             console.log("Output: " + JSON.stringify(result));
@@ -37,7 +37,7 @@ describe("SilentEcho", function() {
         });
 
         it("Should have stream URL", async () => {
-            const sdk = new SilentEcho(process.env.TEST_TOKEN as string);
+            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
             sdk.baseURL = BASE_URL;
             const result = await sdk.message("tell test player to play");
             console.log("Output: " + JSON.stringify(result));
@@ -47,7 +47,7 @@ describe("SilentEcho", function() {
         });
 
         it("Should have debug info", async () => {
-            const sdk = new SilentEcho(process.env.TEST_TOKEN as string);
+            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
             sdk.baseURL = BASE_URL;
             const result = await sdk.message("hi", true);
             console.log("Output: " + JSON.stringify(result));
@@ -57,7 +57,7 @@ describe("SilentEcho", function() {
     });
     describe("#normalizeMessage()", () => {
         it("Should transform no to 'alexa no'", async () => {
-            const sdk = new SilentEcho(process.env.TEST_TOKEN as string);
+            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
             assert.equal(sdk.normalizeMessage("No"), "alexa no");
         });
     });

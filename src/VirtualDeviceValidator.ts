@@ -1,10 +1,10 @@
 import * as https from "https";
-import {ISilentResult, SilentEcho} from "./SilentEcho";
+import {IVirtualDeviceResult, VirtualDevice} from "./VirtualDevice";
 
-export const SilentEchoScriptUnauthorizedError = new Error("Security token lacks sufficient " +
+export const VirtualDeviceScriptUnauthorizedError = new Error("Security token lacks sufficient " +
     "information. Please re-authenticate with Amazon here to update your security token.");
 
-export const SilentEchoValidatorUnauthorizedMessage = (invocationName: string): string => {
+export const VirtualDeviceValidatorUnauthorizedMessage = (invocationName: string): string => {
     return "Security token lacks sufficient " +
         `permissions to invoke "${invocationName}" skill.<br><br>` +
         "To correct this, make sure in the " +
@@ -21,15 +21,15 @@ interface ISubscribers {
     unauthorized: any[];
 }
 
-export class SilentEchoValidator {
-    private silentEcho: SilentEcho;
+export class VirtualDeviceValidator {
+    private virtualDevice: VirtualDevice;
     private subscribers: ISubscribers;
     private sourceAPIBaseURL: string;
     private userID: string;
 
     constructor(token: string, userID: string, baseURL?: string, sourceAPIBaseURL?: string) {
-        this.silentEcho = new SilentEcho(token);
-        this.silentEcho.baseURL = baseURL ? baseURL : "https://silentecho.bespoken.io/process";
+        this.virtualDevice = new VirtualDevice(token);
+        this.virtualDevice.baseURL = baseURL ? baseURL : "https://virtual-device.bespoken.io/process";
         this.subscribers = {message: [], result: [], unauthorized: []};
         this.sourceAPIBaseURL = sourceAPIBaseURL ? sourceAPIBaseURL : "https://source-api.bespoken.tools";
         this.userID = userID;
@@ -45,36 +45,36 @@ export class SilentEchoValidator {
         this.subscribers[event] = [];
     }
 
-    public async execute(silentEchoTestSequences: ISilentEchoTestSequence[],
+    public async execute(virtualDeviceTestSequences: IVirtualDeviceTestSequence[],
                          context?: any): Promise<any> {
-        const result: ISilentEchoValidatorResult = {tests: []};
-        const totalSequences: number = silentEchoTestSequences.length;
+        const result: IVirtualDeviceValidatorResult = {tests: []};
+        const totalSequences: number = virtualDeviceTestSequences.length;
         let currentSequenceIndex: number = 0;
-        for (const sequence of silentEchoTestSequences) {
+        for (const sequence of virtualDeviceTestSequences) {
             let checkAuthResult: string;
             try {
                 checkAuthResult = await this.checkAuth(sequence.invocationName);
             } catch (err) {
-                this.emit("unauthorized", SilentEchoScriptUnauthorizedError,
+                this.emit("unauthorized", VirtualDeviceScriptUnauthorizedError,
                     undefined, context);
                 return Promise.reject(err);
             }
             if (checkAuthResult !== "AUTHORIZED") {
-                this.emit("unauthorized", SilentEchoScriptUnauthorizedError,
+                this.emit("unauthorized", VirtualDeviceScriptUnauthorizedError,
                     undefined, context);
-                return Promise.reject(SilentEchoScriptUnauthorizedError);
+                return Promise.reject(VirtualDeviceScriptUnauthorizedError);
             }
             currentSequenceIndex += 1;
             if (currentSequenceIndex === 1) {
-                await this.silentEcho.message("Alexa, exit");
+                await this.virtualDevice.message("Alexa, exit");
             }
             for (const test of sequence.tests) {
                 try {
-                    const resultItem: ISilentEchoValidatorResultItem = {test};
+                    const resultItem: IVirtualDeviceValidatorResultItem = {test};
                     resultItem.status = "running";
                     const validator: Validator = new Validator(resultItem, undefined);
                     this.emit("message", undefined, validator.resultItem, context);
-                    const actual: ISilentResult = await this.silentEcho.message(test.input);
+                    const actual: IVirtualDeviceResult = await this.virtualDevice.message(test.input);
                     resultItem.actual = actual;
                     if (validator.resultItem && validator.check()) {
                         validator.resultItem.result = "success";
@@ -85,7 +85,7 @@ export class SilentEchoValidator {
                     result.tests.push(validator.resultItem);
                     this.emit("result", undefined, validator.resultItem, context);
                 } catch (err) {
-                    const resultItem: ISilentEchoValidatorResultItem = {test};
+                    const resultItem: IVirtualDeviceValidatorResultItem = {test};
                     const validator: Validator = new Validator(resultItem, err);
                     validator.resultItem.result = "failure";
                     validator.resultItem.status = "done";
@@ -94,7 +94,7 @@ export class SilentEchoValidator {
                 }
             }
             if (totalSequences > currentSequenceIndex) {
-                await this.silentEcho.message("Alexa, exit");
+                await this.virtualDevice.message("Alexa, exit");
             }
         }
         const failures = result.tests.filter((test) => test.result === "failure");
@@ -122,7 +122,7 @@ export class SilentEchoValidator {
                     if (res.statusCode === 200 && data === "AUTHORIZED") {
                         resolve(data);
                     } else {
-                        reject(SilentEchoValidatorUnauthorizedMessage(invocationName));
+                        reject(VirtualDeviceValidatorUnauthorizedMessage(invocationName));
                     }
                 });
             });
@@ -142,7 +142,7 @@ export class SilentEchoValidator {
     }
 }
 
-export interface ISilentEchoTest {
+export interface IVirtualDeviceTest {
     // sequence is the sequence number which this test belongs to.
     sequence: number;
 
@@ -158,28 +158,28 @@ export interface ISilentEchoTest {
     expectedStreamURL?: string;
 }
 
-export interface ISilentEchoTestSequence {
+export interface IVirtualDeviceTestSequence {
     invocationName: string;
-    tests: ISilentEchoTest[];
+    tests: IVirtualDeviceTest[];
 }
 
-export interface ISilentEchoValidatorResultItem {
-    actual?: ISilentResult;
+export interface IVirtualDeviceValidatorResultItem {
+    actual?: IVirtualDeviceResult;
     result?: "success" | "failure";
     status?: "scheduled" | "running" | "done";
-    test: ISilentEchoTest;
+    test: IVirtualDeviceTest;
 }
 
-export interface ISilentEchoValidatorResult {
+export interface IVirtualDeviceValidatorResult {
     result?: "success" | "failure";
-    tests: ISilentEchoValidatorResultItem[];
+    tests: IVirtualDeviceValidatorResultItem[];
 }
 
 export class Validator {
-    public resultItem: ISilentEchoValidatorResultItem;
+    public resultItem: IVirtualDeviceValidatorResultItem;
     public error?: Error;
 
-    public constructor(resultItem: ISilentEchoValidatorResultItem, error?: Error) {
+    public constructor(resultItem: IVirtualDeviceValidatorResultItem, error?: Error) {
         this.resultItem = resultItem;
         this.error = error;
     }

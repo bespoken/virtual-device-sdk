@@ -2,23 +2,23 @@ import {assert} from "chai";
 import * as dotenv from "dotenv";
 import * as nock from "nock";
 import * as Sinon from "sinon";
-import {ISilentResult, SilentEcho} from "../src/SilentEcho";
-import {ISilentEchoTest,
-    ISilentEchoValidatorResultItem,
-    SilentEchoValidator,
-    SilentEchoValidatorUnauthorizedMessage,
-    Validator} from "../src/SilentEchoValidator";
+import {IVirtualDeviceResult, VirtualDevice} from "../src/VirtualDevice";
+import {IVirtualDeviceTest,
+    IVirtualDeviceValidatorResultItem,
+    Validator,
+    VirtualDeviceValidator,
+    VirtualDeviceValidatorUnauthorizedMessage} from "../src/VirtualDeviceValidator";
 import * as fixtures from "./fixtures";
 
-describe("SilentEchoValidator", function() {
+describe("VirtualDeviceValidator", function() {
     this.timeout(60000);
-    const BASE_URL = "https://silentecho.bespoken.io/process";
+    const BASE_URL = "https://virtual-device.bespoken.io/process";
     const SOURCE_API_BASE_URL = process.env.SOURCE_API_BASE_URL;
 
     let token: string;
     const userID: string = "abc";
     let messageStub: any;
-    const messageMock = (message: string, debug: boolean = false): Promise<ISilentResult> => {
+    const messageMock = (message: string, debug: boolean = false): Promise<IVirtualDeviceResult> => {
         return fixtures.message(message);
     };
 
@@ -31,7 +31,7 @@ describe("SilentEchoValidator", function() {
         }
         if (process.env.ENABLE_MESSAGES_MOCK) {
 
-            messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+            messageStub = Sinon.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
         }
     });
 
@@ -44,7 +44,7 @@ describe("SilentEchoValidator", function() {
     describe("#execute()", () => {
         let checkAuthStub: any;
         before(() => {
-            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+            checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
         });
         after(() => {
@@ -70,8 +70,8 @@ describe("SilentEchoValidator", function() {
                     }],
                 },
             ];
-            const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
-            const validatorResult = await silentEchoValidator.execute(sequences);
+            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID, BASE_URL);
+            const validatorResult = await virtualDeviceValidator.execute(sequences);
             assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "success", `${JSON.stringify(test)}`);
@@ -91,8 +91,8 @@ describe("SilentEchoValidator", function() {
                     }],
                 },
             ];
-            const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
-            const validatorResult = await silentEchoValidator.execute(sequences);
+            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID, BASE_URL);
+            const validatorResult = await virtualDeviceValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
             }
@@ -114,16 +114,16 @@ describe("SilentEchoValidator", function() {
         ];
         let checkAuthStub: any;
         before(() => {
-            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+            checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.reject("UNAUTHORIZED"));
         });
         after(() => {
             checkAuthStub.restore();
         });
         it("handles #checkAuth() errors", async () => {
-            const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID, BASE_URL);
             try {
-                await silentEchoValidator.execute(sequences);
+                await virtualDeviceValidator.execute(sequences);
             } catch (err) {
                 assert.equal(err, "UNAUTHORIZED");
             }
@@ -149,9 +149,9 @@ describe("SilentEchoValidator", function() {
             if (process.env.ENABLE_MESSAGES_MOCK) {
                 messageStub.restore();
             }
-            checkAuthStub = Sinon.stub(SilentEchoValidator.prototype, "checkAuth")
+            checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
-            seMessageStub = Sinon.stub(SilentEcho.prototype, "message")
+            seMessageStub = Sinon.stub(VirtualDevice.prototype, "message")
                 .callsFake((message: string): Promise<any> => {
                     if (message.includes("Alexa")) {
                         return Promise.resolve();
@@ -162,13 +162,13 @@ describe("SilentEchoValidator", function() {
         after(() => {
             seMessageStub.restore();
             if (process.env.ENABLE_MESSAGES_MOCK) {
-                messageStub = Sinon.stub(SilentEcho.prototype, "message").callsFake(messageMock);
+                messageStub = Sinon.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
             }
             checkAuthStub.restore();
         });
-        it("handles silent echo errors", async () => {
-            const silentEchoValidator = new SilentEchoValidator(token, userID, BASE_URL);
-            const validatorResult = await silentEchoValidator.execute(sequences);
+        it("handles virtual device errors", async () => {
+            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID, BASE_URL);
+            const validatorResult = await virtualDeviceValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
                 assert.equal(test.status, "done", `${JSON.stringify(test)}`);
@@ -187,9 +187,9 @@ describe("SilentEchoValidator", function() {
                 .get("/v1/skillAuthorized?invocation_name=simple%20player" +
                     `&user_id=${userID}`)
                 .reply(200, "AUTHORIZED");
-            const silentEchoValidator = new SilentEchoValidator(token, userID,
+            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID,
                 BASE_URL, SOURCE_API_BASE_URL);
-            const checkAuthResult = await silentEchoValidator.checkAuth("simple player");
+            const checkAuthResult = await virtualDeviceValidator.checkAuth("simple player");
             assert.equal(checkAuthResult, "AUTHORIZED");
         });
         it("handles replied errors", async () => {
@@ -197,13 +197,13 @@ describe("SilentEchoValidator", function() {
                 .get("/v1/skillAuthorized?invocation_name=simple%20player" +
                     `&user_id=${userID}`)
                 .reply(401, "UNAUTHORIZED");
-            const silentEchoValidator = new SilentEchoValidator(token, userID,
+            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID,
                 BASE_URL, SOURCE_API_BASE_URL);
             try {
-                await silentEchoValidator.checkAuth("simple player");
+                await virtualDeviceValidator.checkAuth("simple player");
             } catch (err) {
                 assert.equal(err,
-                    SilentEchoValidatorUnauthorizedMessage("simple player"));
+                    VirtualDeviceValidatorUnauthorizedMessage("simple player"));
             }
         });
         it("handles request errors", async () => {
@@ -211,10 +211,10 @@ describe("SilentEchoValidator", function() {
                 .get("/v1/skillAuthorized?invocation_name=simple%20player" +
                     `&user_id=${userID}`)
                 .replyWithError("UNKNOWN ERROR");
-            const silentEchoValidator = new SilentEchoValidator(token, userID,
+            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID,
                 BASE_URL, SOURCE_API_BASE_URL);
             try {
-                await silentEchoValidator.checkAuth("simple player");
+                await virtualDeviceValidator.checkAuth("simple player");
             } catch (err) {
                 assert.equal(err, "UNKNOWN ERROR");
             }
@@ -224,22 +224,22 @@ describe("SilentEchoValidator", function() {
     describe("Validator", () => {
         describe("#check()", () => {
             it("returns false if error is present", () => {
-                const test: ISilentEchoTest = {
+                const test: IVirtualDeviceTest = {
                     comparison: "contains",
                     input: "Hi",
                     sequence: 1,
                 };
-                const resultItem: ISilentEchoValidatorResultItem = {test};
+                const resultItem: IVirtualDeviceValidatorResultItem = {test};
                 const validator = new Validator(resultItem, new Error("test error"));
                 assert.equal(validator.check(), false);
             });
             it("returns false if result item comparison is other than 'contains'", () => {
-                const test: ISilentEchoTest = {
+                const test: IVirtualDeviceTest = {
                     comparison: "includes",
                     input: "Hi",
                     sequence: 1,
                 };
-                const resultItem: ISilentEchoValidatorResultItem = {test};
+                const resultItem: IVirtualDeviceValidatorResultItem = {test};
                 const validator = new Validator(resultItem, undefined);
                 assert.equal(validator.check(), false);
             });

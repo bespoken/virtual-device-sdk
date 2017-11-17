@@ -1,10 +1,10 @@
 {
-  "name": "silent-echo-sdk",
+  "name": "virtual-device-sdk",
   "license": "Apache 2.0",
   "private": false,
   "main": "./lib/src/Index.js",
   "typings": "./lib/src/Index.d.ts",
-  "version": "0.3.8",
+  "version": "1.0.0",
   "engines": {
     "node": "> 6.0.0"
   },
@@ -19,7 +19,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git://github.com/bespoken/silent-echo-sdk.git"
+    "url": "git://github.com/bespoken/virtual-device-sdk.git"
   },
   "scripts": {
     "lint": "tslint src/**/*.ts && tslint test/**/*.ts",
