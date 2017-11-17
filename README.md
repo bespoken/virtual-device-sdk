@@ -3,10 +3,7 @@
 [![npm](https://img.shields.io/npm/v/virtual-device-sdk.svg)](https://www.npmjs.com/package/virtual-device-sdk)
 
 # Virtual Device SDK
-Use the Virtual Device SDK to build UIs and bots that interact with Alexa via text.
-
-Check out our first example project to use it - [VirtualDeviceBot](https://github.com/bespoken/silent-echo-bot)!
-Add VirtualDevice to your Slack - [try it here](https://virtual-device.bespoken.io/slack_auth).
+Use the Virtual Device SDK to test Alexa without using our voice.
 
 The SDK can be used via [NodeJS](#nodejs-sdk) or [HTTP](#http-sdk).
 
@@ -59,8 +56,9 @@ export interface ICard {
 The VirtualDevice service can also be called directly via HTTP.
 
 ## Pre-Requisites
-Get a VirtualDevice Token:
-[https://virtual-device.bespoken.io/link_account?token=true](https://virtual-device.bespoken.io/link_account?token=true)
+* Sign into the [Bespoken Dashboard](https://apps.bespoken.io/dashboard)
+* Create a source
+* Select the Validation tab and follow the instructions there
 
 Save the token - you will use it when call the HTTP interface.
 
