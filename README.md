@@ -1,6 +1,6 @@
 [![CircleCI](https://circleci.com/gh/bespoken/silent-echo-sdk.svg?style=svg)](https://circleci.com/gh/bespoken/silent-echo-sdk)
 [![codecov](https://codecov.io/gh/bespoken/silent-echo-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/bespoken/silent-echo-sdk)
-[![npm](https://img.shields.io/npm/v/silent-echo-sdk.svg)](https://www.npmjs.com/package/silent-echo-sdk)
+[![npm](https://img.shields.io/npm/v/virtual-device-sdk.svg)](https://www.npmjs.com/package/virtual-device-sdk)
 
 # Virtual Device SDK
 Use the Virtual Device SDK to build UIs and bots that interact with Alexa via text.
