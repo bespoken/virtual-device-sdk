@@ -13,8 +13,12 @@ Add the Virtual Device SDK to your project:
 ```bash
 npm install virtual-device-sdk --save
 ```
-Get your token:  
-[https://virtual-device.bespoken.io/link_account?token=true](https://virtual-device.bespoken.io/link_account?token=true)
+
+Get your token:
+* Sign into the [Bespoken Dashboard](https://apps.bespoken.io/dashboard)
+* Create a source
+* Select the Validation tab and follow the instructions there
+
 
 Save the token that is generated - you will use it in the step below.
 
@@ -56,9 +60,8 @@ export interface ICard {
 The VirtualDevice service can also be called directly via HTTP.
 
 ## Pre-Requisites
-* Sign into the [Bespoken Dashboard](https://apps.bespoken.io/dashboard)
-* Create a source
-* Select the Validation tab and follow the instructions there
+Get a Virtual Device Token:
+[https://virtual-device.bespoken.io/link_account?token=true](https://virtual-device.bespoken.io/link_account?token=true)
 
 Save the token - you will use it when call the HTTP interface.
 
