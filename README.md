@@ -1,5 +1,5 @@
 [![CircleCI](https://circleci.com/gh/bespoken/virtual-device-sdk.svg?style=svg)](https://circleci.com/gh/bespoken/virtual-device-sdk)
-[![codecov](https://codecov.io/gh/bespoken/silent-echo-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/bespoken/silent-echo-sdk)
+[![codecov](https://codecov.io/gh/bespoken/virtual-device-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/bespoken/virtual-device-sdk)
 [![npm](https://img.shields.io/npm/v/virtual-device-sdk.svg)](https://www.npmjs.com/package/virtual-device-sdk)
 
 # Virtual Device SDK
