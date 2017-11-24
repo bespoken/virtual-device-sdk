@@ -1,4 +1,4 @@
-[![CircleCI](https://circleci.com/gh/bespoken/silent-echo-sdk.svg?style=svg)](https://circleci.com/gh/bespoken/silent-echo-sdk)
+[![CircleCI](https://circleci.com/gh/bespoken/virtual-device-sdk.svg?style=svg)](https://circleci.com/gh/bespoken/virtual-device-sdk)
 [![codecov](https://codecov.io/gh/bespoken/silent-echo-sdk/branch/master/graph/badge.svg)](https://codecov.io/gh/bespoken/silent-echo-sdk)
 [![npm](https://img.shields.io/npm/v/virtual-device-sdk.svg)](https://www.npmjs.com/package/virtual-device-sdk)
 
