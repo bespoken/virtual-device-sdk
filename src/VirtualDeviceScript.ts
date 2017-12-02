@@ -14,7 +14,7 @@ const URLRegexp = /^https?:\/\//i;
 const ScriptContentRegexp = /\"([^"]*)\"\:\s?\"([^"]*)\"/;
 
 // InvocationNameRegexp matches a skill's invocation name.
-const InvocationNameRegexp = /open(.*)$/;
+const InvocationNameRegexp = /(open|launch|tell|ask)(.*)$/;
 
 export const VirtualDeviceScriptSyntaxError = new Error("Invalid script syntax, please " +
     "provide a script with the following sctructure, each block is a sequence:" + `
@@ -274,10 +274,11 @@ export class VirtualDeviceScript {
     }
 
     private detectInvocationName(input: string): string {
-        const matches: RegExpMatchArray | null = input.match(InvocationNameRegexp);
-        if (!matches || matches.length === 1) {
+        const matches: RegExpMatchArray | null = input.toLowerCase().match(
+            InvocationNameRegexp);
+        if (!matches || matches.length !== 3) {
             return "";
         }
-        return matches[1].trim();
+        return matches[2].trim();
     }
 }
