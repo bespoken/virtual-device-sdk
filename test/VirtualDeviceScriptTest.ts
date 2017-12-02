@@ -85,6 +85,85 @@ describe("VirtualDeviceScript", function() {
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             assert.deepEqual(virtualDeviceScript.tests(scripContents), expected);
         });
+        describe("#invocationName", () => {
+            it("success", async () => {
+                const scripContents = `
+                "open test player": "welcome to the simple audio player"
+
+                "Open test player": "welcome to the simple audio player"
+
+                "Launch test player": "welcome to the simple audio player"
+
+                "Tell test player": "welcome to the simple audio player"
+
+                "ask test player": "welcome to the simple audio player"
+	            `;
+                const expected = [
+                    {
+                        invocationName: "test player",
+                        tests: [{
+                            absoluteIndex: 1,
+                            comparison: "contains",
+                            expectedStreamURL: undefined,
+                            expectedTranscript: "welcome to the simple audio player",
+                            input: "open test player",
+                            sequence: 1,
+                            sequenceIndex: 1,
+                        }],
+                    },
+                    {
+                        invocationName: "test player",
+                        tests: [{
+                            absoluteIndex: 2,
+                            comparison: "contains",
+                            expectedStreamURL: undefined,
+                            expectedTranscript: "welcome to the simple audio player",
+                            input: "Open test player",
+                            sequence: 2,
+                            sequenceIndex: 1,
+                        }],
+                    },
+                    {
+                        invocationName: "test player",
+                        tests: [{
+                            absoluteIndex: 3,
+                            comparison: "contains",
+                            expectedStreamURL: undefined,
+                            expectedTranscript: "welcome to the simple audio player",
+                            input: "Launch test player",
+                            sequence: 3,
+                            sequenceIndex: 1,
+                        }],
+                    },
+                    {
+                        invocationName: "test player",
+                        tests: [{
+                            absoluteIndex: 4,
+                            comparison: "contains",
+                            expectedStreamURL: undefined,
+                            expectedTranscript: "welcome to the simple audio player",
+                            input: "Tell test player",
+                            sequence: 4,
+                            sequenceIndex: 1,
+                        }],
+                    },
+                    {
+                        invocationName: "test player",
+                        tests: [{
+                            absoluteIndex: 5,
+                            comparison: "contains",
+                            expectedStreamURL: undefined,
+                            expectedTranscript: "welcome to the simple audio player",
+                            input: "ask test player",
+                            sequence: 5,
+                            sequenceIndex: 1,
+                        }],
+                    },
+                ];
+                const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+                assert.deepEqual(virtualDeviceScript.tests(scripContents), expected);
+            });
+        });
     });
     describe("#execute()", () => {
         let checkAuthStub: any;
