@@ -52,6 +52,10 @@ export class VirtualDevice {
 
         return promise;
     }
+
+    public resetSession(): Promise<IVirtualDeviceResult> {
+        return this.message("alexa quit");
+    }
 }
 
 export interface IVirtualDeviceResult {

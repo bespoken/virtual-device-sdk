@@ -60,5 +60,14 @@ export function message(message: string): Promise<IVirtualDeviceResult> {
             transcriptAudioURL: "",
         });
     }
+    if (message.includes("alexa quit")) {
+        return Promise.resolve({
+            card: null,
+            sessionTimeout: 0,
+            streamURL: "",
+            transcript: "",
+            transcriptAudioURL: "",
+        });
+    }
     return Promise.reject(`unexpected message: ${message}`);
 };
