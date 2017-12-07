@@ -74,6 +74,10 @@ describe("VirtualDevice", function() {
                 messageStub = Sinon.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
             }
         });
+        afterEach(() => {
+            nockScope.done();
+            nock.cleanAll();
+        });
         it("lowercase transcript", async () => {
             nockScope = nock("https://virtual-device.bespoken.io")
                 .get(/process.*/)

@@ -36,6 +36,7 @@ export class VirtualDevice {
                     if (response.statusCode === 200) {
                         const result: IVirtualDeviceResult = JSON.parse(data);
                         result.transcript = this.normalizeTranscript(result.transcript);
+                        result.message = message;
                         resolve(result);
                     } else {
                         reject(data);
@@ -75,6 +76,9 @@ export interface IVirtualDeviceResult {
     streamURL: string | null;
     transcript: string;
     transcriptAudioURL: string | null;
+
+    // message is the message used for this result.
+    message: string;
 }
 
 export interface ICard {
