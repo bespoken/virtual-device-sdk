@@ -35,6 +35,7 @@ export class VirtualDevice {
                 response.on("end", () => {
                     if (response.statusCode === 200) {
                         const result: IVirtualDeviceResult = JSON.parse(data);
+                        result.transcript = this.normalizeTranscript(result.transcript);
                         resolve(result);
                     } else {
                         reject(data);
@@ -55,6 +56,13 @@ export class VirtualDevice {
 
     public resetSession(): Promise<IVirtualDeviceResult> {
         return this.message("alexa quit");
+    }
+
+    private normalizeTranscript(transcript: string): string {
+        if (!transcript) {
+            return "";
+        }
+        return transcript.toLowerCase();
     }
 }
 
