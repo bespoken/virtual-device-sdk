@@ -100,4 +100,4 @@ HTTP Response:
 
 # What's Next
 * Keep the session open longer for deep skill interactions
-* More bots. Lots of 'em.
+* Support for additional languages, platforms and locales - as well as a new Premium tier
