@@ -59,9 +59,9 @@ export class VirtualDevice {
         return this.message("alexa quit");
     }
 
-    private normalizeTranscript(transcript: string): string {
+    private normalizeTranscript(transcript: string | null): string | null {
         if (!transcript) {
-            return "";
+            return null;
         }
         return transcript.toLowerCase();
     }
@@ -74,7 +74,7 @@ export interface IVirtualDeviceResult {
     };
     sessionTimeout: number;
     streamURL: string | null;
-    transcript: string;
+    transcript: string | null;
     transcriptAudioURL: string | null;
 
     // message is the message used for this result.
