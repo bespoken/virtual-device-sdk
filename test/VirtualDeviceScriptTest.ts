@@ -419,7 +419,7 @@ describe("VirtualDeviceScript", function() {
                             <td style="border:1px solid black;padding:5px;text-align:center;">&#10004;</td>
                             <td style="border:1px solid black;padding:5px;">open test player</td>
                             <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
-                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player say play to play some audio</td>
+                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player sleep later play some audio</td>
                         </tr>
                         <tr style="color:rgb(76,175,80);">
                             <td style="border:1px solid black;padding:5px;text-align:center;">&#10004;</td>

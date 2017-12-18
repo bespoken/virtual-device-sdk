@@ -31,7 +31,7 @@ export function message(message: string): Promise<IVirtualDeviceResult> {
             message: "open",
             sessionTimeout: 0,
             streamURL: "",
-            transcript: "welcome to the simple audio player say play to play some audio",
+            transcript: "welcome to the simple audio player sleep later play some audio",
             transcriptAudioURL: "",
         });
     }
