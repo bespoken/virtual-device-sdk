@@ -66,7 +66,7 @@ export class VirtualDeviceValidator {
             }
             currentSequenceIndex += 1;
             if (currentSequenceIndex === 1) {
-                await this.virtualDevice.message("Alexa, exit");
+                await this.virtualDevice.resetSession();
             }
             for (const test of sequence.tests) {
                 try {

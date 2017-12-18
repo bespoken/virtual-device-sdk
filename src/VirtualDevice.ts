@@ -35,6 +35,8 @@ export class VirtualDevice {
                 response.on("end", () => {
                     if (response.statusCode === 200) {
                         const result: IVirtualDeviceResult = JSON.parse(data);
+                        result.transcript = this.normalizeTranscript(result.transcript);
+                        result.message = message;
                         resolve(result);
                     } else {
                         reject(data);
@@ -52,6 +54,17 @@ export class VirtualDevice {
 
         return promise;
     }
+
+    public resetSession(): Promise<IVirtualDeviceResult> {
+        return this.message("alexa quit");
+    }
+
+    private normalizeTranscript(transcript: string | null): string | null {
+        if (!transcript) {
+            return null;
+        }
+        return transcript.toLowerCase();
+    }
 }
 
 export interface IVirtualDeviceResult {
@@ -61,8 +74,11 @@ export interface IVirtualDeviceResult {
     };
     sessionTimeout: number;
     streamURL: string | null;
-    transcript: string;
+    transcript: string | null;
     transcriptAudioURL: string | null;
+
+    // message is the message used for this result.
+    message: string;
 }
 
 export interface ICard {

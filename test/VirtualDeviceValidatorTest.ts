@@ -153,7 +153,7 @@ describe("VirtualDeviceValidator", function() {
                 .returns(Promise.resolve("AUTHORIZED"));
             seMessageStub = Sinon.stub(VirtualDevice.prototype, "message")
                 .callsFake((message: string): Promise<any> => {
-                    if (message.includes("Alexa")) {
+                    if (message.includes("Alexa") || message.includes("alexa quit")) {
                         return Promise.resolve();
                     }
                     return Promise.reject("something went wrong");
