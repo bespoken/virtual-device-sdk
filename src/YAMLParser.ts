@@ -125,43 +125,10 @@ export class Value {
         }
     }
 
-    public isDefined(): boolean {
-        return this.value !== undefined;
-    }
-
-    public isArray(): boolean {
-        return Array.isArray(this.value);
-    }
-
-    public isNull(): boolean {
-        return this.value === null;
-    }
-
-    public isString(): boolean {
-        return (typeof this.value) === "string";
-    }
-
-    public object(): any {
-        return this.value as any;
-    }
-
-    public array(): Value[] {
-        return this.value as any[];
-    }
-
-    public toString(): string {
-        return "Name: " + this.name + " Value: " + this.value;
-    }
-
     public toObject(): any {
         let o: any;
         if (!this.isDefined()) {
             throw new Error("This should not happen - undefined object: " + this.toString());
-        }
-
-        let cleanName = this.name as string;
-        if (this.name !== undefined) {
-            cleanName = this.cleanString(cleanName);
         }
 
         if (this.isArray()) {
@@ -192,6 +159,34 @@ export class Value {
             }
         }
         return o;
+    }
+
+    public isDefined(): boolean {
+        return this.value !== undefined;
+    }
+
+    public isArray(): boolean {
+        return Array.isArray(this.value);
+    }
+
+    public isNull(): boolean {
+        return this.value === null;
+    }
+
+    public isString(): boolean {
+        return (typeof this.value) === "string";
+    }
+
+    public object(): any {
+        return this.value as any;
+    }
+
+    public array(): Value[] {
+        return this.value as any[];
+    }
+
+    public toString(): string {
+        return "Name: " + this.name + " Value: " + this.value;
     }
 
     public cleanString(s: string) {
