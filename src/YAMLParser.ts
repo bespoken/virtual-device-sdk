@@ -49,6 +49,13 @@ export class YAMLParser {
             // If the line ends with a colon, means this property will hold an object
             const name = cleanLine.substring(0, cleanLine.length - 1);
             context.push(new Value(tabs, name));
+        } else if (cleanLine.startsWith("- ")) {
+            // We just discovered this is an array, potentially!
+            if (!context.top().isArray()) {
+                context.top().value = [];
+            }
+            const arrayValue = cleanLine.substring(2).trim();
+            context.top().array().push(new Value(tabs, undefined, arrayValue));
         } else {
             // If the line does not end with a colon, means this is a self-contained key-value
             const name = cleanLine.split(":")[0].trim();
@@ -58,19 +65,6 @@ export class YAMLParser {
         }
 
     }
-
-    // private handleListItem(line: string, tabs: number, context: YAMLContext) {
-    //     if (tabs - 1 === context.tabs || context.array) {
-    //         const arrayValue = line.substring(2).trim();
-    //         if (!context.array) {
-    //             context.array = [];
-    //         }
-    //
-    //         context.array.push(arrayValue);
-    //     } else {
-    //         throw new Error("INVALID - Line " + context.lineNumber + ": cannot add a list item here.");
-    //     }
-    // }
 
     private countAtStart(line: string, value: string) {
         let count = 0;
@@ -93,10 +87,6 @@ export class YAMLContext {
 
     public top(): Value {
         return this.stack[this.stack.length - 1];
-    }
-
-    public pop(): void {
-        this.stack = this.stack.slice(0, this.stack.length - 1);
     }
 
     public root(): Value {
@@ -180,10 +170,14 @@ export class Value {
             for (const v of this.array()) {
                 if (v.isNull()) {
                     o.push(null);
-                } else {
+                } else if (v.name) {
+                    // Create an object on the fly, if this has a name
                     const arrayObject: any = {};
                     arrayObject[this.cleanString(v.name as string)] = v.toObject();
                     o.push(arrayObject);
+                } else {
+                    // If there is no name, just add it - should be a string
+                    o.push(v.toObject());
                 }
             }
         } else if (this.isString()) {
@@ -204,6 +198,7 @@ export class Value {
         if (s.startsWith("'") || s.startsWith("\"")) {
             s = s.substring(1);
         }
+
         if (s.endsWith("'") || s.endsWith("\"")) {
             s = s.substring(0, s.length - 1);
         }

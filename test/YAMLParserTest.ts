@@ -63,5 +63,38 @@ describe("YAMLParser", function() {
             assert.equal(result[2].o2.p3, "value3");
         });
 
+        it("Parses two objects with a blank line in between", async () => {
+            const content = "o1:\n" +
+                "   p1: value1\n" +
+                "   p2: value2\n" +
+                "\n" +
+                "o2:\n" +
+                "   p3: value3\n" +
+                "   p4: value4";
+            const parser = new YAMLParser(content);
+            const result = parser.parse();
+            assert.equal(result.length, 3);
+            assert.equal(result[0].o1.p1, "value1");
+            assert.equal(result[1], null);
+            assert.equal(result[2].o2.p3, "value3");
+        });
+
+        it("Parses two objects with an array", async () => {
+            const content = "o1:\n" +
+                "   - Test\n" +
+                "   - Test2\n" +
+                "\n" +
+                "o2:\n" +
+                "   p3: value3\n" +
+                "   p4: value4";
+            const parser = new YAMLParser(content);
+            const result = parser.parse();
+            assert.equal(result.length, 3);
+            assert.equal(result[0].o1[0], "Test");
+            assert.equal(result[0].o1[1], "Test2");
+            assert.equal(result[1], null);
+            assert.equal(result[2].o2.p3, "value3");
+        });
+
     });
 });
