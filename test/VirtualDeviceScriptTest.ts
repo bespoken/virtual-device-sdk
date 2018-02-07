@@ -272,7 +272,8 @@ describe("VirtualDeviceScript", function() {
                 await script.executeDir("test/nonExistentDir");
                 assert.fail("This should never be reached");
             } catch (e) {
-                assert.include(e, "Directory to execute does not exist: " + __dirname + "/nonExistentDir");
+                assert.include(e, "Directory to execute does not exist: ");
+                assert.include(e, "/nonExistentDir");
             }
         });
 
@@ -282,8 +283,8 @@ describe("VirtualDeviceScript", function() {
                 await script.executeDir("test/scriptDir/IgnoreMe.xml");
                 assert.fail("This should never be reached");
             } catch (e) {
-                assert.include(e, "Not a directory: "
-                    + __dirname + "/scriptDir/IgnoreMe.xml");
+                assert.include(e, "Not a directory: ");
+                assert.include(e, "/scriptDir/IgnoreMe.xml");
             }
         });
     });
@@ -312,8 +313,8 @@ describe("VirtualDeviceScript", function() {
                 await script.executeFile("test/scriptDir/NonExistent.test.yml");
                 assert.fail("This point should never be reached");
             } catch (e) {
-                assert.include(e, "File to execute does not exist: "
-                    + __dirname + "/scriptDir/NonExistent.test.yml");
+                assert.include(e, "File to execute does not exist:");
+                assert.include(e, "/scriptDir/NonExistent.test.yml");
             }
         });
     });
