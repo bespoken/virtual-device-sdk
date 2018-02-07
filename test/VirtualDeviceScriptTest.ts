@@ -257,7 +257,7 @@ describe("VirtualDeviceScript", function() {
         });
 
         it("executes a directory", async () => {
-            const script = new VirtualDeviceScript("TOKEN", "USER_ID");
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
             const results = await script.executeDir("test/scriptDir");
             // Should run two files - it ignores the one that does not end in YML
             assert.equal(results.length, 3);
@@ -267,7 +267,7 @@ describe("VirtualDeviceScript", function() {
         });
 
         it("fails on missing directory", async () => {
-            const script = new VirtualDeviceScript("TOKEN", "USER_ID");
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
             try {
                 await script.executeDir("test/nonExistentDir");
                 assert.fail("This should never be reached");
@@ -278,7 +278,7 @@ describe("VirtualDeviceScript", function() {
         });
 
         it("fails on not a directory", async () => {
-            const script = new VirtualDeviceScript("TOKEN", "USER_ID");
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
             try {
                 await script.executeDir("test/scriptDir/IgnoreMe.xml");
                 assert.fail("This should never be reached");
@@ -301,14 +301,14 @@ describe("VirtualDeviceScript", function() {
         });
 
         it("is successful", async () => {
-            const script = new VirtualDeviceScript("TOKEN", "USER_ID");
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
             const result = await script.executeFile("test/scriptDir/Test1.test.yml");
             // Should run two files - it ignores the one that does not end in YML
             assert.equal(result.result, "success");
         });
 
         it("fails on missing file", async () => {
-            const script = new VirtualDeviceScript("TOKEN", "USER_ID");
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
             try {
                 await script.executeFile("test/scriptDir/NonExistent.test.yml");
                 assert.fail("This point should never be reached");
