@@ -1,3 +1,5 @@
+import * as fs from "fs";
+import * as path from "path";
 import {
     IVirtualDeviceTest,
     IVirtualDeviceTestSequence,
@@ -88,7 +90,49 @@ export class VirtualDeviceScript {
         return sequences;
     }
 
-    public execute(scriptContents: string, context?: any): Promise<any> {
+    /**
+     * Executes a directory of tests
+     * It will load any files that end with "yml" or "yaml" in the directory and execute them
+     * @param {string} directoryPath
+     */
+    public async executeDir(directoryPath: string): Promise<IVirtualDeviceValidatorResult[]> {
+        directoryPath = path.resolve(directoryPath);
+        let stats;
+        try {
+            stats = fs.statSync(directoryPath);
+        } catch (e) {
+            return Promise.reject("Directory to execute does not exist: " + directoryPath);
+        }
+
+        if (!stats.isDirectory()) {
+            return Promise.reject("Not a directory: " + directoryPath);
+        }
+
+        const items = fs.readdirSync(directoryPath);
+        const results = [];
+        for (const filePath of items) {
+            if (filePath.endsWith(".yml") || filePath.endsWith(".yaml")) {
+                const fullPath = path.join(directoryPath, filePath);
+                const result = await this.executeFile(fullPath);
+                results.push(result);
+            }
+        }
+        return results;
+    }
+
+    public executeFile(filePath: string): Promise<IVirtualDeviceValidatorResult> {
+        filePath = path.resolve(filePath);
+        try {
+            fs.statSync(filePath);
+        } catch (e) {
+            return Promise.reject("File to execute does not exist: " + filePath);
+        }
+
+        const fileContents = fs.readFileSync(filePath, "UTF-8");
+        return this.execute(fileContents);
+    }
+
+    public execute(scriptContents: string, context?: any): Promise<IVirtualDeviceValidatorResult> {
         return this.virtualDeviceValidator.execute(this.tests(scriptContents), context);
     }
 

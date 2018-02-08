@@ -9,11 +9,39 @@ import {IVirtualDeviceScriptCallback,
     VirtualDeviceScript} from "../src/VirtualDeviceScript";
 import {IVirtualDeviceValidatorResultItem,
     VirtualDeviceScriptUnauthorizedError,
-    VirtualDeviceValidator} from "../src/VirtualDeviceValidator";
+    VirtualDeviceValidator,
+} from "../src/VirtualDeviceValidator";
 import * as fixtures from "./fixtures";
 
 chai.use(sinonChai);
 const expect = chai.expect;
+
+// We put the MessageMock in its own class
+// This may be enabled all tests, or just for some, so we need some extra safety and logic around it
+class MessageMock {
+    public static enable() {
+        if (MessageMock.sandbox) {
+            return;
+        }
+
+        const messageMock = (message: string, debug: boolean = false): Promise<IVirtualDeviceResult> => {
+            return fixtures.message(message);
+        };
+
+        MessageMock.sandbox = Sinon.sandbox.create();
+        MessageMock.sandbox.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
+    }
+
+    public static disable() {
+        if (!MessageMock.sandbox) {
+            return;
+        }
+        MessageMock.sandbox.restore();
+        MessageMock.sandbox = undefined;
+    }
+
+    private static sandbox: any;
+}
 
 describe("VirtualDeviceScript", function() {
     this.timeout(120000);
@@ -22,7 +50,6 @@ describe("VirtualDeviceScript", function() {
 
     let token: string;
     const userID: string = "abc";
-    let messageStub: any;
     before(() => {
         dotenv.config();
         if (process.env.TEST_TOKEN) {
@@ -30,16 +57,15 @@ describe("VirtualDeviceScript", function() {
         } else {
             assert.fail("No TEST_TOKEN defined");
         }
+
         if (process.env.ENABLE_MESSAGES_MOCK) {
-            const messageMock = (message: string, debug: boolean = false): Promise<IVirtualDeviceResult> => {
-                return fixtures.message(message);
-            };
-            messageStub = Sinon.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
+            MessageMock.enable();
         }
     });
+
     after(() => {
         if (process.env.ENABLE_MESSAGES_MOCK) {
-            messageStub.restore();
+            MessageMock.disable();
         }
     });
     describe("#tests()", () => {
@@ -241,6 +267,85 @@ describe("VirtualDeviceScript", function() {
             assertSequenceInfo(3, 2);
         });
     });
+
+    describe("#executeDir()", () => {
+        let sandbox: any;
+        before(() => {
+            sandbox = Sinon.sandbox.create();
+            sandbox.stub(VirtualDeviceValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+            MessageMock.enable();
+        });
+        after(() => {
+            sandbox.restore();
+            MessageMock.disable();
+        });
+
+        it("executes a directory", async () => {
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
+            const results = await script.executeDir("test/scriptDir");
+            // Should run two files - it ignores the one that does not end in YML
+            assert.equal(results.length, 3);
+            assert.equal(results[0].result, "success");
+            assert.equal(results[1].result, "failure");
+            assert.equal(results[2].result, "success");
+        });
+
+        it("fails on missing directory", async () => {
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
+            try {
+                await script.executeDir("test/nonExistentDir");
+                assert.fail("This should never be reached");
+            } catch (e) {
+                assert.include(e, "Directory to execute does not exist: ");
+                assert.include(e, "/nonExistentDir");
+            }
+        });
+
+        it("fails on not a directory", async () => {
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
+            try {
+                await script.executeDir("test/scriptDir/IgnoreMe.xml");
+                assert.fail("This should never be reached");
+            } catch (e) {
+                assert.include(e, "Not a directory: ");
+                assert.include(e, "/scriptDir/IgnoreMe.xml");
+            }
+        });
+    });
+
+    describe("#executeFile()", () => {
+        let sandbox: any;
+        before(() => {
+            sandbox = Sinon.sandbox.create();
+            sandbox.stub(VirtualDeviceValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+            MessageMock.enable();
+        });
+        after(() => {
+            sandbox.restore();
+            MessageMock.disable();
+        });
+
+        it("is successful", async () => {
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
+            const result = await script.executeFile("test/scriptDir/Test1.test.yml");
+            // Should run two files - it ignores the one that does not end in YML
+            assert.equal(result.result, "success");
+        });
+
+        it("fails on missing file", async () => {
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
+            try {
+                await script.executeFile("test/scriptDir/NonExistent.test.yml");
+                assert.fail("This point should never be reached");
+            } catch (e) {
+                assert.include(e, "File to execute does not exist:");
+                assert.include(e, "/scriptDir/NonExistent.test.yml");
+            }
+        });
+    });
+
     describe("#on()", () => {
         let checkAuthStub: any;
         before(() => {
@@ -423,7 +528,7 @@ describe("VirtualDeviceScript", function() {
                             <td style="border:1px solid black;padding:5px;text-align:center;">&#10004;</td>
                             <td style="border:1px solid black;padding:5px;">open test player</td>
                             <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
-                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player sleep later play some audio</td>
+                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player to play some audio</td>
                         </tr>
                         <tr style="color:rgb(76,175,80);">
                             <td style="border:1px solid black;padding:5px;text-align:center;">&#10004;</td>
