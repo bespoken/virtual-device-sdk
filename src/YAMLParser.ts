@@ -51,6 +51,7 @@ export class YAMLParser {
             context.push(new Value(tabs, name));
         } else if (cleanLine.startsWith("- ")) {
             // We just discovered this is an array, potentially!
+            // If the object is not already an array, make it one
             if (!context.top().isArray()) {
                 context.top().value = [];
             }
@@ -94,6 +95,7 @@ export class YAMLContext {
     }
 
     public popTo(tabs: number): void {
+        this.tabs = tabs;
         if (tabs >= this.stack.length) {
             return;
         }
@@ -140,7 +142,8 @@ export class Value {
                 } else if (v.name) {
                     // Create an object on the fly, if this has a name
                     const arrayObject: any = {};
-                    arrayObject[this.cleanString(v.name as string)] = v.toObject();
+                    arrayObject.name = this.cleanString(v.name as string);
+                    arrayObject.value = v.toObject();
                     o.push(arrayObject);
                 } else {
                     // If there is no name, just add it - should be a string
