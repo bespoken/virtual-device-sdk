@@ -19,7 +19,6 @@ Get your token:
 * Create a source
 * Select the Validation tab and follow the instructions there
 
-
 Save the token that is generated - you will use it in the step below.
 
 ## Sending a Message
@@ -59,11 +58,12 @@ export interface ICard {
 # HTTP SDK
 The VirtualDevice service can also be called directly via HTTP.
 
-## Pre-Requisites
-Get a Virtual Device Token:
-[https://virtual-device.bespoken.io/link_account?token=true](https://virtual-device.bespoken.io/link_account?token=true)
+To use it, first get your token:
+* Sign into the [Bespoken Dashboard](https://apps.bespoken.io/dashboard)
+* Create a source
+* Select the Validation tab and follow the instructions there
 
-Save the token - you will use it when call the HTTP interface.
+Save the token that is generated - you will use it in the step below.
 
 ## Requests
 The Base URL is:  

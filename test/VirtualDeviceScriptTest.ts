@@ -9,11 +9,39 @@ import {IVirtualDeviceScriptCallback,
     VirtualDeviceScript} from "../src/VirtualDeviceScript";
 import {IVirtualDeviceValidatorResultItem,
     VirtualDeviceScriptUnauthorizedError,
-    VirtualDeviceValidator} from "../src/VirtualDeviceValidator";
+    VirtualDeviceValidator,
+} from "../src/VirtualDeviceValidator";
 import * as fixtures from "./fixtures";
 
 chai.use(sinonChai);
 const expect = chai.expect;
+
+// We put the MessageMock in its own class
+// This may be enabled all tests, or just for some, so we need some extra safety and logic around it
+class MessageMock {
+    public static enable() {
+        if (MessageMock.sandbox) {
+            return;
+        }
+
+        const messageMock = (message: string, debug: boolean = false): Promise<IVirtualDeviceResult> => {
+            return fixtures.message(message);
+        };
+
+        MessageMock.sandbox = Sinon.sandbox.create();
+        MessageMock.sandbox.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
+    }
+
+    public static disable() {
+        if (!MessageMock.sandbox) {
+            return;
+        }
+        MessageMock.sandbox.restore();
+        MessageMock.sandbox = undefined;
+    }
+
+    private static sandbox: any;
+}
 
 describe("VirtualDeviceScript", function() {
     this.timeout(120000);
@@ -22,7 +50,6 @@ describe("VirtualDeviceScript", function() {
 
     let token: string;
     const userID: string = "abc";
-    let messageStub: any;
     before(() => {
         dotenv.config();
         if (process.env.TEST_TOKEN) {
@@ -30,17 +57,15 @@ describe("VirtualDeviceScript", function() {
         } else {
             assert.fail("No TEST_TOKEN defined");
         }
+
         if (process.env.ENABLE_MESSAGES_MOCK) {
-            const messageMock = (message: string, debug: boolean = false): Promise<IVirtualDeviceResult> => {
-                return fixtures.message(message);
-            };
-            messageStub = Sinon.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
+            MessageMock.enable();
         }
     });
 
     after(() => {
         if (process.env.ENABLE_MESSAGES_MOCK) {
-            messageStub.restore();
+            MessageMock.disable();
         }
     });
 
