@@ -126,7 +126,7 @@ describe("YAMLParser", function() {
 	        `;
             const parser = new YAMLParser(contents);
             const result = parser.parse();
-            assert.equal(result.length, 5)
+            assert.equal(result.length, 5);
             assert.equal(result[0].value(), null);
             assert.equal(result[1].string(), "welcome to the simple audio player");
             assert.equal(result[3].string(), "https://feeds.soundcloud.com/stream/");
