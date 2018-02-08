@@ -6,8 +6,7 @@ import * as Sinon from "sinon";
 import * as sinonChai from "sinon-chai";
 import {IVirtualDeviceResult, VirtualDevice} from "../src/VirtualDevice";
 import {IVirtualDeviceScriptCallback,
-    VirtualDeviceScript,
-    VirtualDeviceScriptSyntaxError} from "../src/VirtualDeviceScript";
+    VirtualDeviceScript} from "../src/VirtualDeviceScript";
 import {IVirtualDeviceValidatorResultItem,
     VirtualDeviceScriptUnauthorizedError,
     VirtualDeviceValidator} from "../src/VirtualDeviceValidator";
@@ -46,9 +45,9 @@ describe("VirtualDeviceScript", function() {
     describe("#tests()", () => {
         it("success", async () => {
             const scripContents = `
-            "open test player": "welcome to the simple audio player"
-            "Hi": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"open test player": "welcome to the simple audio player"
+"Hi": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const expected = [
                 {
@@ -88,15 +87,15 @@ describe("VirtualDeviceScript", function() {
         describe("#invocationName", () => {
             it("success", async () => {
                 const scripContents = `
-                "open test player": "welcome to the simple audio player"
+"open test player": "welcome to the simple audio player"
 
-                "Open test player": "welcome to the simple audio player"
+"Open test player": "welcome to the simple audio player"
 
-                "Launch test player": "welcome to the simple audio player"
+"Launch test player": "welcome to the simple audio player"
 
-                "Tell test player": "welcome to the simple audio player"
+"Tell test player": "welcome to the simple audio player"
 
-                "ask test player": "welcome to the simple audio player"
+"ask test player": "welcome to the simple audio player"
 	            `;
                 const expected = [
                     {
@@ -180,11 +179,11 @@ describe("VirtualDeviceScript", function() {
                 `"Hi": ""
                 `,
                 `
-                "Hi": ""`,
+"Hi": ""`,
                 `
-                "Hi": "*"
-                "open test player": "welcome to the simple audio player"
-                "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"Hi": "*"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
             ];
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
@@ -198,14 +197,14 @@ describe("VirtualDeviceScript", function() {
         });
         it("success sequence", async () => {
             const scripContents = `
-            "Hi": "*"
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"Hi": "*"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
 
-            "Hi": "*"
+"Hi": "*"
 
-            "Hi": "*"
-            "open test player": "welcome to the simple audio player"
+"Hi": "*"
+"open test player": "welcome to the simple audio player"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             const validatorResult = await virtualDeviceScript.execute(scripContents);
@@ -257,11 +256,11 @@ describe("VirtualDeviceScript", function() {
                 `"Hi": ""
                 `,
                 `
-                "Hi": ""`,
+"Hi": ""`,
                 `
-                "Hi": "*"
-                "open test player": "welcome to the simple audio player"
-                "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"Hi": "*"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
             ];
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
@@ -323,8 +322,8 @@ describe("VirtualDeviceScript", function() {
                 {
                 expected: undefined,
                 scriptContents: `
-                    "open test player": "welcome to the simple audio player"
-                    "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
                 }];
             for (const test of tests) {
@@ -334,39 +333,44 @@ describe("VirtualDeviceScript", function() {
         });
         it("returns syntax error", async () => {
             const tests = [
-                {expected: VirtualDeviceScriptSyntaxError,
+                {expected: "Line 1: No right-hand value specified.",
                 scriptContents: `wrong contents`,
                 },
-                {expected: VirtualDeviceScriptSyntaxError,
+                {expected: "Line 1: No right-hand value specified.",
                 scriptContents: `open test player`,
                 },
-                {expected: VirtualDeviceScriptSyntaxError,
+                {expected: "Line 1: No properties added for object.",
                 scriptContents: `"open test player":`,
                 },
-                {expected: VirtualDeviceScriptSyntaxError,
+                {expected: undefined,
                 scriptContents: `"open test player": welcome to the simple audio player`,
                 },
-                {expected: VirtualDeviceScriptSyntaxError,
+                {expected: undefined,
                 scriptContents: `"open test player": "welcome to the simple audio player`,
                 },
-                {expected: VirtualDeviceScriptSyntaxError,
+                {expected: "Line 2: No right-hand value specified.",
                 scriptContents: `
-                    "open test player": "welcome to the simple audio player"
-                    "tell test player to play"
+"open test player": "welcome to the simple audio player"
+"tell test player to play"
                 `,
                 },
                 {
-                expected: VirtualDeviceScriptSyntaxError,
+                expected: undefined,
                 scriptContents: `
-                    "open test player": "welcome to the simple audio player"
-                    "tell test player to play": https://feeds.soundcloud.com/stream/"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": https://feeds.soundcloud.com/stream/"
                 `,
                 },
                 ];
             for (const test of tests) {
                 const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
-                assert.equal(virtualDeviceScript.validate(test.scriptContents),
-                    test.expected, `test: ${JSON.stringify(test)}`);
+                const output = virtualDeviceScript.validate(test.scriptContents);
+                if (test.expected) {
+                    assert.equal((output as Error).message, test.expected, `test: ${JSON.stringify(test)}`);
+                } else {
+                    assert.isUndefined(output, `test: ${JSON.stringify(test)}`);
+                }
+
             }
         });
     });
@@ -381,8 +385,8 @@ describe("VirtualDeviceScript", function() {
         });
         it("success", async () => {
             const scripContents = `
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             const validatorResult = await virtualDeviceScript.execute(scripContents);
@@ -437,8 +441,8 @@ describe("VirtualDeviceScript", function() {
     describe("#prettifyAsPartialHTML()", () => {
         it("renders correctly scheduled result items", async () => {
             const scripContents = `
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             // tslint:disable:max-line-length
@@ -490,8 +494,8 @@ describe("VirtualDeviceScript", function() {
         });
         it("renders correctly running result items", async () => {
             const scripContents = `
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             // tslint:disable:max-line-length
@@ -555,8 +559,8 @@ describe("VirtualDeviceScript", function() {
         });
         it("renders correctly done result items", async () => {
             const scripContents = `
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             // tslint:disable:max-line-length
@@ -621,8 +625,8 @@ describe("VirtualDeviceScript", function() {
         });
         it("renders correctly failed result items", async () => {
             const scripContents = `
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             // tslint:disable:max-line-length

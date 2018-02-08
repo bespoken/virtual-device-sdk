@@ -37,9 +37,16 @@ export class YAMLParser {
     }
 
     private parseLine(line: string, context: YAMLContext) {
-        let tabs = YAMLParser.countAtStart(line, YAMLParser.TAB);
-        if (tabs === 0) {
-            tabs = YAMLParser.countAtStart(line, YAMLParser.TWO_SPACES);
+        // If we have increased the tabs, means this is either an array or a object
+        const cleanLine = line.trim();
+
+        let tabs = 0;
+        // We calculate the number of tabs if this line is not empty
+        if (cleanLine.length > 0) {
+            YAMLParser.countAtStart(line, YAMLParser.TAB);
+            if (tabs === 0) {
+                tabs = YAMLParser.countAtStart(line, YAMLParser.TWO_SPACES);
+            }
         }
 
         // Not allowed to indent by more than one tab per line
@@ -50,10 +57,6 @@ export class YAMLParser {
         }
 
         context.popTo(tabs);
-
-        // If we have increased the tabs, means this is either an array or a object
-        const cleanLine = line.trim();
-
         if (cleanLine.length === 0) {
             // If the length is zero, means this is an empty line and we set as null
             context.push(new Value(context.lineNumber, tabs, undefined, null));
@@ -70,7 +73,7 @@ export class YAMLParser {
         } else {
             // If the line does not end with a colon, means this is a self-contained key-value
             const name = cleanLine.split(":")[0].trim();
-            const value = cleanLine.split(":")[1].trim();
+            const value = cleanLine.split(":").slice(1).join(":").trim();
 
             context.push(new Value(context.lineNumber, tabs, name, value));
         }
@@ -154,6 +157,14 @@ export class Value {
 
     public isString(): boolean {
         return (typeof this._value) === "string";
+    }
+
+    public isEmpty(): boolean {
+        return this._value.length === 0;
+    }
+
+    public isObject(): boolean {
+        return (typeof this._value) === "object";
     }
 
     public object(): any {

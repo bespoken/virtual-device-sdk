@@ -118,5 +118,19 @@ describe("YAMLParser", function() {
             assert.equal(result[2].value().p3.string(), "value3");
         });
 
+        it("Uses a case with a file contents literal", async () => {
+            const contents = `
+"open test player": "welcome to the simple audio player"
+"Hi": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
+	        `;
+            const parser = new YAMLParser(contents);
+            const result = parser.parse();
+            assert.equal(result.length, 5)
+            assert.equal(result[0].value(), null);
+            assert.equal(result[1].string(), "welcome to the simple audio player");
+            assert.equal(result[3].string(), "https://feeds.soundcloud.com/stream/");
+        });
+
     });
 });

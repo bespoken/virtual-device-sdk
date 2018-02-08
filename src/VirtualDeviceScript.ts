@@ -6,22 +6,12 @@ import {
     Validator,
     VirtualDeviceValidator,
 } from "./VirtualDeviceValidator";
-
-const URLRegexp = /^https?:\/\//i;
-
-// ScriptContentRegexp matches two strings within quotes:
-// "match #1": "match #2"
-const ScriptContentRegexp = /\"([^"]*)\"\:\s?\"([^"]*)\"/;
+import {YAMLParser} from "./YAMLParser";
 
 // InvocationNameRegexp matches a skill's invocation name.
-const InvocationNameRegexp = /(open|launch|tell|ask)(.*)$/;
+const invocationNameRegexp = /(open|launch|tell|ask)(.*)$/;
 
-export const VirtualDeviceScriptSyntaxError = new Error("Invalid script syntax, please " +
-    "provide a script with the following sctructure, each block is a sequence:" + `
-    "<Input>": "<ExpectedOutput>"
-    "<Input>": "<ExpectedOutput>"
-
-    "<Input>": "<ExpectedOutput>"`);
+const urlRegExp = /^https?:\/\//i;
 
 export type IVirtualDeviceScriptCallback = (
     error: Error,
@@ -37,27 +27,21 @@ export class VirtualDeviceScript {
     }
 
     public tests(scriptContents: string): IVirtualDeviceTestSequence[] {
+        // Throw away blank lines at beginning and end
+        scriptContents = scriptContents.trim();
+
         const sequences: IVirtualDeviceTestSequence[] = [];
         let currentSequence: IVirtualDeviceTestSequence = {tests: [], invocationName: ""};
         let sequence: number = 1;
         let sequenceIndex: number = 1;
         let absoluteIndex: number = 0;
-        const lines = scriptContents.split("\n");
-        let currentLineIndex: number = 0;
-        for (let line of lines) {
-            currentLineIndex += 1;
-            line = line.trim();
-            if (line !== "") {
+        const utterances = new YAMLParser(scriptContents).parse();
+        let utteranceCount: number = 0;
+        for (const utterance of utterances) {
+            utteranceCount += 1;
+            if (!utterance.isNull()) {
                 absoluteIndex += 1;
-                let matches: RegExpMatchArray | null = [];
-                let input: string | null = "";
-                let output: string | null = "";
-                matches = line.match(ScriptContentRegexp);
-                input = matches && matches[1];
-                output = matches && matches[2];
-                if (!matches || !input) {
-                    throw VirtualDeviceScriptSyntaxError;
-                }
+                const input = utterance.name() as string;
                 const test: IVirtualDeviceTest = {
                     absoluteIndex,
                     comparison: "contains",
@@ -67,23 +51,34 @@ export class VirtualDeviceScript {
                     sequence,
                     sequenceIndex,
                 };
-                if (output && URLRegexp.test(output)) {
-                    test.expectedStreamURL = output;
-                } else {
-                    test.expectedTranscript = output || undefined;
+
+                // If the value for this is just a string, then check whether it is a URL
+                if (utterance.isString()) {
+                    if (utterance.isEmpty()) {
+                        throw new Error("Line " + utterance.line + ": No right-hand value specified.");
+                    }
+                    // If this utterance is a URL, assume it is a stream check
+                    if (urlRegExp.test(utterance.string())) {
+                        test.expectedStreamURL = utterance.string();
+                    } else {
+                        test.expectedTranscript = utterance.string();
+                    }
+                } else if (utterance.value() === undefined) {
+                    throw new Error("Line " + utterance.line + ": No properties added for object.");
                 }
+
                 currentSequence.tests.push(test);
                 sequenceIndex += 1;
             }
-            if (line === "" || currentLineIndex === lines.length) {
+            // If this a blank line, or the last utterance, we tie up this sequence
+            if (utterance.isNull() || utteranceCount === utterances.length) {
                 if (currentSequence.tests.length) {
                     sequence += 1;
                     const firstInput = (currentSequence.tests
                         && currentSequence.tests.length > 0
                         && currentSequence.tests[0]
                         && currentSequence.tests[0].input) || "";
-                    currentSequence.invocationName = this.detectInvocationName(
-                        firstInput);
+                    currentSequence.invocationName = this.detectInvocationName(firstInput);
                     sequences.push({...currentSequence});
                     currentSequence = {tests: [], invocationName: ""};
                     sequenceIndex = 1;
@@ -275,7 +270,7 @@ export class VirtualDeviceScript {
 
     private detectInvocationName(input: string): string {
         const matches: RegExpMatchArray | null = input.toLowerCase().match(
-            InvocationNameRegexp);
+            invocationNameRegexp);
         if (!matches || matches.length !== 3) {
             return "";
         }
