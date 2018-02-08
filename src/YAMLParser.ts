@@ -4,6 +4,18 @@ export class YAMLParser {
     private static NEWLINE: string = "\n";
     private static TWO_SPACES: string = "  ";
 
+    private static countAtStart(line: string, value: string) {
+        let count = 0;
+        while (true) {
+            if (line.startsWith(value)) {
+                count++;
+                line = line.slice(value.length);
+            } else {
+                break;
+            }
+        }
+        return count;
+    }
     // public static fromFile(yamlFile: string): any {
     //     const contents = fs.readFileSync(yamlFile, "UTF-8");
     //     return new YAMLParser(contents).parse();
@@ -11,23 +23,23 @@ export class YAMLParser {
 
     public constructor(public yamlContents: string) {}
 
-    public parse(): any[] {
+    public parse(): Value[] {
         const lines = this.yamlContents.split(YAMLParser.NEWLINE);
 
         const context = new YAMLContext();
-        context.push(new Value(0, undefined, []));
+        context.push(new Value(0, 0, undefined, []));
         for (const line of lines) {
             context.lineNumber++;
             this.parseLine(line, context);
         }
 
-        return context.root().toObject();
+        return context.root().array();
     }
 
     private parseLine(line: string, context: YAMLContext) {
-        let tabs = this.countAtStart(line, YAMLParser.TAB);
+        let tabs = YAMLParser.countAtStart(line, YAMLParser.TAB);
         if (tabs === 0) {
-            tabs = this.countAtStart(line, YAMLParser.TWO_SPACES);
+            tabs = YAMLParser.countAtStart(line, YAMLParser.TWO_SPACES);
         }
 
         // Not allowed to indent by more than one tab per line
@@ -44,40 +56,25 @@ export class YAMLParser {
 
         if (cleanLine.length === 0) {
             // If the length is zero, means this is an empty line and we set as null
-            context.push(new Value(tabs, undefined, null));
+            context.push(new Value(context.lineNumber, tabs, undefined, null));
         } else if (cleanLine.endsWith(":")) {
             // If the line ends with a colon, means this property will hold an object
             const name = cleanLine.substring(0, cleanLine.length - 1);
-            context.push(new Value(tabs, name));
+            context.push(new Value(context.lineNumber, tabs, name));
         } else if (cleanLine.startsWith("- ")) {
             // We just discovered this is an array, potentially!
             // If the object is not already an array, make it one
-            if (!context.top().isArray()) {
-                context.top().value = [];
-            }
+            context.top().value([]);
             const arrayValue = cleanLine.substring(2).trim();
-            context.top().array().push(new Value(tabs, undefined, arrayValue));
+            context.top().array().push(new Value(context.lineNumber, tabs, undefined, arrayValue));
         } else {
             // If the line does not end with a colon, means this is a self-contained key-value
             const name = cleanLine.split(":")[0].trim();
             const value = cleanLine.split(":")[1].trim();
 
-            context.push(new Value(tabs, name, value));
+            context.push(new Value(context.lineNumber, tabs, name, value));
         }
 
-    }
-
-    private countAtStart(line: string, value: string) {
-        let count = 0;
-        while (true) {
-            if (line.startsWith(value)) {
-                count++;
-                line = line.slice(value.length);
-            } else {
-                break;
-            }
-        }
-        return count;
     }
 }
 
@@ -105,10 +102,15 @@ export class YAMLContext {
     public push(value: Value): void  {
         console.log("PUSH " + value.toString());
         if (this.stack.length > 0) {
+            // If nothing is set yet, make it an object
             if (this.top().isArray()) {
                 this.top().array().push(value);
             } else {
-                this.top().object()[value.name as string] = value;
+                if (!this.top().value()) {
+                    this.top().value({});
+                }
+
+                this.top().object()[value.name() as string] = value;
             }
         }
         this.stack.push(value);
@@ -121,78 +123,11 @@ export class YAMLContext {
  * We parse the file and create a bunch of entries, then
  */
 export class Value {
-    public constructor(public tabs: number, public name?: string, public value?: any) {
-        if (this.value === undefined) {
-            this.value = {};
-        }
-    }
-
-    public toObject(): any {
-        let o: any;
-        if (!this.isDefined()) {
-            throw new Error("This should not happen - undefined object: " + this.toString());
+    public static cleanString(s?: string): string | undefined {
+        if (!s) {
+            return undefined;
         }
 
-        if (this.isArray()) {
-            // If this is an array, we turn each value inside it into a key-value pair object
-            o = [];
-            for (const v of this.array()) {
-                if (v.isNull()) {
-                    o.push(null);
-                } else if (v.name) {
-                    // Create an object on the fly, if this has a name
-                    const arrayObject: any = {};
-                    arrayObject.name = this.cleanString(v.name as string);
-                    arrayObject.value = v.toObject();
-                    o.push(arrayObject);
-                } else {
-                    // If there is no name, just add it - should be a string
-                    o.push(v.toObject());
-                }
-            }
-        } else if (this.isString()) {
-            o = this.cleanString(this.value);
-
-        } else if (this.isNull()) {
-            o = null;
-        } else {
-            o = {};
-            for (const k of Object.keys(this.object())) {
-                o[k] = this.object()[k].toObject();
-            }
-        }
-        return o;
-    }
-
-    public isDefined(): boolean {
-        return this.value !== undefined;
-    }
-
-    public isArray(): boolean {
-        return Array.isArray(this.value);
-    }
-
-    public isNull(): boolean {
-        return this.value === null;
-    }
-
-    public isString(): boolean {
-        return (typeof this.value) === "string";
-    }
-
-    public object(): any {
-        return this.value as any;
-    }
-
-    public array(): Value[] {
-        return this.value as any[];
-    }
-
-    public toString(): string {
-        return "Name: " + this.name + " Value: " + this.value;
-    }
-
-    public cleanString(s: string) {
         if (s.startsWith("'") || s.startsWith("\"")) {
             s = s.substring(1);
         }
@@ -201,5 +136,53 @@ export class Value {
             s = s.substring(0, s.length - 1);
         }
         return s;
+    }
+
+    public constructor(public line: number, public tabs: number, private _name?: string, private _value?: any) {}
+
+    public name(): string | undefined {
+        return Value.cleanString(this._name);
+    }
+
+    public isArray(): boolean {
+        return Array.isArray(this._value);
+    }
+
+    public isNull(): boolean {
+        return this._value === null;
+    }
+
+    public isString(): boolean {
+        return (typeof this._value) === "string";
+    }
+
+    public object(): any {
+        return this._value as any;
+    }
+
+    public array(): Value[] {
+        return this._value as Value[];
+    }
+
+    public string(): string {
+        return Value.cleanString(this._value) as string;
+    }
+
+    public toString(): string {
+        return "Name: " + this._name + " Value: " + this._value;
+    }
+
+    public value(v?: any): any {
+        if (!v) {
+            return this._value;
+        }
+
+        // Do not set the value twice
+        if (this._value) {
+            return this._value;
+        }
+
+        this._value = v;
+        return this._value;
     }
 }
