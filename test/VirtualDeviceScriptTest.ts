@@ -76,8 +76,7 @@ describe("VirtualDeviceScript", function() {
   transcript: "welcome to the simple audio player"
   card:
     title: Title of the card
-    image:
-      smallImageUrl: https://bespoken.io/wp-content/
+    imageURL: https://bespoken.io/wp-content/
 "Hi": 
   - "welcome to the simple audio player"
   - hi
@@ -92,9 +91,7 @@ describe("VirtualDeviceScript", function() {
                         comparison: "contains",
                         expected: {
                             card: {
-                                image: {
-                                    smallImageUrl: "https://bespoken.io/wp-content/",
-                                },
+                                imageURL: "https://bespoken.io/wp-content/",
                                 title: "Title of the card",
                             },
                             transcript: "welcome to the simple audio player",
@@ -230,16 +227,17 @@ describe("VirtualDeviceScript", function() {
                 `,
                 `
 "Hi": ""`,
-                `
-"Hi": "*"
+                  `
 "open test player":
   transcript: "welcome to the simple audio player"
   card:
-    title: Title of the card
-    image:
-      smallImageUrl: https://bespoken.io/wp-content/
+    imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png"
+    subTitle: "Simple Player Unit Test"
+    mainTitle: "Title of the card"
+    textField: "Text content for a standard card"
+    type: "BodyTemplate2"
 "tell test player to play": 
-  streamURL: "https://feeds.soundcloud.com/stream/"
+  streamURL: "https://feeds.soundcloud.com/stream/"  
                 `,
             ];
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);

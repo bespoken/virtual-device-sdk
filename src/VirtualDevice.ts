@@ -80,14 +80,9 @@ export interface IVirtualDeviceResult {
 }
 
 export interface ICard {
-    content: string | null;
-    image: ICardImage | null;
-    title: string;
-    text: string | null;
+    imageURL: string | null;
+    mainTitle: string | null;
+    subTitle: string | null;
+    textField: string | null;
     type: string;
-}
-
-export interface ICardImage {
-    largeImageUrl: string;
-    smallImageUrl: string;
 }

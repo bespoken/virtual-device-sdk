@@ -14,14 +14,11 @@ export function message(message: string): Promise<IVirtualDeviceResult> {
     if (message.includes("hi")) {
         return Promise.resolve({
             card: {
-                content: null,
-                image: {
-                    largeImageUrl: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
-                    smallImageUrl: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
-                },
-                text: "Content of a simple card",
-                title: "Title of the card",
-                type: "Standard",
+                imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
+                mainTitle: "Title of the card",
+                subTitle: "Simple Player Unit Test",
+                textField: "Text content for a standard card",
+                type: "BodyTemplate2",
             },
             debug: {rawJSON: {messageBody: ""}},
             message: "Hi",
@@ -37,14 +34,11 @@ export function message(message: string): Promise<IVirtualDeviceResult> {
     if (message.includes("open")) {
         return Promise.resolve({
             card: {
-                content: null,
-                image: {
-                    largeImageUrl: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
-                    smallImageUrl: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
-                },
-                text: "Content of a simple card",
-                title: "Title of the card",
-                type: "Standard",
+                imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
+                mainTitle: "Title of the card",
+                subTitle: "Simple Player Unit Test",
+                textField: "Text content for a standard card",
+                type: "BodyTemplate2",
             },
             message: "open",
             sessionTimeout: 0,
