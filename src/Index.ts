@@ -1,5 +1,5 @@
 import {ICard, IVirtualDeviceResult, VirtualDevice} from "./VirtualDevice";
-import {VirtualDeviceScript, VirtualDeviceScriptSyntaxError} from "./VirtualDeviceScript";
+import {VirtualDeviceScript} from "./VirtualDeviceScript";
 import {IVirtualDeviceValidatorResult,
     IVirtualDeviceValidatorResultItem,
     VirtualDeviceScriptUnauthorizedError,
@@ -11,7 +11,6 @@ export {
     IVirtualDeviceResult,
     VirtualDevice,
     VirtualDeviceScript,
-    VirtualDeviceScriptSyntaxError,
     VirtualDeviceScriptUnauthorizedError,
     VirtualDeviceValidator,
     IVirtualDeviceValidatorResultItem,

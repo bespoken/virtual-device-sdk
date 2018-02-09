@@ -6,10 +6,8 @@ import * as Sinon from "sinon";
 import * as sinonChai from "sinon-chai";
 import {IVirtualDeviceResult, VirtualDevice} from "../src/VirtualDevice";
 import {IVirtualDeviceScriptCallback,
-    VirtualDeviceScript,
-    VirtualDeviceScriptSyntaxError} from "../src/VirtualDeviceScript";
-import {
-    IVirtualDeviceValidatorResultItem,
+    VirtualDeviceScript} from "../src/VirtualDeviceScript";
+import {IVirtualDeviceValidatorResultItem,
     VirtualDeviceScriptUnauthorizedError,
     VirtualDeviceValidator,
 } from "../src/VirtualDeviceValidator";
@@ -70,12 +68,21 @@ describe("VirtualDeviceScript", function() {
             MessageMock.disable();
         }
     });
+
     describe("#tests()", () => {
         it("success", async () => {
             const scripContents = `
-            "open test player": "welcome to the simple audio player"
-            "Hi": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"open test player": 
+  transcript: "welcome to the simple audio player"
+  card:
+    title: Title of the card
+    image:
+      smallImageUrl: https://bespoken.io/wp-content/
+"Hi": 
+  - "welcome to the simple audio player"
+  - hi
+"tell test player to play": 
+  streamURL: "https://feeds.soundcloud.com/stream/"
 	        `;
             const expected = [
                 {
@@ -83,8 +90,15 @@ describe("VirtualDeviceScript", function() {
                     tests: [{
                         absoluteIndex: 1,
                         comparison: "contains",
-                        expectedStreamURL: undefined,
-                        expectedTranscript: "welcome to the simple audio player",
+                        expected: {
+                            card: {
+                                image: {
+                                    smallImageUrl: "https://bespoken.io/wp-content/",
+                                },
+                                title: "Title of the card",
+                            },
+                            transcript: "welcome to the simple audio player",
+                        },
                         input: "open test player",
                         sequence: 1,
                         sequenceIndex: 1,
@@ -92,8 +106,9 @@ describe("VirtualDeviceScript", function() {
                     {
                         absoluteIndex: 2,
                         comparison: "contains",
-                        expectedStreamURL: undefined,
-                        expectedTranscript: "welcome to the simple audio player",
+                        expected: {
+                            transcript: ["welcome to the simple audio player", "hi"],
+                        },
                         input: "Hi",
                         sequence: 1,
                         sequenceIndex: 2,
@@ -101,8 +116,9 @@ describe("VirtualDeviceScript", function() {
                     {
                         absoluteIndex: 3,
                         comparison: "contains",
-                        expectedStreamURL: "https://feeds.soundcloud.com/stream/",
-                        expectedTranscript: undefined,
+                        expected: {
+                            streamURL: "https://feeds.soundcloud.com/stream/",
+                        },
                         input: "tell test player to play",
                         sequence: 1,
                         sequenceIndex: 3,
@@ -115,15 +131,15 @@ describe("VirtualDeviceScript", function() {
         describe("#invocationName", () => {
             it("success", async () => {
                 const scripContents = `
-                "open test player": "welcome to the simple audio player"
+"open test player": "welcome to the simple audio player"
 
-                "Open test player": "welcome to the simple audio player"
+"Open test player": "welcome to the simple audio player"
 
-                "Launch test player": "welcome to the simple audio player"
+"Launch test player": "welcome to the simple audio player"
 
-                "Tell test player": "welcome to the simple audio player"
+"Tell test player": "welcome to the simple audio player"
 
-                "ask test player": "welcome to the simple audio player"
+"ask test player": "welcome to the simple audio player"
 	            `;
                 const expected = [
                     {
@@ -131,8 +147,9 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 1,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected: {
+                                transcript: "welcome to the simple audio player",
+                            },
                             input: "open test player",
                             sequence: 1,
                             sequenceIndex: 1,
@@ -143,8 +160,9 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 2,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected: {
+                                transcript: "welcome to the simple audio player",
+                            },
                             input: "Open test player",
                             sequence: 2,
                             sequenceIndex: 1,
@@ -155,8 +173,9 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 3,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected : {
+                                transcript: "welcome to the simple audio player",
+                            },
                             input: "Launch test player",
                             sequence: 3,
                             sequenceIndex: 1,
@@ -167,8 +186,9 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 4,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected: {
+                                transcript: "welcome to the simple audio player",
+                            },
                             input: "Tell test player",
                             sequence: 4,
                             sequenceIndex: 1,
@@ -179,8 +199,7 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 5,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected: { transcript: "welcome to the simple audio player" },
                             input: "ask test player",
                             sequence: 5,
                             sequenceIndex: 1,
@@ -192,26 +211,35 @@ describe("VirtualDeviceScript", function() {
             });
         });
     });
+
     describe("#execute()", () => {
         let checkAuthStub: any;
         before(() => {
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
         });
+
         after(() => {
             checkAuthStub.restore();
         });
+
         it("success", async () => {
             const tests = [
                 `"Hi": "*"`,
                 `"Hi": ""
                 `,
                 `
-                "Hi": ""`,
+"Hi": ""`,
                 `
-                "Hi": "*"
-                "open test player": "welcome to the simple audio player"
-                "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"Hi": "*"
+"open test player":
+  transcript: "welcome to the simple audio player"
+  card:
+    title: Title of the card
+    image:
+      smallImageUrl: https://bespoken.io/wp-content/
+"tell test player to play": 
+  streamURL: "https://feeds.soundcloud.com/stream/"
                 `,
             ];
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
@@ -223,16 +251,32 @@ describe("VirtualDeviceScript", function() {
                 }
             }
         });
+
+        it("card failure", async () => {
+            const test = `
+"open test player":
+  transcript: "welcome to the simple audio player"
+  card:
+    title: Title of the card
+    image:
+      smallImageUrl: https://incorrect.url/
+`;
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const validatorResult = await virtualDeviceScript.execute(test);
+            assert.equal(validatorResult.result, "failure", `${JSON.stringify(validatorResult)}`);
+        });
+
         it("success sequence", async () => {
             const scripContents = `
-            "Hi": "*"
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"Hi": "*"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": 
+  streamURL: "https://feeds.soundcloud.com/stream/"
 
-            "Hi": "*"
+"Hi": "*"
 
-            "Hi": "*"
-            "open test player": "welcome to the simple audio player"
+"Hi": "*"
+"open test player": "welcome to the simple audio player"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             const validatorResult = await virtualDeviceScript.execute(scripContents);
@@ -270,104 +314,28 @@ describe("VirtualDeviceScript", function() {
         });
     });
 
-    describe("#executeDir()", () => {
-        let sandbox: any;
-        before(() => {
-            sandbox = Sinon.sandbox.create();
-            sandbox.stub(VirtualDeviceValidator.prototype, "checkAuth")
-                .returns(Promise.resolve("AUTHORIZED"));
-            MessageMock.enable();
-        });
-        after(() => {
-            sandbox.restore();
-            MessageMock.disable();
-        });
-
-        it("executes a directory", async () => {
-            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
-            const results = await script.executeDir("test/scriptDir");
-            // Should run two files - it ignores the one that does not end in YML
-            assert.equal(results.length, 3);
-            assert.equal(results[0].result, "success");
-            assert.equal(results[1].result, "failure");
-            assert.equal(results[2].result, "success");
-        });
-
-        it("fails on missing directory", async () => {
-            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
-            try {
-                await script.executeDir("test/nonExistentDir");
-                assert.fail("This should never be reached");
-            } catch (e) {
-                assert.include(e, "Directory to execute does not exist: ");
-                assert.include(e, "/nonExistentDir");
-            }
-        });
-
-        it("fails on not a directory", async () => {
-            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
-            try {
-                await script.executeDir("test/scriptDir/IgnoreMe.xml");
-                assert.fail("This should never be reached");
-            } catch (e) {
-                assert.include(e, "Not a directory: ");
-                assert.include(e, "/scriptDir/IgnoreMe.xml");
-            }
-        });
-    });
-
-    describe("#executeFile()", () => {
-        let sandbox: any;
-        before(() => {
-            sandbox = Sinon.sandbox.create();
-            sandbox.stub(VirtualDeviceValidator.prototype, "checkAuth")
-                .returns(Promise.resolve("AUTHORIZED"));
-            MessageMock.enable();
-        });
-        after(() => {
-            sandbox.restore();
-            MessageMock.disable();
-        });
-
-        it("is successful", async () => {
-            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
-            const result = await script.executeFile("test/scriptDir/Test1.test.yml");
-            // Should run two files - it ignores the one that does not end in YML
-            assert.equal(result.result, "success");
-        });
-
-        it("fails on missing file", async () => {
-            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
-            try {
-                await script.executeFile("test/scriptDir/NonExistent.test.yml");
-                assert.fail("This point should never be reached");
-            } catch (e) {
-                assert.include(e, "File to execute does not exist:");
-                assert.include(e, "/scriptDir/NonExistent.test.yml");
-            }
-        });
-    });
-
     describe("#on()", () => {
         let checkAuthStub: any;
         before(() => {
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
         });
+
         after(() => {
             checkAuthStub.restore();
         });
+
         it("success ", async () => {
             const tests = [
                 `"Hi": "*"`,
                 `"Hi": ""
                 `,
                 `
-                "Hi": ""`,
+"Hi": ""`,
                 `
-                "Hi": "*"
-                "open test player": "welcome to the simple audio player"
-                "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"Hi": "*"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
             ];
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
@@ -398,15 +366,19 @@ describe("VirtualDeviceScript", function() {
             expect(resultCallbackSpy).to.have.been.callCount(6);
         });
     });
+
     describe("#on() unauthorized event", () => {
         let checkAuthStub: any;
+
         before(() => {
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("UNAUTHORIZED"));
         });
+
         after(() => {
             checkAuthStub.restore();
         });
+
         it("returns unauthorized error", async () => {
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             const unauthorizedCallback: any = (error: Error,
@@ -423,14 +395,15 @@ describe("VirtualDeviceScript", function() {
             expect(unauthorizedCallbackSpy).to.have.been.callCount(1);
         });
     });
+
     describe("#validate()", () => {
         it("returns undefined", async () => {
             const tests = [
                 {
                 expected: undefined,
                 scriptContents: `
-                    "open test player": "welcome to the simple audio player"
-                    "tell test player to play": "https://feeds.soundcloud.com/stream/"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
                 }];
             for (const test of tests) {
@@ -438,363 +411,55 @@ describe("VirtualDeviceScript", function() {
                 assert.equal(virtualDeviceScript.validate(test.scriptContents), test.expected);
             }
         });
+
         it("returns syntax error", async () => {
             const tests = [
-                {expected: VirtualDeviceScriptSyntaxError,
+                {expected: "Line 1: No right-hand value specified.",
                 scriptContents: `wrong contents`,
                 },
-                {expected: VirtualDeviceScriptSyntaxError,
+                {expected: "Line 1: No right-hand value specified.",
                 scriptContents: `open test player`,
                 },
-                {expected: VirtualDeviceScriptSyntaxError,
+                {expected: "Line 1: No properties added for object.",
                 scriptContents: `"open test player":`,
                 },
-                {expected: VirtualDeviceScriptSyntaxError,
+                {expected: undefined,
                 scriptContents: `"open test player": welcome to the simple audio player`,
                 },
-                {expected: VirtualDeviceScriptSyntaxError,
+                {expected: undefined,
                 scriptContents: `"open test player": "welcome to the simple audio player`,
                 },
-                {expected: VirtualDeviceScriptSyntaxError,
+                {expected: "Line 2: No right-hand value specified.",
                 scriptContents: `
-                    "open test player": "welcome to the simple audio player"
-                    "tell test player to play"
+"open test player": "welcome to the simple audio player"
+"tell test player to play"
                 `,
                 },
                 {
-                expected: VirtualDeviceScriptSyntaxError,
+                expected: undefined,
                 scriptContents: `
-                    "open test player": "welcome to the simple audio player"
-                    "tell test player to play": https://feeds.soundcloud.com/stream/"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": https://feeds.soundcloud.com/stream/"
                 `,
                 },
                 ];
             for (const test of tests) {
                 const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
-                assert.equal(virtualDeviceScript.validate(test.scriptContents),
-                    test.expected, `test: ${JSON.stringify(test)}`);
+                const output = virtualDeviceScript.validate(test.scriptContents);
+                if (test.expected) {
+                    assert.equal((output as Error).message, test.expected, `test: ${JSON.stringify(test)}`);
+                } else {
+                    assert.isUndefined(output, `test: ${JSON.stringify(test)}`);
+                }
+
             }
         });
     });
-    describe("#prettifyAsHTML()", () => {
-        let checkAuthStub: any;
-        before(() => {
-            checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
-                .returns(Promise.resolve("AUTHORIZED"));
-        });
-        after(() => {
-            checkAuthStub.restore();
-        });
-        it("success", async () => {
-            const scripContents = `
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
-	        `;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
-            const validatorResult = await virtualDeviceScript.execute(scripContents);
-            // tslint:disable:max-line-length
-            const expected = `
-            <div>
-                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
-                    Validation Script Results
-                </p>
-                <div style="margin:0 0 -18px;" class="output">
-                    <p style="font-weight:bold;"class="heading">Output:</p>
-                </div>
-                <div class="overall">
-                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
-                    <p class="content" style="color:rgb(76,175,80);">2 tests, 2 succeeded, 0 failed</p>
-                </div>
-                <div class="time">
-                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
-                    <p class="content"></p>
-                </div>
-                    <div style="margin-bottom:16px;" class="sequence">
-                        <p style="margin:0 0 2px;font-weight:bold;" class="heading">Sequence: 1</p>
-                        <table style="border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th style="border:1px solid black;padding:5px;">Result</th>
-                                    <th style="border:1px solid black;padding:5px;">Input</th>
-                                    <th style="border:1px solid black;padding:5px;">Expected</th>
-                                    <th style="border:1px solid black;padding:5px;">Actual</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                        <tr style="color:rgb(76,175,80);">
-                            <td style="border:1px solid black;padding:5px;text-align:center;">&#10004;</td>
-                            <td style="border:1px solid black;padding:5px;">open test player</td>
-                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
-                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player to play some audio</td>
-                        </tr>
-                        <tr style="color:rgb(76,175,80);">
-                            <td style="border:1px solid black;padding:5px;text-align:center;">&#10004;</td>
-                            <td style="border:1px solid black;padding:5px;">tell test player to play</td>
-                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
-                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010-building-an-alexa-skill-with-flask-ask-with-john-wheeler.mp3</td>
-                        </tr></tbody>
-                        </table>
-                    </div>
-            </div>`;
-            // tslint:enable:max-line-length
-            assert.equal(virtualDeviceScript.prettifyAsHTML(validatorResult, false), expected);
-        });
-    });
-    describe("#prettifyAsPartialHTML()", () => {
-        it("renders correctly scheduled result items", async () => {
-            const scripContents = `
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
-	        `;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
-            // tslint:disable:max-line-length
-            const expected = `
-            <div>
-                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
-                    Validation Script Results<img src='/assets/Spinner.svg' height=34>
-                </p>
-                <div style="margin:0 0 -18px;" class="output">
-                    <p style="font-weight:bold;"class="heading">Output:</p>
-                </div>
-                <div class="overall">
-                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
-                    <p class="content" style="color:rgb(76,175,80);">2 tests, 0 succeeded, 0 failed</p>
-                </div>
-                <div class="time">
-                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
-                    <p class="content"></p>
-                </div>
-                    <div style="margin-bottom:16px;" class="sequence">
-                        <p style="margin:0 0 2px;font-weight:bold;" class="heading">Sequence: 1</p>
-                        <table style="border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th style="border:1px solid black;padding:5px;">Result</th>
-                                    <th style="border:1px solid black;padding:5px;">Input</th>
-                                    <th style="border:1px solid black;padding:5px;">Expected</th>
-                                    <th style="border:1px solid black;padding:5px;">Actual</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                        <tr>
-                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/assets/Schedule.svg' height=18></td>
-                            <td style="border:1px solid black;padding:5px;">open test player</td>
-                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
-                            <td style="border:1px solid black;padding:5px;"></td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/assets/Schedule.svg' height=18></td>
-                            <td style="border:1px solid black;padding:5px;">tell test player to play</td>
-                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
-                            <td style="border:1px solid black;padding:5px;"></td>
-                        </tr></tbody>
-                        </table>
-                    </div>
-            </div>`;
-            // tslint:enable:max-line-length
-            assert.equal(virtualDeviceScript.prettifyAsPartialHTML(scripContents, [], false), expected);
-        });
-        it("renders correctly running result items", async () => {
-            const scripContents = `
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
-	        `;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
-            // tslint:disable:max-line-length
-            const expected = `
-            <div>
-                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
-                    Validation Script Results<img src='/assets/Spinner.svg' height=34>
-                </p>
-                <div style="margin:0 0 -18px;" class="output">
-                    <p style="font-weight:bold;"class="heading">Output:</p>
-                </div>
-                <div class="overall">
-                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
-                    <p class="content" style="color:rgb(76,175,80);">2 tests, 0 succeeded, 0 failed</p>
-                </div>
-                <div class="time">
-                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
-                    <p class="content"></p>
-                </div>
-                    <div style="margin-bottom:16px;" class="sequence">
-                        <p style="margin:0 0 2px;font-weight:bold;" class="heading">Sequence: 1</p>
-                        <table style="border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th style="border:1px solid black;padding:5px;">Result</th>
-                                    <th style="border:1px solid black;padding:5px;">Input</th>
-                                    <th style="border:1px solid black;padding:5px;">Expected</th>
-                                    <th style="border:1px solid black;padding:5px;">Actual</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                        <tr>
-                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/assets/Spinner.svg' height=24></td>
-                            <td style="border:1px solid black;padding:5px;">open test player</td>
-                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
-                            <td style="border:1px solid black;padding:5px;"></td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/assets/Schedule.svg' height=18></td>
-                            <td style="border:1px solid black;padding:5px;">tell test player to play</td>
-                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
-                            <td style="border:1px solid black;padding:5px;"></td>
-                        </tr></tbody>
-                        </table>
-                    </div>
-            </div>`;
-            // tslint:enable:max-line-length
-            const resultItem: IVirtualDeviceValidatorResultItem  = {
-                status: "running",
-                test: {
-                    absoluteIndex: 1,
-                    comparison: "contains",
-                    expectedTranscript: "welcome to the simple audio player",
-                    input: "open test player",
-                    sequence: 1,
-                    sequenceIndex: 1,
-                },
-            };
-            const resultItems = [resultItem];
-            assert.equal(virtualDeviceScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
-        });
-        it("renders correctly done result items", async () => {
-            const scripContents = `
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
-	        `;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
-            // tslint:disable:max-line-length
-            const expected = `
-            <div>
-                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
-                    Validation Script Results<img src='/assets/Spinner.svg' height=34>
-                </p>
-                <div style="margin:0 0 -18px;" class="output">
-                    <p style="font-weight:bold;"class="heading">Output:</p>
-                </div>
-                <div class="overall">
-                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
-                    <p class="content" style="color:rgb(76,175,80);">2 tests, 1 succeeded, 0 failed</p>
-                </div>
-                <div class="time">
-                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
-                    <p class="content"></p>
-                </div>
-                    <div style="margin-bottom:16px;" class="sequence">
-                        <p style="margin:0 0 2px;font-weight:bold;" class="heading">Sequence: 1</p>
-                        <table style="border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th style="border:1px solid black;padding:5px;">Result</th>
-                                    <th style="border:1px solid black;padding:5px;">Input</th>
-                                    <th style="border:1px solid black;padding:5px;">Expected</th>
-                                    <th style="border:1px solid black;padding:5px;">Actual</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                        <tr style="color:rgb(76,175,80);">
-                            <td style="border:1px solid black;padding:5px;text-align:center;">&#10004;</td>
-                            <td style="border:1px solid black;padding:5px;">open test player</td>
-                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
-                            <td style="border:1px solid black;padding:5px;"></td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/assets/Schedule.svg' height=18></td>
-                            <td style="border:1px solid black;padding:5px;">tell test player to play</td>
-                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
-                            <td style="border:1px solid black;padding:5px;"></td>
-                        </tr></tbody>
-                        </table>
-                    </div>
-            </div>`;
-            // tslint:enable:max-line-length
-            const resultItem: IVirtualDeviceValidatorResultItem  = {
-                result: "success",
-                status: "done",
-                test: {
-                    absoluteIndex: 1,
-                    comparison: "contains",
-                    expectedTranscript: "welcome to the simple audio player",
-                    input: "open test player",
-                    sequence: 1,
-                    sequenceIndex: 1,
-                },
-            };
-            const resultItems = [resultItem];
-            assert.equal(virtualDeviceScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
-        });
-        it("renders correctly failed result items", async () => {
-            const scripContents = `
-            "open test player": "welcome to the simple audio player"
-            "tell test player to play": "https://feeds.soundcloud.com/stream/"
-	        `;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
-            // tslint:disable:max-line-length
-            const expected = `
-            <div>
-                <p style="font-weight:500;font-size:28px;font-family:'Roboto','Helvetica','Arial',sans-serif;">
-                    Validation Script Results<img src='/assets/Spinner.svg' height=34>
-                </p>
-                <div style="margin:0 0 -18px;" class="output">
-                    <p style="font-weight:bold;"class="heading">Output:</p>
-                </div>
-                <div class="overall">
-                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Overall:</p>
-                    <p class="content" style="color:rgb(244,67,54);">2 tests, 0 succeeded, 1 failed</p>
-                </div>
-                <div class="time">
-                    <p style="margin:0 0 -6px;font-weight:bold;" class="heading">Time:</p>
-                    <p class="content"></p>
-                </div>
-                    <div style="margin-bottom:16px;" class="sequence">
-                        <p style="margin:0 0 2px;font-weight:bold;" class="heading">Sequence: 1</p>
-                        <table style="border-collapse:collapse;">
-                            <thead>
-                                <tr>
-                                    <th style="border:1px solid black;padding:5px;">Result</th>
-                                    <th style="border:1px solid black;padding:5px;">Input</th>
-                                    <th style="border:1px solid black;padding:5px;">Expected</th>
-                                    <th style="border:1px solid black;padding:5px;">Actual</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                        <tr style="color:rgb(244,67,54);">
-                            <td style="border:1px solid black;padding:5px;text-align:center;">&#10008;</td>
-                            <td style="border:1px solid black;padding:5px;">open test player</td>
-                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
-                            <td style="border:1px solid black;padding:5px;"></td>
-                        </tr>
-                        <tr>
-                            <td style="border:1px solid black;padding:5px;text-align:center;"><img src='/assets/Schedule.svg' height=18></td>
-                            <td style="border:1px solid black;padding:5px;">tell test player to play</td>
-                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/</td>
-                            <td style="border:1px solid black;padding:5px;"></td>
-                        </tr></tbody>
-                        </table>
-                    </div>
-            </div>`;
-            // tslint:enable:max-line-length
-            const resultItem: IVirtualDeviceValidatorResultItem  = {
-                result: "failure",
-                status: "done",
-                test: {
-                    absoluteIndex: 1,
-                    comparison: "contains",
-                    expectedTranscript: "welcome to the simple audio player",
-                    input: "open test player",
-                    sequence: 1,
-                    sequenceIndex: 1,
-                },
-            };
-            const resultItems = [resultItem];
-            assert.equal(virtualDeviceScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
-        });
-    });
+
     describe("#checkAuth()", () => {
         let sevCheckAuthSpy: any;
         let nockScope: any;
+
         before(() => {
             nockScope = nock("https://source-api.bespoken.tools")
                 .get("/v1/skillAuthorized?invocation_name=test%20player" +
@@ -802,12 +467,14 @@ describe("VirtualDeviceScript", function() {
                 .reply(200, "AUTHORIZED");
             sevCheckAuthSpy = Sinon.spy(VirtualDeviceScript.prototype, "checkAuth");
         });
+
         after(() => {
             nockScope.done();
             nock.cleanAll();
             sevCheckAuthSpy.reset();
             sevCheckAuthSpy.restore();
         });
+
         it("success", async () => {
             const scripContents = `"open test player": "*"`;
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL, SOURCE_API_BASE_URL);
@@ -816,15 +483,19 @@ describe("VirtualDeviceScript", function() {
             expect(sevCheckAuthSpy).to.have.been.callCount(1);
         });
     });
+
     describe("#off()", () => {
         let checkAuthStub: any;
+
         before(() => {
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
         });
+
         after(() => {
             checkAuthStub.restore();
         });
+
         it("success", async () => {
             const scripContents = `"open test player": "*"`;
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL,
