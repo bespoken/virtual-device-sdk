@@ -250,20 +250,6 @@ describe("VirtualDeviceScript", function() {
             }
         });
 
-        it("card failure", async () => {
-            const test = `
-"open test player":
-  transcript: "welcome to the simple audio player"
-  card:
-    title: Title of the card
-    image:
-      smallImageUrl: https://incorrect.url/
-`;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
-            const validatorResult = await virtualDeviceScript.execute(test);
-            assert.equal(validatorResult.result, "failure", `${JSON.stringify(validatorResult)}`);
-        });
-
         it("success sequence", async () => {
             const scripContents = `
 "Hi": "*"
