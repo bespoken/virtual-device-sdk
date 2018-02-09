@@ -275,6 +275,7 @@ describe("VirtualDeviceScript", function() {
 
 "Hi": "*"
 "open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             const validatorResult = await virtualDeviceScript.execute(scripContents);
