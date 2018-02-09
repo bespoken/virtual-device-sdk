@@ -302,7 +302,7 @@ describe("VirtualDeviceScript", function() {
             };
             assertSequenceInfo(1, 3);
             assertSequenceInfo(2, 1);
-            assertSequenceInfo(3, 2);
+            assertSequenceInfo(3, 3);
         });
     });
 
