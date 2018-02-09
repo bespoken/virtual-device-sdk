@@ -152,6 +152,7 @@ describe("PrettyPrinter", function() {
             // tslint:enable:max-line-length
             assert.equal(virtualDeviceScript.prettifyAsPartialHTML(scripContents, [], false), expected);
         });
+
         it("renders correctly running result items", async () => {
             const scripContents = `
 "open test player": "welcome to the simple audio player"
@@ -208,7 +209,9 @@ describe("PrettyPrinter", function() {
                 test: {
                     absoluteIndex: 1,
                     comparison: "contains",
-                    expectedTranscript: "welcome to the simple audio player",
+                    expected: {
+                        transcript: "welcome to the simple audio player",
+                    },
                     input: "open test player",
                     sequence: 1,
                     sequenceIndex: 1,
@@ -217,6 +220,7 @@ describe("PrettyPrinter", function() {
             const resultItems = [resultItem];
             assert.equal(virtualDeviceScript.prettifyAsPartialHTML(scripContents, resultItems, false), expected);
         });
+
         it("renders correctly done result items", async () => {
             const scripContents = `
 "open test player": "welcome to the simple audio player"
@@ -274,7 +278,9 @@ describe("PrettyPrinter", function() {
                 test: {
                     absoluteIndex: 1,
                     comparison: "contains",
-                    expectedTranscript: "welcome to the simple audio player",
+                    expected: {
+                        transcript: "welcome to the simple audio player",
+                    },
                     input: "open test player",
                     sequence: 1,
                     sequenceIndex: 1,
@@ -340,7 +346,9 @@ describe("PrettyPrinter", function() {
                 test: {
                     absoluteIndex: 1,
                     comparison: "contains",
-                    expectedTranscript: "welcome to the simple audio player",
+                    expected: {
+                        transcript: "welcome to the simple audio player",
+                    },
                     input: "open test player",
                     sequence: 1,
                     sequenceIndex: 1,

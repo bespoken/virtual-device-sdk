@@ -73,8 +73,11 @@ describe("VirtualDeviceScript", function() {
         it("success", async () => {
             const scripContents = `
 "open test player": "welcome to the simple audio player"
-"Hi": "welcome to the simple audio player"
-"tell test player to play": "https://feeds.soundcloud.com/stream/"
+"Hi": 
+  - "welcome to the simple audio player"
+  - hi
+"tell test player to play": 
+  streamURL: "https://feeds.soundcloud.com/stream/"
 	        `;
             const expected = [
                 {
@@ -82,8 +85,9 @@ describe("VirtualDeviceScript", function() {
                     tests: [{
                         absoluteIndex: 1,
                         comparison: "contains",
-                        expectedStreamURL: undefined,
-                        expectedTranscript: "welcome to the simple audio player",
+                        expected: {
+                            transcript: "welcome to the simple audio player",
+                        },
                         input: "open test player",
                         sequence: 1,
                         sequenceIndex: 1,
@@ -91,8 +95,9 @@ describe("VirtualDeviceScript", function() {
                     {
                         absoluteIndex: 2,
                         comparison: "contains",
-                        expectedStreamURL: undefined,
-                        expectedTranscript: "welcome to the simple audio player",
+                        expected: {
+                            transcript: ["welcome to the simple audio player", "hi"],
+                        },
                         input: "Hi",
                         sequence: 1,
                         sequenceIndex: 2,
@@ -100,8 +105,9 @@ describe("VirtualDeviceScript", function() {
                     {
                         absoluteIndex: 3,
                         comparison: "contains",
-                        expectedStreamURL: "https://feeds.soundcloud.com/stream/",
-                        expectedTranscript: undefined,
+                        expected: {
+                            streamURL: "https://feeds.soundcloud.com/stream/",
+                        },
                         input: "tell test player to play",
                         sequence: 1,
                         sequenceIndex: 3,
@@ -130,8 +136,9 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 1,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected: {
+                                transcript: "welcome to the simple audio player",
+                            },
                             input: "open test player",
                             sequence: 1,
                             sequenceIndex: 1,
@@ -142,8 +149,9 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 2,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected: {
+                                transcript: "welcome to the simple audio player",
+                            },
                             input: "Open test player",
                             sequence: 2,
                             sequenceIndex: 1,
@@ -154,8 +162,9 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 3,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected : {
+                                transcript: "welcome to the simple audio player",
+                            },
                             input: "Launch test player",
                             sequence: 3,
                             sequenceIndex: 1,
@@ -166,8 +175,9 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 4,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected: {
+                                transcript: "welcome to the simple audio player",
+                            },
                             input: "Tell test player",
                             sequence: 4,
                             sequenceIndex: 1,
@@ -178,8 +188,7 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 5,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected: { transcript: "welcome to the simple audio player" },
                             input: "ask test player",
                             sequence: 5,
                             sequenceIndex: 1,
@@ -211,7 +220,8 @@ describe("VirtualDeviceScript", function() {
                 `
 "Hi": "*"
 "open test player": "welcome to the simple audio player"
-"tell test player to play": "https://feeds.soundcloud.com/stream/"
+"tell test player to play": 
+  streamURL: "https://feeds.soundcloud.com/stream/"
                 `,
             ];
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
@@ -228,7 +238,8 @@ describe("VirtualDeviceScript", function() {
             const scripContents = `
 "Hi": "*"
 "open test player": "welcome to the simple audio player"
-"tell test player to play": "https://feeds.soundcloud.com/stream/"
+"tell test player to play": 
+  streamURL: "https://feeds.soundcloud.com/stream/"
 
 "Hi": "*"
 

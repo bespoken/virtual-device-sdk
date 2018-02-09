@@ -100,9 +100,9 @@ export class PrettyPrinter {
                         <tr${(test.result && trStyles(test.result)) || ""}>
                             <td style="${tdAndThStyleProps}text-align:center;">${icon ? icon : ""}</td>
                             <td ${tdStyles}>${test.test.input}</td>
-                            <td ${tdStyles}>${test.test.expectedStreamURL
-                        ? test.test.expectedStreamURL
-                        : test.test.expectedTranscript || ""}</td>
+                            <td ${tdStyles}>${test.test.expected.streamURL
+                        ? test.test.expected.streamURL
+                        : test.test.expected.transcript || ""}</td>
                             <td ${tdStyles}>${test.actual && test.actual.streamURL
                         ? test.actual.streamURL
                         : (test.actual && test.actual.transcript) || ""}</td>
