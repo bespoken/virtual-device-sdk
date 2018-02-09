@@ -221,13 +221,7 @@ describe("VirtualDeviceScript", function() {
         });
 
         it("success", async () => {
-            const tests = [
-                `"Hi": "*"`,
-                `"Hi": ""
-                `,
-                `
-"Hi": ""`,
-                  `
+            const tests = [`
 "open test player":
   transcript: "welcome to the simple audio player"
   card:
@@ -250,16 +244,29 @@ describe("VirtualDeviceScript", function() {
             }
         });
 
+        it("card failure", async () => {
+            const test = `
+"open test player":
+  transcript: "welcome to the simple audio player"
+  card:
+    title: Title of the card
+    imageURL: https://incorrect.url/
+`;
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const validatorResult = await virtualDeviceScript.execute(test);
+            assert.equal(validatorResult.result, "failure", `${JSON.stringify(validatorResult)}`);
+        });
+
         it("success sequence", async () => {
             const scripContents = `
-"Hi": "*"
+"alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
 "tell test player to play": 
   streamURL: "https://feeds.soundcloud.com/stream/"
 
-"Hi": "*"
+"alexa Hi": "*"
 
-"Hi": "*"
+"alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
 "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
