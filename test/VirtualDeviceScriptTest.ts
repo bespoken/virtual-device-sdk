@@ -72,7 +72,12 @@ describe("VirtualDeviceScript", function() {
     describe("#tests()", () => {
         it("success", async () => {
             const scripContents = `
-"open test player": "welcome to the simple audio player"
+"open test player": 
+  transcript: "welcome to the simple audio player"
+  card:
+    title: Title of the card
+    image:
+      smallImageUrl: https://bespoken.io/wp-content/
 "Hi": 
   - "welcome to the simple audio player"
   - hi
@@ -86,6 +91,12 @@ describe("VirtualDeviceScript", function() {
                         absoluteIndex: 1,
                         comparison: "contains",
                         expected: {
+                            card: {
+                                image: {
+                                    smallImageUrl: "https://bespoken.io/wp-content/",
+                                },
+                                title: "Title of the card",
+                            },
                             transcript: "welcome to the simple audio player",
                         },
                         input: "open test player",
@@ -207,9 +218,11 @@ describe("VirtualDeviceScript", function() {
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
         });
+
         after(() => {
             checkAuthStub.restore();
         });
+
         it("success", async () => {
             const tests = [
                 `"Hi": "*"`,
@@ -219,7 +232,12 @@ describe("VirtualDeviceScript", function() {
 "Hi": ""`,
                 `
 "Hi": "*"
-"open test player": "welcome to the simple audio player"
+"open test player":
+  transcript: "welcome to the simple audio player"
+  card:
+    title: Title of the card
+    image:
+      smallImageUrl: https://bespoken.io/wp-content/
 "tell test player to play": 
   streamURL: "https://feeds.soundcloud.com/stream/"
                 `,
@@ -232,6 +250,20 @@ describe("VirtualDeviceScript", function() {
                     assert.equal(t.result, "success", `${JSON.stringify(t)}`);
                 }
             }
+        });
+
+        it("card failure", async () => {
+            const test = `
+"open test player":
+  transcript: "welcome to the simple audio player"
+  card:
+    title: Title of the card
+    image:
+      smallImageUrl: https://incorrect.url/
+`;
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const validatorResult = await virtualDeviceScript.execute(test);
+            assert.equal(validatorResult.result, "failure", `${JSON.stringify(validatorResult)}`);
         });
 
         it("success sequence", async () => {

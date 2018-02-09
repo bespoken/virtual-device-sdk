@@ -208,7 +208,7 @@ export class Validator {
         }
     }
 
-    private static checkObject(value?: any, expected?: any, ...properties: string[]) {
+    private static checkObject(value?: any, expected?: any) {
         if (!expected) {
             return true;
         }
@@ -217,12 +217,19 @@ export class Validator {
             return false;
         }
 
-        for (const property of properties) {
+        for (const property of Object.keys(expected)) {
             const expectedPropertyValue = expected[property];
             const actualPropertyValue = value[property];
-            if (Validator.checkString(actualPropertyValue, expectedPropertyValue)) {
-                return false;
+            if (typeof expectedPropertyValue === "string") {
+                if (!Validator.checkString(actualPropertyValue, expectedPropertyValue)) {
+                    return false;
+                }
+            } else {
+                if (!Validator.checkObject(actualPropertyValue, expectedPropertyValue)) {
+                    return false;
+                }
             }
+
         }
         return true;
     }

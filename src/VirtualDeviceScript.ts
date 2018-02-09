@@ -37,10 +37,14 @@ export class VirtualDeviceScript {
         let sequence: number = 1;
         let sequenceIndex: number = 1;
         let absoluteIndex: number = 0;
-        const utterances = new YAMLParser(scriptContents).parse();
+        const utteranceTests = new YAMLParser(scriptContents).parse();
         let utteranceCount: number = 0;
-        for (const utteranceTest of utterances) {
+        // Takes results from parsing YAML and turns it into tests
+        for (const utteranceTest of utteranceTests) {
             utteranceCount += 1;
+
+            // Null means a blank line and a new sequence is starting
+            // Otherwise, it is considered a test
             if (!utteranceTest.isNull()) {
                 absoluteIndex += 1;
                 const input = utteranceTest.name() as string;
@@ -54,8 +58,8 @@ export class VirtualDeviceScript {
                 };
 
                 const expected: any = test.expected;
-                // If the value is a string, must be a transcript or URL
                 if (utteranceTest.isString()) {
+                    // If the value is a string, must be a transcript or URL
                     if (utteranceTest.isEmpty()) {
                         throw new Error("Line " + utteranceTest.line + ": No right-hand value specified.");
                     }
@@ -66,8 +70,10 @@ export class VirtualDeviceScript {
                         expected.transcript = utteranceTest.string();
                     }
                 } else if (utteranceTest.isArray()) {
+                    // If the value is an array, it is possible transcript values
                     expected.transcript = utteranceTest.stringArray();
                 } else if (utteranceTest.isObject()) {
+                    // If the value is an object, we just set that to be expected
                     test.expected = utteranceTest.object();
                 } else if (utteranceTest.value() === undefined) {
                     throw new Error("Line " + utteranceTest.line + ": No properties added for object.");
@@ -77,7 +83,7 @@ export class VirtualDeviceScript {
                 sequenceIndex += 1;
             }
             // If this a blank line, or the last utterance, we tie up this sequence
-            if (utteranceTest.isNull() || utteranceCount === utterances.length) {
+            if (utteranceTest.isNull() || utteranceCount === utteranceTests.length) {
                 if (currentSequence.tests.length) {
                     sequence += 1;
                     const firstInput = (currentSequence.tests
