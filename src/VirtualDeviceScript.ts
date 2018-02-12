@@ -1,7 +1,7 @@
 import * as fs from "fs";
 import * as path from "path";
-
 import {PrettyPrinter} from "./PrettyPrinter";
+
 import {
     IVirtualDeviceTest,
     IVirtualDeviceTestSequence,

@@ -306,6 +306,84 @@ describe("VirtualDeviceScript", function() {
         });
     });
 
+    describe("#executeDir()", () => {
+        let sandbox: any;
+        before(() => {
+            sandbox = Sinon.sandbox.create();
+            sandbox.stub(VirtualDeviceValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+            MessageMock.enable();
+        });
+        after(() => {
+            sandbox.restore();
+            MessageMock.disable();
+        });
+
+        it("executes a directory", async () => {
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
+            const results = await script.executeDir("test/scriptDir");
+            // Should run two files - it ignores the one that does not end in YML
+            assert.equal(results.length, 3);
+            assert.equal(results[0].result, "success");
+            assert.equal(results[1].result, "failure");
+            assert.equal(results[2].result, "success");
+        });
+
+        it("fails on missing directory", async () => {
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
+            try {
+                await script.executeDir("test/nonExistentDir");
+                assert.fail("This should never be reached");
+            } catch (e) {
+                assert.include(e, "Directory to execute does not exist: ");
+                assert.include(e, "/nonExistentDir");
+            }
+        });
+
+        it("fails on not a directory", async () => {
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
+            try {
+                await script.executeDir("test/scriptDir/IgnoreMe.xml");
+                assert.fail("This should never be reached");
+            } catch (e) {
+                assert.include(e, "Not a directory: ");
+                assert.include(e, "/scriptDir/IgnoreMe.xml");
+            }
+        });
+    });
+
+    describe("#executeFile()", () => {
+        let sandbox: any;
+        before(() => {
+            sandbox = Sinon.sandbox.create();
+            sandbox.stub(VirtualDeviceValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+            MessageMock.enable();
+        });
+        after(() => {
+            sandbox.restore();
+            MessageMock.disable();
+        });
+
+        it("is successful", async () => {
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
+            const result = await script.executeFile("test/scriptDir/Test1.test.yml");
+            // Should run two files - it ignores the one that does not end in YML
+            assert.equal(result.result, "success");
+        });
+
+        it("fails on missing file", async () => {
+            const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
+            try {
+                await script.executeFile("test/scriptDir/NonExistent.test.yml");
+                assert.fail("This point should never be reached");
+            } catch (e) {
+                assert.include(e, "File to execute does not exist:");
+                assert.include(e, "/scriptDir/NonExistent.test.yml");
+            }
+        });
+    });
+
     describe("#on()", () => {
         let checkAuthStub: any;
         before(() => {
