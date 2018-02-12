@@ -33,8 +33,6 @@ describe("VirtualDevice", function() {
             const result = await sdk.message("Hi");
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.transcript);
-            assert.isDefined(result.transcriptAudioURL);
-            assert.isNull(result.transcriptAudioURL);
         });
 
         it("Should have stream URL", async () => {
