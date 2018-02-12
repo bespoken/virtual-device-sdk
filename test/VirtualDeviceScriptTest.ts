@@ -72,9 +72,16 @@ describe("VirtualDeviceScript", function() {
     describe("#tests()", () => {
         it("success", async () => {
             const scripContents = `
-"open test player": "welcome to the simple audio player"
-"Hi": "welcome to the simple audio player"
-"tell test player to play": "https://feeds.soundcloud.com/stream/"
+"open test player": 
+  transcript: "welcome to the simple audio player"
+  card:
+    title: Title of the card
+    imageURL: https://bespoken.io/wp-content/
+"Hi": 
+  - "welcome to the simple audio player"
+  - hi
+"tell test player to play": 
+  streamURL: "https://feeds.soundcloud.com/stream/"
 	        `;
             const expected = [
                 {
@@ -82,8 +89,13 @@ describe("VirtualDeviceScript", function() {
                     tests: [{
                         absoluteIndex: 1,
                         comparison: "contains",
-                        expectedStreamURL: undefined,
-                        expectedTranscript: "welcome to the simple audio player",
+                        expected: {
+                            card: {
+                                imageURL: "https://bespoken.io/wp-content/",
+                                title: "Title of the card",
+                            },
+                            transcript: "welcome to the simple audio player",
+                        },
                         input: "open test player",
                         sequence: 1,
                         sequenceIndex: 1,
@@ -91,8 +103,9 @@ describe("VirtualDeviceScript", function() {
                     {
                         absoluteIndex: 2,
                         comparison: "contains",
-                        expectedStreamURL: undefined,
-                        expectedTranscript: "welcome to the simple audio player",
+                        expected: {
+                            transcript: ["welcome to the simple audio player", "hi"],
+                        },
                         input: "Hi",
                         sequence: 1,
                         sequenceIndex: 2,
@@ -100,8 +113,9 @@ describe("VirtualDeviceScript", function() {
                     {
                         absoluteIndex: 3,
                         comparison: "contains",
-                        expectedStreamURL: "https://feeds.soundcloud.com/stream/",
-                        expectedTranscript: undefined,
+                        expected: {
+                            streamURL: "https://feeds.soundcloud.com/stream/",
+                        },
                         input: "tell test player to play",
                         sequence: 1,
                         sequenceIndex: 3,
@@ -130,8 +144,9 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 1,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected: {
+                                transcript: "welcome to the simple audio player",
+                            },
                             input: "open test player",
                             sequence: 1,
                             sequenceIndex: 1,
@@ -142,8 +157,9 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 2,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected: {
+                                transcript: "welcome to the simple audio player",
+                            },
                             input: "Open test player",
                             sequence: 2,
                             sequenceIndex: 1,
@@ -154,8 +170,9 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 3,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected : {
+                                transcript: "welcome to the simple audio player",
+                            },
                             input: "Launch test player",
                             sequence: 3,
                             sequenceIndex: 1,
@@ -166,8 +183,9 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 4,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected: {
+                                transcript: "welcome to the simple audio player",
+                            },
                             input: "Tell test player",
                             sequence: 4,
                             sequenceIndex: 1,
@@ -178,8 +196,7 @@ describe("VirtualDeviceScript", function() {
                         tests: [{
                             absoluteIndex: 5,
                             comparison: "contains",
-                            expectedStreamURL: undefined,
-                            expectedTranscript: "welcome to the simple audio player",
+                            expected: { transcript: "welcome to the simple audio player" },
                             input: "ask test player",
                             sequence: 5,
                             sequenceIndex: 1,
@@ -198,20 +215,23 @@ describe("VirtualDeviceScript", function() {
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
         });
+
         after(() => {
             checkAuthStub.restore();
         });
+
         it("success", async () => {
-            const tests = [
-                `"Hi": "*"`,
-                `"Hi": ""
-                `,
-                `
-"Hi": ""`,
-                `
-"Hi": "*"
-"open test player": "welcome to the simple audio player"
-"tell test player to play": "https://feeds.soundcloud.com/stream/"
+            const tests = [`
+"open test player":
+  transcript: "welcome to the simple audio player"
+  card:
+    imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png"
+    subTitle: "Simple Player Unit Test"
+    mainTitle: "Title of the card"
+    textField: "Text content for a standard card"
+    type: "BodyTemplate2"
+"tell test player to play": 
+  streamURL: "https://feeds.soundcloud.com/stream/"  
                 `,
             ];
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
@@ -224,16 +244,31 @@ describe("VirtualDeviceScript", function() {
             }
         });
 
+        it("card failure", async () => {
+            const test = `
+"open test player":
+  transcript: "welcome to the simple audio player"
+  card:
+    title: Title of the card
+    imageURL: https://incorrect.url/
+`;
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const validatorResult = await virtualDeviceScript.execute(test);
+            assert.equal(validatorResult.result, "failure", `${JSON.stringify(validatorResult)}`);
+        });
+
         it("success sequence", async () => {
             const scripContents = `
-"Hi": "*"
+"alexa Hi": "*"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": 
+  streamURL: "https://feeds.soundcloud.com/stream/"
+
+"alexa Hi": "*"
+
+"alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
 "tell test player to play": "https://feeds.soundcloud.com/stream/"
-
-"Hi": "*"
-
-"Hi": "*"
-"open test player": "welcome to the simple audio player"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             const validatorResult = await virtualDeviceScript.execute(scripContents);
@@ -267,7 +302,7 @@ describe("VirtualDeviceScript", function() {
             };
             assertSequenceInfo(1, 3);
             assertSequenceInfo(2, 1);
-            assertSequenceInfo(3, 2);
+            assertSequenceInfo(3, 3);
         });
     });
 

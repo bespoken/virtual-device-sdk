@@ -154,8 +154,11 @@ export interface IVirtualDeviceTest {
 
     input: string;
     comparison: string;
-    expectedTranscript?: string;
-    expectedStreamURL?: string;
+    expected?: {
+        card?: any,
+        streamURL?: string | string[],
+        transcript?: string | string[],
+    };
 }
 
 export interface IVirtualDeviceTestSequence {
@@ -176,6 +179,61 @@ export interface IVirtualDeviceValidatorResult {
 }
 
 export class Validator {
+    private static checkString(value: string | null, expected: undefined | string | string []) {
+        if (!expected) {
+            return true;
+        }
+
+        if (!value) {
+            return false;
+        }
+
+        if (Array.isArray(expected)) {
+            const expectedArray = expected;
+            for (const expectedValue of expectedArray) {
+                if (expectedValue.trim() === "*" || expectedValue.trim() === "") {
+                    return true;
+                }
+
+                if (value.includes(expectedValue)) {
+                    return true;
+                }
+            }
+            return false;
+        } else {
+            if (expected.trim() === "*" || expected.trim() === "") {
+                return true;
+            }
+            return (value.includes(expected as string));
+        }
+    }
+
+    private static checkObject(value?: any, expected?: any) {
+        if (!expected) {
+            return true;
+        }
+
+        if (!value) {
+            return false;
+        }
+
+        for (const property of Object.keys(expected)) {
+            const expectedPropertyValue = expected[property];
+            const actualPropertyValue = value[property];
+            if (typeof expectedPropertyValue === "string") {
+                if (!Validator.checkString(actualPropertyValue, expectedPropertyValue)) {
+                    return false;
+                }
+            } else {
+                if (!Validator.checkObject(actualPropertyValue, expectedPropertyValue)) {
+                    return false;
+                }
+            }
+
+        }
+        return true;
+    }
+
     public resultItem: IVirtualDeviceValidatorResultItem;
     public error?: Error;
 
@@ -189,31 +247,26 @@ export class Validator {
         if (this.error) {
             return false;
         }
+
         if (this.resultItem.test.comparison !== "contains") {
             return false;
         }
-        if (!this.resultItem.test.expectedTranscript &&
-            !this.resultItem.test.expectedStreamURL) {
-            return true;
+
+        if (!this.resultItem.actual) {
+            return false;
         }
-        if (this.resultItem.test.expectedTranscript === "*"
-            || this.resultItem.test.expectedStreamURL === "*"
-            || this.resultItem.test.expectedTranscript === ""
-            || this.resultItem.test.expectedStreamURL === "") {
-            return true;
-        }
-        if (this.resultItem.actual &&
-            this.resultItem.actual.transcript &&
-            this.resultItem.test.expectedTranscript &&
-            this.resultItem.test.comparison === "contains" &&
-            this.resultItem.actual.transcript.includes(this.resultItem.test.expectedTranscript)) {
+
+        if (!this.resultItem.test.expected) {
             return true;
         }
 
-        return !!(this.resultItem.actual &&
-            this.resultItem.actual.streamURL &&
-            this.resultItem.test.expectedStreamURL &&
-            this.resultItem.test.comparison === "contains" &&
-            this.resultItem.actual.streamURL.includes(this.resultItem.test.expectedStreamURL));
+        // Checks the transcript, stream and card - all must pass to be good!
+        const transcriptOkay = Validator.checkString(this.resultItem.actual.transcript,
+            this.resultItem.test.expected.transcript);
+        const streamOkay = Validator.checkString(this.resultItem.actual.streamURL,
+            this.resultItem.test.expected.streamURL);
+        const cardOkay = Validator.checkObject(this.resultItem.actual.card, this.resultItem.test.expected.card);
+
+        return transcriptOkay && streamOkay && cardOkay;
     }
 }

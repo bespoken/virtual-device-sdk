@@ -50,7 +50,7 @@ describe("YAMLParser", function() {
             const result = parser.parse();
             assert.equal(result.length, 1);
             assert.equal(result[0].name(), "name");
-            assert.equal(result[0].object().p1.string(), "value1");
+            assert.equal(result[0].object().p1, "value1");
         });
 
         it("Parses two objects with a blank line in between", async () => {
@@ -64,9 +64,9 @@ describe("YAMLParser", function() {
             const parser = new YAMLParser(content);
             const result = parser.parse();
             assert.equal(result.length, 3);
-            assert.equal(result[0].object().p1.string(), "value1");
+            assert.equal(result[0].object().p1, "value1");
             assert.equal(result[1].value(), null);
-            assert.equal(result[2].object().p3.string(), "value3");
+            assert.equal(result[2].object().p3, "value3");
         });
 
         it("Parses multi-level objects", async () => {
@@ -82,8 +82,8 @@ describe("YAMLParser", function() {
             assert.equal(result.length, 2);
             assert.equal(result[0].value().p1.string(), "value1");
             assert.equal(result[0].name(), "o1");
-            assert.equal(result[0].object().o2.object().p3.string(), "value3");
-            assert.equal(result[0].object().o2.object().p4.string(), "value4");
+            assert.equal(result[0].object().o2.p3, "value3");
+            assert.equal(result[0].object().o2.p4, "value4");
             assert.equal(result[1].string(), "value4");
         });
 

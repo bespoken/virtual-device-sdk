@@ -13,7 +13,6 @@ import {YAMLParser} from "./YAMLParser";
 
 // InvocationNameRegexp matches a skill's invocation name.
 const invocationNameRegexp = /(open|launch|tell|ask)(.*)$/;
-
 const urlRegExp = /^https?:\/\//i;
 
 export type IVirtualDeviceScriptCallback = (
@@ -38,43 +37,53 @@ export class VirtualDeviceScript {
         let sequence: number = 1;
         let sequenceIndex: number = 1;
         let absoluteIndex: number = 0;
-        const utterances = new YAMLParser(scriptContents).parse();
+        const utteranceTests = new YAMLParser(scriptContents).parse();
         let utteranceCount: number = 0;
-        for (const utterance of utterances) {
+        // Takes results from parsing YAML and turns it into tests
+        for (const utteranceTest of utteranceTests) {
             utteranceCount += 1;
-            if (!utterance.isNull()) {
+
+            // Null means a blank line and a new sequence is starting
+            // Otherwise, it is considered a test
+            if (!utteranceTest.isNull()) {
                 absoluteIndex += 1;
-                const input = utterance.name() as string;
+                const input = utteranceTest.name() as string;
                 const test: IVirtualDeviceTest = {
                     absoluteIndex,
                     comparison: "contains",
-                    expectedStreamURL: undefined,
-                    expectedTranscript: undefined,
+                    expected: {},
                     input,
                     sequence,
                     sequenceIndex,
                 };
 
-                // If the value for this is just a string, then check whether it is a URL
-                if (utterance.isString()) {
-                    if (utterance.isEmpty()) {
-                        throw new Error("Line " + utterance.line + ": No right-hand value specified.");
+                const expected: any = test.expected;
+                if (utteranceTest.isString()) {
+                    // If the value is a string, must be a transcript or URL
+                    if (utteranceTest.isEmpty()) {
+                        throw new Error("Line " + utteranceTest.line + ": No right-hand value specified.");
                     }
-                    // If this utterance is a URL, assume it is a stream check
-                    if (urlRegExp.test(utterance.string())) {
-                        test.expectedStreamURL = utterance.string();
+
+                    if (urlRegExp.test(utteranceTest.string())) {
+                        expected.streamURL = utteranceTest.string();
                     } else {
-                        test.expectedTranscript = utterance.string();
+                        expected.transcript = utteranceTest.string();
                     }
-                } else if (utterance.value() === undefined) {
-                    throw new Error("Line " + utterance.line + ": No properties added for object.");
+                } else if (utteranceTest.isArray()) {
+                    // If the value is an array, it is possible transcript values
+                    expected.transcript = utteranceTest.stringArray();
+                } else if (utteranceTest.isObject()) {
+                    // If the value is an object, we just set that to be expected
+                    test.expected = utteranceTest.object();
+                } else if (utteranceTest.value() === undefined) {
+                    throw new Error("Line " + utteranceTest.line + ": No properties added for object.");
                 }
 
                 currentSequence.tests.push(test);
                 sequenceIndex += 1;
             }
             // If this a blank line, or the last utterance, we tie up this sequence
-            if (utterance.isNull() || utteranceCount === utterances.length) {
+            if (utteranceTest.isNull() || utteranceCount === utteranceTests.length) {
                 if (currentSequence.tests.length) {
                     sequence += 1;
                     const firstInput = (currentSequence.tests

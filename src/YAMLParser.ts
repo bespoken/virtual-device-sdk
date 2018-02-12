@@ -113,7 +113,7 @@ export class YAMLContext {
                     this.top().value({});
                 }
 
-                this.top().object()[value.name() as string] = value;
+                this.top().value()[value.name() as string] = value;
             }
         }
         this.stack.push(value);
@@ -168,11 +168,34 @@ export class Value {
     }
 
     public object(): any {
-        return this._value as any;
+        // Turn all the values into objects
+        const o = this._value as any;
+        const newObject: any = {};
+        for (const key of Object.keys(o)) {
+            const value = o[key];
+            let flatValue;
+            if (value.isString()) {
+                flatValue = value.string();
+            } else if (value.isArray()) {
+                flatValue = value.stringArray();
+            } else if (value.isObject()) {
+                flatValue = value.object();
+            }
+            newObject[key] = flatValue;
+        }
+        return newObject;
     }
 
     public array(): Value[] {
         return this._value as Value[];
+    }
+
+    public stringArray(): string[] {
+        const strings: string[] = [];
+        for (const value of this.array()) {
+            strings.push(value.string());
+        }
+        return strings;
     }
 
     public string(): string {

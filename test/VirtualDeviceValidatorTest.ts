@@ -56,15 +56,17 @@ describe("VirtualDeviceValidator", function() {
                     invocationName: "test player",
                     tests: [{
                         comparison: "contains",
-                        expectedStreamURL: undefined,
-                        expectedTranscript: "welcome to the simple audio player",
+                        expected: {
+                            transcript: "welcome to the simple audio player",
+                        },
                         input: "open test player",
                         sequence: 1,
                     },
                     {
                         comparison: "contains",
-                        expectedStreamURL: "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010",
-                        expectedTranscript: undefined,
+                        expected: {
+                            streamURL: "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010",
+                        },
                         input: "tell test player to play",
                         sequence: 1,
                     }],
@@ -84,8 +86,9 @@ describe("VirtualDeviceValidator", function() {
                     invocationName: "test player",
                     tests: [{
                         comparison: "contains",
-                        expectedStreamURL: undefined,
-                        expectedTranscript: "wrong transcript",
+                        expected: {
+                            transcript: "wrong transcript",
+                        },
                         input: "tell test player to play",
                         sequence: 1,
                     }],
@@ -105,8 +108,9 @@ describe("VirtualDeviceValidator", function() {
                 invocationName: "test player",
                 tests: [{
                     comparison: "contains",
-                    expectedStreamURL: undefined,
-                    expectedTranscript: "welcome to the simple audio player",
+                    expected: {
+                        transcript: "welcome to the simple audio player",
+                    },
                     input: "open test player",
                     sequence: 1,
                 }],
