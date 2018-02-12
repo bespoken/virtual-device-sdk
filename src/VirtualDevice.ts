@@ -75,8 +75,6 @@ export interface IVirtualDeviceResult {
     sessionTimeout: number;
     streamURL: string | null;
     transcript: string | null;
-    transcriptAudioURL: string | null;
-
     // message is the message used for this result.
     message: string;
 }
@@ -85,6 +83,6 @@ export interface ICard {
     imageURL: string | null;
     mainTitle: string | null;
     subTitle: string | null;
-    textField: string;
+    textField: string | null;
     type: string;
 }

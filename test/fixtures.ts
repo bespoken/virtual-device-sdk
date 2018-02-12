@@ -13,7 +13,13 @@ export function message(message: string): Promise<IVirtualDeviceResult> {
     }
     if (message.includes("hi")) {
         return Promise.resolve({
-            card: null,
+            card: {
+                imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
+                mainTitle: "Title of the card",
+                subTitle: "Simple Player Unit Test",
+                textField: "Text content for a standard card",
+                type: "BodyTemplate2",
+            },
             debug: {rawJSON: {messageBody: ""}},
             message: "Hi",
             sessionTimeout: 0,
@@ -27,11 +33,17 @@ export function message(message: string): Promise<IVirtualDeviceResult> {
     }
     if (message.includes("open")) {
         return Promise.resolve({
-            card: null,
+            card: {
+                imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
+                mainTitle: "Title of the card",
+                subTitle: "Simple Player Unit Test",
+                textField: "Text content for a standard card",
+                type: "BodyTemplate2",
+            },
             message: "open",
             sessionTimeout: 0,
             streamURL: "",
-            transcript: "welcome to the simple audio player sleep later play some audio",
+            transcript: "welcome to the simple audio player to play some audio",
             transcriptAudioURL: "",
         });
     }
