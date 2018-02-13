@@ -46,7 +46,7 @@ export class VirtualDeviceValidator {
     }
 
     public async execute(virtualDeviceTestSequences: IVirtualDeviceTestSequence[],
-                         context?: any): Promise<any> {
+                         context?: any): Promise<IVirtualDeviceValidatorResult> {
         const result: IVirtualDeviceValidatorResult = {tests: []};
         const totalSequences: number = virtualDeviceTestSequences.length;
         let currentSequenceIndex: number = 0;
@@ -74,9 +74,10 @@ export class VirtualDeviceValidator {
                     resultItem.status = "running";
                     const validator: Validator = new Validator(resultItem, undefined);
                     this.emit("message", undefined, validator.resultItem, context);
-                    const actual: IVirtualDeviceResult = await this.virtualDevice.message(test.input);
-                    resultItem.actual = actual;
-                    if (validator.resultItem && validator.check()) {
+                    resultItem.actual = await this.virtualDevice.message(test.input);
+                    const errors = validator.check();
+                    validator.resultItem.errors = errors;
+                    if (validator.resultItem && errors.length === 0) {
                         validator.resultItem.result = "success";
                     } else {
                         validator.resultItem.result = "failure";
@@ -168,9 +169,27 @@ export interface IVirtualDeviceTestSequence {
 
 export interface IVirtualDeviceValidatorResultItem {
     actual?: IVirtualDeviceResult;
+    errors?: ValidatorError[];
     result?: "success" | "failure";
     status?: "scheduled" | "running" | "done";
     test: IVirtualDeviceTest;
+}
+
+export class ValidatorError {
+    public static asArray(message: string): ValidatorError[] {
+        return [new ValidatorError(message)];
+    }
+
+    public static propertyError(property: string,
+                                expected: undefined | string | string [],
+                                actual: null | string): ValidatorError {
+        return new ValidatorError(undefined, property, expected, actual);
+    }
+
+    public constructor(public message?: string,
+                       public property?: string,
+                       public expected?: undefined | string | string [],
+                       public actual?: null | string) {}
 }
 
 export interface IVirtualDeviceValidatorResult {
@@ -179,59 +198,72 @@ export interface IVirtualDeviceValidatorResult {
 }
 
 export class Validator {
-    private static checkString(value: string | null, expected: undefined | string | string []) {
+    private static checkString(property: string,
+                               value: string | null,
+                               expected: undefined | string | string []): ValidatorError | undefined {
         if (!expected) {
-            return true;
+            return undefined;
         }
 
         if (!value) {
-            return false;
+            return ValidatorError.propertyError(property, expected, value);
         }
 
         if (Array.isArray(expected)) {
             const expectedArray = expected;
             for (const expectedValue of expectedArray) {
                 if (expectedValue.trim() === "*" || expectedValue.trim() === "") {
-                    return true;
+                    return undefined;
                 }
 
                 if (value.includes(expectedValue)) {
-                    return true;
+                    return undefined;
                 }
             }
-            return false;
+            return ValidatorError.propertyError(property, expected, value);
         } else {
             if (expected.trim() === "*" || expected.trim() === "") {
-                return true;
+                return undefined;
             }
-            return (value.includes(expected as string));
+            const matches = (value.includes(expected as string));
+            if (matches) {
+                return undefined;
+            } else {
+                return ValidatorError.propertyError(property, expected, value);
+            }
         }
     }
 
-    private static checkObject(value?: any, expected?: any) {
+    private static checkObject(parentProperty: string, value?: any, expected?: any): ValidatorError | undefined {
         if (!expected) {
-            return true;
+            return undefined;
         }
 
         if (!value) {
-            return false;
+            return ValidatorError.propertyError(parentProperty, expected, value);
         }
 
         for (const property of Object.keys(expected)) {
             const expectedPropertyValue = expected[property];
             const actualPropertyValue = value[property];
+            let fullProperty = property;
+            if (parentProperty) {
+                fullProperty = parentProperty + "." + property;
+            }
             if (typeof expectedPropertyValue === "string") {
-                if (!Validator.checkString(actualPropertyValue, expectedPropertyValue)) {
-                    return false;
+                const error = Validator.checkString(fullProperty, actualPropertyValue, expectedPropertyValue);
+                if (error) {
+                    return error;
                 }
             } else {
-                if (!Validator.checkObject(actualPropertyValue, expectedPropertyValue)) {
-                    return false;
+                const error = Validator.checkObject(fullProperty, actualPropertyValue, expectedPropertyValue);
+                if (error) {
+                    return error;
                 }
             }
 
         }
-        return true;
+        return undefined;
     }
 
     public resultItem: IVirtualDeviceValidatorResultItem;
@@ -243,30 +275,44 @@ export class Validator {
     }
 
     // check checks whether validation checks success or fails.
-    public check(): boolean {
+    public check(): ValidatorError[] {
         if (this.error) {
-            return false;
+            return ValidatorError.asArray(this.error.message);
         }
 
         if (this.resultItem.test.comparison !== "contains") {
-            return false;
+            return ValidatorError.asArray("Invalid test comparison: " + this.resultItem.test.comparison);
         }
 
         if (!this.resultItem.actual) {
-            return false;
+            return ValidatorError.asArray("Invalid test result - no result");
         }
 
         if (!this.resultItem.test.expected) {
-            return true;
+            return [];
         }
 
         // Checks the transcript, stream and card - all must pass to be good!
-        const transcriptOkay = Validator.checkString(this.resultItem.actual.transcript,
+        const transcriptError = Validator.checkString("transcript",
+            this.resultItem.actual.transcript,
             this.resultItem.test.expected.transcript);
-        const streamOkay = Validator.checkString(this.resultItem.actual.streamURL,
+        const streamError = Validator.checkString("streamURL",
+            this.resultItem.actual.streamURL,
             this.resultItem.test.expected.streamURL);
-        const cardOkay = Validator.checkObject(this.resultItem.actual.card, this.resultItem.test.expected.card);
+        const cardError = Validator.checkObject("card",
+            this.resultItem.actual.card,
+            this.resultItem.test.expected.card);
 
-        return transcriptOkay && streamOkay && cardOkay;
+        const errors: ValidatorError[] = [];
+        if (transcriptError) {
+            errors.push(transcriptError);
+        }
+        if (streamError) {
+            errors.push(streamError);
+        }
+        if (cardError) {
+            errors.push(cardError);
+        }
+        return errors;
     }
 }

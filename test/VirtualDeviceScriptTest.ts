@@ -323,10 +323,16 @@ describe("VirtualDeviceScript", function() {
             const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
             const results = await script.executeDir("test/scriptDir");
             // Should run two files - it ignores the one that does not end in YML
-            assert.equal(results.length, 3);
-            assert.equal(results[0].result, "success");
-            assert.equal(results[1].result, "failure");
-            assert.equal(results[2].result, "success");
+            assert.equal(Object.keys(results).length, 3);
+            for (const key of Object.keys(results)) {
+                if (key.includes("Test1") || key.includes("Test3")) {
+                    assert.equal(results[key].result, "success");
+                }
+
+                if (key.includes("Test2")) {
+                    assert.equal(results[key].result, "failure");
+                }
+            }
         });
 
         it("fails on missing directory", async () => {
