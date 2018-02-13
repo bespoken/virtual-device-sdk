@@ -261,8 +261,6 @@ describe("VirtualDeviceScript", function() {
             const scripContents = `
 "alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
-"tell test player to play": 
-  streamURL: "https://feeds.soundcloud.com/stream/"
 
 "alexa Hi": "*"
 
@@ -300,7 +298,7 @@ describe("VirtualDeviceScript", function() {
                     assert.equal(resultItem.test.absoluteIndex, absoluteIndex, absoluteMsg);
                 }
             };
-            assertSequenceInfo(1, 3);
+            assertSequenceInfo(1, 2);
             assertSequenceInfo(2, 1);
             assertSequenceInfo(3, 3);
         });
