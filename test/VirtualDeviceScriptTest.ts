@@ -401,13 +401,13 @@ describe("VirtualDeviceScript", function() {
 
         it("success ", async () => {
             const tests = [
-                `"Hi": "*"`,
-                `"Hi": ""
+                `"alexa Hi": "*"`,
+                `"alexa Hi": ""
                 `,
                 `
-"Hi": ""`,
+"alexa Hi": ""`,
                 `
-"Hi": "*"
+"alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
 "tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
