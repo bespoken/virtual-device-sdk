@@ -103,7 +103,6 @@ export class YAMLContext {
     }
 
     public push(value: Value): void  {
-        console.log("PUSH " + value.toString());
         if (this.stack.length > 0) {
             // If nothing is set yet, make it an object
             if (this.top().isArray()) {

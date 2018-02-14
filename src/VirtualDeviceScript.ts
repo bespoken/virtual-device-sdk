@@ -22,15 +22,26 @@ export type IVirtualDeviceScriptCallback = (
 
 export class VirtualDeviceScript {
     private virtualDeviceValidator: VirtualDeviceValidator;
+    private tokens: {[id: string]: string} = {};
 
     constructor(token: string, userID: string, baseURL?: string, sourceAPIBaseURL?: string) {
         baseURL = baseURL ? baseURL : "https://virtual-device.bespoken.io/process";
         this.virtualDeviceValidator = new VirtualDeviceValidator(token, userID, baseURL, sourceAPIBaseURL);
     }
 
+    /**
+     * Set tokens that will be replaced in the script
+     * @param {string} token The token will be searched for with angle brackets on either side (NAME -> <NAME>)
+     * @param {string} value
+     */
+    public findReplace(token: string, value: string) {
+        this.tokens[token] = value;
+    }
+
     public tests(scriptContents: string): IVirtualDeviceTestSequence[] {
         // Throw away blank lines at beginning and end
         scriptContents = scriptContents.trim();
+        scriptContents = this.tokenize(scriptContents);
 
         const sequences: IVirtualDeviceTestSequence[] = [];
         let currentSequence: IVirtualDeviceTestSequence = {tests: [], invocationName: ""};
@@ -98,6 +109,15 @@ export class VirtualDeviceScript {
             }
         }
         return sequences;
+    }
+
+    private tokenize(script: string): string {
+        for (const token of Object.keys(this.tokens)) {
+            const fullToken = "<" + token + ">";
+            const value = this.tokens[token];
+            script = script.split(fullToken).join(value);
+        }
+        return script;
     }
 
     /**

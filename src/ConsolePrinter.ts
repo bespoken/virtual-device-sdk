@@ -48,7 +48,7 @@ export class ConsolePrinter {
             out = chalk.default.red;
         }
 
-        let line = ConsolePrinter.rpad(name, " ", TEST_NAME_LENGTH) + "\n";
+        let line = name + "\n";
         let output = out(line);
         for (const testResult of result.tests) {
             // Print out the sequence name on its own line
