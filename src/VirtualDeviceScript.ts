@@ -105,7 +105,7 @@ export class VirtualDeviceScript {
      * It will load any files that end with "yml" or "yaml" in the directory and execute them
      * @param {string} directoryPath
      */
-    public async executeDir(directoryPath: string): Promise<IVirtualDeviceValidatorResult[]> {
+    public async executeDir(directoryPath: string): Promise<{[id: string]: IVirtualDeviceValidatorResult}> {
         directoryPath = path.resolve(directoryPath);
         let stats;
         try {
@@ -119,12 +119,12 @@ export class VirtualDeviceScript {
         }
 
         const items = fs.readdirSync(directoryPath);
-        const results = [];
+        const results: {[id: string]: IVirtualDeviceValidatorResult} = {};
         for (const filePath of items) {
             if (filePath.endsWith(".yml") || filePath.endsWith(".yaml")) {
                 const fullPath = path.join(directoryPath, filePath);
                 const result = await this.executeFile(fullPath);
-                results.push(result);
+                results[fullPath] = result;
             }
         }
         return results;

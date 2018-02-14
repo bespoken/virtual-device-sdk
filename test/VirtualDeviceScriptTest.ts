@@ -261,8 +261,6 @@ describe("VirtualDeviceScript", function() {
             const scripContents = `
 "alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
-"tell test player to play": 
-  streamURL: "https://feeds.soundcloud.com/stream/"
 
 "alexa Hi": "*"
 
@@ -300,7 +298,7 @@ describe("VirtualDeviceScript", function() {
                     assert.equal(resultItem.test.absoluteIndex, absoluteIndex, absoluteMsg);
                 }
             };
-            assertSequenceInfo(1, 3);
+            assertSequenceInfo(1, 2);
             assertSequenceInfo(2, 1);
             assertSequenceInfo(3, 3);
         });
@@ -323,10 +321,16 @@ describe("VirtualDeviceScript", function() {
             const script = new VirtualDeviceScript(process.env.TEST_TOKEN as string, "USER_ID");
             const results = await script.executeDir("test/scriptDir");
             // Should run two files - it ignores the one that does not end in YML
-            assert.equal(results.length, 3);
-            assert.equal(results[0].result, "success");
-            assert.equal(results[1].result, "failure");
-            assert.equal(results[2].result, "success");
+            assert.equal(Object.keys(results).length, 3);
+            for (const key of Object.keys(results)) {
+                if (key.includes("Test1") || key.includes("Test3")) {
+                    assert.equal(results[key].result, "success");
+                }
+
+                if (key.includes("Test2")) {
+                    assert.equal(results[key].result, "failure");
+                }
+            }
         });
 
         it("fails on missing directory", async () => {
@@ -397,13 +401,13 @@ describe("VirtualDeviceScript", function() {
 
         it("success ", async () => {
             const tests = [
-                `"Hi": "*"`,
-                `"Hi": ""
+                `"alexa Hi": "*"`,
+                `"alexa Hi": ""
                 `,
                 `
-"Hi": ""`,
+"alexa Hi": ""`,
                 `
-"Hi": "*"
+"alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
 "tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,

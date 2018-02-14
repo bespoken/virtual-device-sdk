@@ -89,7 +89,7 @@ describe("VirtualDeviceValidator", function() {
                         expected: {
                             transcript: "wrong transcript",
                         },
-                        input: "tell test player to play",
+                        input: "open test player",
                         sequence: 1,
                     }],
                 },
@@ -98,6 +98,37 @@ describe("VirtualDeviceValidator", function() {
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
+                const error = (test.errors as any)[0];
+                assert.equal(error.property, "transcript");
+                assert.equal(error.expected, "wrong transcript");
+                assert.include(error.actual, "simple audio player");
+            }
+        });
+
+        it("has deep failure", async () => {
+            const sequences = [
+                {
+                    invocationName: "test player",
+                    tests: [{
+                        comparison: "contains",
+                        expected: {
+                            card: {
+                                mainTitle: "Wrong title",
+                            },
+                        },
+                        input: "open test player",
+                        sequence: 1,
+                    }],
+                },
+            ];
+            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID, BASE_URL);
+            const validatorResult = await virtualDeviceValidator.execute(sequences);
+            for (const test of validatorResult.tests) {
+                assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
+                const error = (test.errors as any)[0];
+                assert.equal(error.property, "card.mainTitle");
+                assert.equal(error.expected, "Wrong title");
+                assert.include(error.actual, "Title of the card");
             }
         });
     });
@@ -235,7 +266,7 @@ describe("VirtualDeviceValidator", function() {
                 };
                 const resultItem: IVirtualDeviceValidatorResultItem = {test};
                 const validator = new Validator(resultItem, new Error("test error"));
-                assert.equal(validator.check(), false);
+                assert.isDefined(validator.check());
             });
             it("returns false if result item comparison is other than 'contains'", () => {
                 const test: IVirtualDeviceTest = {
@@ -245,7 +276,7 @@ describe("VirtualDeviceValidator", function() {
                 };
                 const resultItem: IVirtualDeviceValidatorResultItem = {test};
                 const validator = new Validator(resultItem, undefined);
-                assert.equal(validator.check(), false);
+                assert.isDefined(validator.check());
             });
         });
     });
