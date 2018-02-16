@@ -1,6 +1,6 @@
 import {assert} from "chai";
-import {IVirtualDeviceValidatorResult} from "../src";
 import {ConsolePrinter} from "../src/ConsolePrinter";
+import {IVirtualDeviceValidatorResult} from "../src/VirtualDeviceValidator";
 
 describe("ConsolePrinter", function() {
     it("Prints simple results", function() {
