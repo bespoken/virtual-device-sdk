@@ -1,6 +1,9 @@
 import * as chalk from "chalk";
 import * as path from "path";
-import {IVirtualDeviceValidatorResult, ValidatorError} from "./VirtualDeviceValidator";
+import {
+    IVirtualDeviceValidatorResult, IVirtualDeviceValidatorResultItem,
+    ValidatorError
+} from "./VirtualDeviceValidator";
 
 const TEST_NAME_LENGTH = 20;
 const TEST_PROPERTY_LENGTH = 10;
@@ -54,7 +57,9 @@ export class ConsolePrinter {
             // Print out the sequence name on its own line
             if (testResult.test.sequenceIndex === 1) {
                 const sequenceLine = TAB + "Sequence " + testResult.test.sequence + ": " + testResult.test.input;
-                output = ConsolePrinter.concat(output, sequenceLine, result.result !== "success");
+                output = ConsolePrinter.concat(output,
+                    sequenceLine,
+                    this.sequenceHasError(testResult.test.sequence, result.tests));
             }
 
             line = TAB + TAB;
@@ -76,5 +81,14 @@ export class ConsolePrinter {
             }
         }
         return output;
+    }
+
+    private sequenceHasError(sequence: number, testResults: IVirtualDeviceValidatorResultItem []) {
+        for (const testResult of testResults) {
+            if (testResult.test.sequence === sequence && testResult.result !== "success") {
+                return true;
+            }
+        }
+        return false;
     }
 }
