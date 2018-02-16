@@ -1,3 +1,5 @@
+#!/usr/bin/env
+
 import * as dotenv from "dotenv";
 import * as fs from "fs";
 import * as Path from "path";
