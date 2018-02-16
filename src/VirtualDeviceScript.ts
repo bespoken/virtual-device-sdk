@@ -111,15 +111,6 @@ export class VirtualDeviceScript {
         return sequences;
     }
 
-    private tokenize(script: string): string {
-        for (const token of Object.keys(this.tokens)) {
-            const fullToken = "<" + token + ">";
-            const value = this.tokens[token];
-            script = script.split(fullToken).join(value);
-        }
-        return script;
-    }
-
     /**
      * Executes a directory of tests
      * It will load any files that end with "yml" or "yaml" in the directory and execute them
@@ -219,5 +210,14 @@ export class VirtualDeviceScript {
             return "";
         }
         return matches[2].trim();
+    }
+
+    private tokenize(script: string): string {
+        for (const token of Object.keys(this.tokens)) {
+            const fullToken = token;
+            const value = this.tokens[token];
+            script = script.split(fullToken).join(value);
+        }
+        return script;
     }
 }

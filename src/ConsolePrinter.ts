@@ -1,8 +1,7 @@
 import * as chalk from "chalk";
 import * as path from "path";
 import {
-    IVirtualDeviceValidatorResult, IVirtualDeviceValidatorResultItem,
-    ValidatorError
+    IVirtualDeviceValidatorResult, IVirtualDeviceValidatorResultItem, ValidatorError,
 } from "./VirtualDeviceValidator";
 
 const TEST_NAME_LENGTH = 20;
