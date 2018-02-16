@@ -9,6 +9,16 @@ import {VirtualDeviceScript} from "./VirtualDeviceScript";
 dotenv.config();
 
 const TestRunner = {
+    addTokens: (script: VirtualDeviceScript) => {
+        for (const key of Object.keys(process.env)) {
+            if (key.startsWith("token.")) {
+                const value = process.env[key] as string;
+                const token = key.substr(key.indexOf(".") + 1);
+                console.log("Replacing token: " + token + " with: " + value);
+                script.findReplace(token, value);
+            }
+        }
+    },
     checkEnvironment: (name: string) => {
         if (!process.env[name]) {
             throw new Error(name + " environment variable must be set");
@@ -16,11 +26,11 @@ const TestRunner = {
     },
     run: (path?: string) => {
         TestRunner.checkEnvironment("BESPOKEN_USER_ID");
-        TestRunner.checkEnvironment("INVOCATION_NAME");
         TestRunner.checkEnvironment("VIRTUAL_DEVICE_TOKEN");
 
         const script = new VirtualDeviceScript(process.env.VIRTUAL_DEVICE_TOKEN as string,
             process.env.BESPOKEN_USER_ID as string);
+        TestRunner.addTokens(script);
         script.findReplace("INVOCATION_NAME", process.env.INVOCATION_NAME as string);
 
         script.on("result", (error, resultItem) => {
