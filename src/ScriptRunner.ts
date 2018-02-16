@@ -1,4 +1,4 @@
-#!/usr/bin/env
+#!/usr/bin/env node
 
 import * as dotenv from "dotenv";
 import * as fs from "fs";
