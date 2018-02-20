@@ -68,7 +68,7 @@ describe("ConsolePrinter", function() {
         const lines = output.split("\n");
         // Can't get this test to work right because of weirdness that chalk does
         // assert.equal(lines[2].trim().replace(/[^a-zA-Z: ]/g, "").length, 116);
-        assert.equal(lines[4], "      Actual:   i did not do it");
-        assert.equal(lines[5], "      Expected: i did it");
+        assert.equal(lines[4].trim(), "Actual:   i did not do it");
+        assert.equal(lines[5].trim(), "Expected: i did it");
     });
 });
