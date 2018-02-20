@@ -15,13 +15,24 @@ export class VirtualDevice {
 
     }
 
-    public message(message: string, debug?: boolean): Promise<IVirtualDeviceResult> {
+    public message(message: string,
+                   languageCode?: string,
+                   voiceID?: string,
+                   debug?: boolean): Promise<IVirtualDeviceResult> {
         message = this.normalizeMessage(message);
 
         let url = this.baseURL + "?message=" + message + "&user_id=" + this.token;
 
         if (debug) {
             url += "&debug=true";
+        }
+
+        if (languageCode) {
+            url += "&language_code=" + languageCode;
+        }
+
+        if (voiceID) {
+            url += "&voice_id=" + voiceID;
         }
 
         const promise = new Promise<IVirtualDeviceResult>((resolve, reject) => {

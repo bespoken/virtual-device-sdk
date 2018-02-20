@@ -50,8 +50,15 @@ export class VirtualDeviceScript {
         let absoluteIndex: number = 0;
         const utteranceTests = new YAMLParser(scriptContents).parse();
         let utteranceCount: number = 0;
+        let config: any = {};
         // Takes results from parsing YAML and turns it into tests
         for (const utteranceTest of utteranceTests) {
+            // The first test may not be a test - may be the config
+            if (utteranceCount === 0 && utteranceTest.name() === "config") {
+                config = utteranceTest.object();
+                continue;
+            }
+
             utteranceCount += 1;
 
             // Null means a blank line and a new sequence is starting
@@ -93,6 +100,7 @@ export class VirtualDeviceScript {
                 currentSequence.tests.push(test);
                 sequenceIndex += 1;
             }
+
             // If this a blank line, or the last utterance, we tie up this sequence
             if (utteranceTest.isNull() || utteranceCount === utteranceTests.length) {
                 if (currentSequence.tests.length) {
@@ -104,6 +112,13 @@ export class VirtualDeviceScript {
                     currentSequence.invocationName = this.detectInvocationName(firstInput);
                     sequences.push({...currentSequence});
                     currentSequence = {tests: [], invocationName: ""};
+                    if (config.voiceID) {
+                        currentSequence.voiceID = config.voiceID;
+                    }
+
+                    if (config.locale) {
+                        currentSequence.locale = config.locale;
+                    }
                     sequenceIndex = 1;
                 }
             }

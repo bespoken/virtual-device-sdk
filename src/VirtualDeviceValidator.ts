@@ -22,12 +22,27 @@ interface ISubscribers {
 }
 
 export class VirtualDeviceValidator {
+    private static languageCode(locale: string): string | undefined {
+        let languageCode = undefined;
+        if (locale) {
+            languageCode = locale.split("_")[0];
+        }
+        return undefined;
+    }
+
+    private static virtualDevice(sequence: IVirtualDeviceTestSequence) {
+        // Lookup token by locale
+        if (sequence.locale) {
+
+        }
+    }
+
     private virtualDevice: VirtualDevice;
     private subscribers: ISubscribers;
     private sourceAPIBaseURL: string;
     private userID: string;
 
-    constructor(token: string, userID: string, baseURL?: string, sourceAPIBaseURL?: string) {
+    constructor(token: string, userID?: string, baseURL?: string, sourceAPIBaseURL?: string) {
         this.virtualDevice = new VirtualDevice(token);
         this.virtualDevice.baseURL = baseURL ? baseURL : "https://virtual-device.bespoken.io/process";
         this.subscribers = {message: [], result: [], unauthorized: []};
@@ -110,6 +125,11 @@ export class VirtualDeviceValidator {
     // checkAuth checks whether given invocation name can be invoked
     // by `this.userID`.
     public checkAuth(invocationName: string): Promise<any> {
+        // Bypass this check if user ID is not set
+        if (!this.userID) {
+            return Promise.resolve("AUTHORIZED");
+        }
+
         return new Promise((resolve, reject) => {
             let data = "";
             const params = `?invocation_name=${invocationName}` +
@@ -164,7 +184,9 @@ export interface IVirtualDeviceTest {
 
 export interface IVirtualDeviceTestSequence {
     invocationName: string;
+    locale?: string;
     tests: IVirtualDeviceTest[];
+    voiceID?: string;
 }
 
 export interface IVirtualDeviceValidatorResultItem {
