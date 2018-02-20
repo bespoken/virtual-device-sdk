@@ -23,7 +23,7 @@ describe("ConsolePrinter", function() {
                         absoluteIndex: 1,
                         comparison: "contains",
                         expected: {
-                            transcript: "your test skill i",
+                            transcript: "your test skill i can do lots of things",
                         },
                         input: "open test skill",
                         sequence: 1,
@@ -65,5 +65,10 @@ describe("ConsolePrinter", function() {
         const output = printer.printResult("Launch", result as IVirtualDeviceValidatorResult);
         console.log(output);
         assert.isDefined(output);
+        const lines = output.split("\n");
+        // Can't get this test to work right because of weirdness that chalk does
+        // assert.equal(lines[2].trim().replace(/[^a-zA-Z: ]/g, "").length, 116);
+        assert.equal(lines[4], "      Actual:   i did not do it");
+        assert.equal(lines[5], "      Expected: i did it");
     });
 });

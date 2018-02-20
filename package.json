@@ -28,7 +28,7 @@
     "lint": "tslint src/**/*.ts && tslint test/**/*.ts",
     "tsc": "tsc",
     "pretest": "npm run tsc && npm run lint",
-    "test": "nyc mocha lib/test/*Test.js",
+    "test": "nyc mocha lib/test/ConsolePrinterTest.js",
     "posttest": "nyc report --reporter=json && codecov -f coverage/*.json",
     "typings": "typings install",
     "preversion": "npm run tsc"
