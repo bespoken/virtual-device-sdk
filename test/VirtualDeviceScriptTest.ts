@@ -393,10 +393,13 @@ describe("VirtualDeviceScript", function() {
         before(() => {
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
+            // For these tests, we always use the mock
+            MessageMock.enable();
         });
 
         after(() => {
             checkAuthStub.restore();
+            MessageMock.disable();
         });
 
         it("success ", async () => {

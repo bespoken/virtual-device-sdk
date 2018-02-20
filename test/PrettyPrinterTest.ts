@@ -9,29 +9,20 @@ import * as fixtures from "./fixtures";
 describe("PrettyPrinter", function() {
     this.timeout(120000);
     const BASE_URL = "https://virtual-device.bespoken.io/process";
+    const token = "DUMMY_TOKEN";
+    const userID = "abc";
 
-    let token: string;
-    const userID: string = "abc";
     let messageStub: any;
     before(() => {
         dotenv.config();
-        if (process.env.TEST_TOKEN) {
-            token = process.env.TEST_TOKEN as string;
-        } else {
-            assert.fail("No TEST_TOKEN defined");
-        }
-        if (process.env.ENABLE_MESSAGES_MOCK) {
-            const messageMock = (message: string, debug: boolean = false): Promise<IVirtualDeviceResult> => {
-                return fixtures.message(message);
-            };
-            messageStub = Sinon.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
-        }
+        const messageMock = (message: string, debug: boolean = false): Promise<IVirtualDeviceResult> => {
+            return fixtures.message(message);
+        };
+        messageStub = Sinon.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
     });
 
     after(() => {
-        if (process.env.ENABLE_MESSAGES_MOCK) {
-            messageStub.restore();
-        }
+        messageStub.restore();
     });
 
     describe("#prettifyAsHTML()", () => {

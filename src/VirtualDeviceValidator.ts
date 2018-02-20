@@ -147,7 +147,7 @@ export interface IVirtualDeviceTest {
     // sequence is the sequence number which this test belongs to.
     sequence: number;
 
-    // sequenceIndex is the index number of this test whitin the sequence.
+    // sequenceIndex is the index number of this test within the sequence.
     sequenceIndex?: number;
 
     // absoluteIndex is the index number of this test within the all sequences.

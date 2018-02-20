@@ -1,3 +1,4 @@
+import {ConsolePrinter} from "./ConsolePrinter";
 import {ICard, IVirtualDeviceResult, VirtualDevice} from "./VirtualDevice";
 import {VirtualDeviceScript} from "./VirtualDeviceScript";
 import {IVirtualDeviceValidatorResult,
@@ -6,6 +7,7 @@ import {IVirtualDeviceValidatorResult,
     VirtualDeviceValidator} from "./VirtualDeviceValidator";
 
 export {
+    ConsolePrinter,
     ICard,
     IVirtualDeviceValidatorResult,
     IVirtualDeviceResult,
