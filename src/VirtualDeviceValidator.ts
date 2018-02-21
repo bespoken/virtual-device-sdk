@@ -21,31 +21,29 @@ interface ISubscribers {
     unauthorized: any[];
 }
 
-export class VirtualDeviceValidator {
-    private subscribers: ISubscribers;
+export abstract class VirtualDeviceValidator {
     private sourceAPIBaseURL: string;
+    private subscribers: ISubscribers;
     private userID?: string;
 
-    constructor(private token?: string, userID?: string, private baseURL?: string, sourceAPIBaseURL?: string) {
+    constructor(protected token?: string, userID?: string, protected baseURL?: string, sourceAPIBaseURL?: string) {
         this.subscribers = {message: [], result: [], unauthorized: []};
         this.sourceAPIBaseURL = sourceAPIBaseURL ? sourceAPIBaseURL : "https://source-api.bespoken.tools";
         this.userID = userID;
-    }
-
-    public subscribe(event: string, cb: any) {
-        if (event in this.subscribers) {
-            this.subscribers[event].push(cb);
-        }
-    }
-
-    public unsubscribe(event: string) {
-        this.subscribers[event] = [];
     }
 
     public async execute(virtualDeviceTestSequences: IVirtualDeviceTestSequence[],
                          context?: any): Promise<IVirtualDeviceValidatorResult> {
         const result: IVirtualDeviceValidatorResult = {tests: []};
         for (const sequence of virtualDeviceTestSequences) {
+            // Check the authorization
+            try {
+                await this.checkAuth(sequence.invocationName);
+            } catch (err) {
+                this.emit("unauthorized", VirtualDeviceScriptUnauthorizedError, undefined, context);
+                throw err;
+            }
+
             await this.executeSequence(sequence, result);
         }
 
@@ -56,6 +54,16 @@ export class VirtualDeviceValidator {
             result.result = "success";
         }
         return Promise.resolve(result);
+    }
+
+    public subscribe(event: string, cb: any) {
+        if (event in this.subscribers) {
+            this.subscribers[event].push(cb);
+        }
+    }
+
+    public unsubscribe(event: string) {
+        this.subscribers[event] = [];
     }
 
     // checkAuth checks whether given invocation name can be invoked
@@ -90,7 +98,7 @@ export class VirtualDeviceValidator {
         });
     }
 
-    private emit(event: string, error: any, data: any, context?: any) {
+    protected emit(event: string, error: any, data: any, context?: any) {
         if (event in this.subscribers) {
             this.subscribers[event].forEach((subscriber) => {
                 subscriber(error, data, context);
@@ -98,64 +106,11 @@ export class VirtualDeviceValidator {
         }
     }
 
-    private async executeSequence(sequence: IVirtualDeviceTestSequence,
-                                  result: IVirtualDeviceValidatorResult): Promise<void> {
-        const virtualDevice = this.virtualDevice(sequence);
-
-        let checkAuthResult: string;
-        try {
-            checkAuthResult = await this.checkAuth(sequence.invocationName);
-        } catch (err) {
-            this.emit("unauthorized", VirtualDeviceScriptUnauthorizedError,
-                undefined, context);
-            return Promise.reject(err);
-        }
-
-        if (checkAuthResult !== "AUTHORIZED") {
-            this.emit("unauthorized", VirtualDeviceScriptUnauthorizedError,
-                undefined, context);
-            return Promise.reject(VirtualDeviceScriptUnauthorizedError);
-        }
-
-        // Reset the session before each sequence
-        await virtualDevice.resetSession();
-        const messages = [];
-        // Do one pass on the sequence
-        for (const test of sequence.tests) {
-            messages.push(test.input);
-        }
-
-        let results;
-        try {
-            results = await virtualDevice.batchMessage(messages);
-        } catch (e) {
-            result.result = "failure";
-            result.errorMessage = e.toString();
-            return;
-        }
-
-        // Do another pass, to match the replies from the virtual device to the tests
-        for (let i = 0; i < sequence.tests.length; i++ ) {
-            const test = sequence.tests[i];
-
-            const resultItem: IVirtualDeviceValidatorResultItem = {test};
-            resultItem.actual = results[i];
-            const validator: Validator = new Validator(resultItem, undefined);
-            const errors = validator.check();
-
-            resultItem.errors = errors;
-            if (errors.length === 0) {
-                resultItem.result = "success";
-            } else {
-                resultItem.result = "failure";
-            }
-            validator.resultItem.status = "done";
-            result.tests.push(resultItem);
-        }
-    }
+    protected abstract async executeSequence(sequence: IVirtualDeviceTestSequence,
+                                             result: IVirtualDeviceValidatorResult): Promise<void>;
 
     // Creates a Virtual Device based on the test sequence
-    private virtualDevice(sequence: IVirtualDeviceTestSequence): VirtualDevice {
+    protected virtualDevice(sequence: IVirtualDeviceTestSequence): VirtualDevice {
         // Lookup token by locale
         let token = this.token ? this.token : process.env.VIRTUAL_DEVICE_TOKEN;
         let tokenName;

@@ -413,12 +413,68 @@ describe("VirtualDeviceScript", function() {
         });
     });
 
+    describe("#on()", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+            // For these tests, we always use the mock
+            MessageMock.enable();
+        });
+
+        after(() => {
+            checkAuthStub.restore();
+            MessageMock.disable();
+        });
+
+        it("success ", async () => {
+            const tests = [
+                `"alexa Hi": "*"`,
+                `"alexa Hi": ""
+                `,
+                `
+"alexa Hi": ""`,
+                `
+"alexa Hi": "*"
+"open test player": "welcome to the simple audio player"
+"tell test player to play": "https://feeds.soundcloud.com/stream/"
+                `,
+            ];
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL, undefined, false);
+            const messageCallback: IVirtualDeviceScriptCallback = (
+                error: Error,
+                resultItem: IVirtualDeviceValidatorResultItem,
+                context?: any) => {
+                assert.equal(resultItem.status, "running");
+            };
+            const messageCallbackSpy = Sinon.spy(messageCallback);
+            const resultCallback: IVirtualDeviceScriptCallback = (
+                error: Error,
+                resultItem: IVirtualDeviceValidatorResultItem,
+                context?: any) => {
+                assert.equal(resultItem.status, "done");
+            };
+            const resultCallbackSpy = Sinon.spy(resultCallback);
+            virtualDeviceScript.on("message", messageCallbackSpy);
+            virtualDeviceScript.on("result", resultCallbackSpy);
+            for (const test of tests) {
+                const validatorResult = await virtualDeviceScript.execute(test);
+                assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+                for (const t of validatorResult.tests) {
+                    assert.equal(t.result, "success", `${JSON.stringify(t)}`);
+                }
+            }
+            expect(messageCallbackSpy).to.have.been.callCount(6);
+            expect(resultCallbackSpy).to.have.been.callCount(6);
+        });
+    });
+
     describe("#on() unauthorized event", () => {
         let checkAuthStub: any;
 
         before(() => {
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
-                .returns(Promise.resolve("UNAUTHORIZED"));
+                .throws("UNAUTHORIZED");
         });
 
         after(() => {
@@ -436,7 +492,7 @@ describe("VirtualDeviceScript", function() {
             try {
                 await virtualDeviceScript.execute(`"Hi": "*"`);
             } catch (err) {
-                assert.equal(err, VirtualDeviceScriptUnauthorizedError);
+                assert.equal(err, "UNAUTHORIZED");
             }
             expect(unauthorizedCallbackSpy).to.have.been.callCount(1);
         });

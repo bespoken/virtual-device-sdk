@@ -1,7 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
-import {PrettyPrinter} from "./PrettyPrinter";
 
+import {BatchValidator} from "./BatchValidator";
+import {PrettyPrinter} from "./PrettyPrinter";
+import {SequencedValidator} from "./SequencedValidator";
 import {
     IVirtualDeviceTest,
     IVirtualDeviceTestSequence,
@@ -24,9 +26,13 @@ export class VirtualDeviceScript {
     private virtualDeviceValidator: VirtualDeviceValidator;
     private tokens: {[id: string]: string} = {};
 
-    constructor(token?: string, userID?: string, baseURL?: string, sourceAPIBaseURL?: string) {
+    constructor(token?: string, userID?: string, baseURL?: string, sourceAPIBaseURL?: string, batch: boolean = true) {
         baseURL = baseURL ? baseURL : "https://virtual-device.bespoken.io";
-        this.virtualDeviceValidator = new VirtualDeviceValidator(token, userID, baseURL, sourceAPIBaseURL);
+        if (batch) {
+            this.virtualDeviceValidator = new BatchValidator(token, userID, baseURL, sourceAPIBaseURL);
+        } else {
+            this.virtualDeviceValidator = new SequencedValidator(token, userID, baseURL, sourceAPIBaseURL);
+        }
     }
 
     /**

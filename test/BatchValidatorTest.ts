@@ -2,6 +2,8 @@ import {assert} from "chai";
 import * as dotenv from "dotenv";
 import * as nock from "nock";
 import * as Sinon from "sinon";
+
+import {BatchValidator} from "../src/BatchValidator";
 import {VirtualDevice} from "../src/VirtualDevice";
 import {IVirtualDeviceTest,
     IVirtualDeviceValidatorResultItem,
@@ -10,7 +12,7 @@ import {IVirtualDeviceTest,
     VirtualDeviceValidatorUnauthorizedMessage} from "../src/VirtualDeviceValidator";
 import {MessageMock} from "./MessageMock";
 
-describe("VirtualDeviceValidator", function() {
+describe("BatchValidator", function() {
     this.timeout(60000);
     const BASE_URL = "https://virtual-device.bespoken.io";
     const SOURCE_API_BASE_URL = process.env.SOURCE_API_BASE_URL;
@@ -64,7 +66,7 @@ describe("VirtualDeviceValidator", function() {
                     }],
                 },
             ];
-            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new BatchValidator(token, userID, BASE_URL);
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
             for (const test of validatorResult.tests) {
@@ -86,7 +88,7 @@ describe("VirtualDeviceValidator", function() {
                     }],
                 },
             ];
-            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new BatchValidator(token, userID, BASE_URL);
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
@@ -113,7 +115,7 @@ describe("VirtualDeviceValidator", function() {
                     }],
                 },
             ];
-            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new BatchValidator(token, userID, BASE_URL);
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
@@ -140,17 +142,20 @@ describe("VirtualDeviceValidator", function() {
             },
         ];
         let checkAuthStub: any;
+
         before(() => {
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
-                .returns(Promise.reject("UNAUTHORIZED"));
+                .throws("UNAUTHORIZED");
         });
         after(() => {
             checkAuthStub.restore();
         });
+
         it("handles #checkAuth() errors", async () => {
-            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new BatchValidator(token, userID, BASE_URL);
             try {
                 await virtualDeviceValidator.execute(sequences);
+                assert.fail("This should never be reached");
             } catch (err) {
                 assert.equal(err, "UNAUTHORIZED");
             }
@@ -190,7 +195,7 @@ describe("VirtualDeviceValidator", function() {
             checkAuthStub.restore();
         });
         it("handles virtual device errors", async () => {
-            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new BatchValidator(token, userID, BASE_URL);
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
@@ -213,7 +218,7 @@ describe("VirtualDeviceValidator", function() {
                 .get("/v1/skillAuthorized?invocation_name=simple%20player" +
                     `&user_id=${userID}`)
                 .reply(200, "AUTHORIZED");
-            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID,
+            const virtualDeviceValidator = new BatchValidator(token, userID,
                 BASE_URL, SOURCE_API_BASE_URL);
             const checkAuthResult = await virtualDeviceValidator.checkAuth("simple player");
             assert.equal(checkAuthResult, "AUTHORIZED");
@@ -223,7 +228,7 @@ describe("VirtualDeviceValidator", function() {
                 .get("/v1/skillAuthorized?invocation_name=simple%20player" +
                     `&user_id=${userID}`)
                 .reply(401, "UNAUTHORIZED");
-            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID,
+            const virtualDeviceValidator = new BatchValidator(token, userID,
                 BASE_URL, SOURCE_API_BASE_URL);
             try {
                 await virtualDeviceValidator.checkAuth("simple player");
@@ -237,7 +242,7 @@ describe("VirtualDeviceValidator", function() {
                 .get("/v1/skillAuthorized?invocation_name=simple%20player" +
                     `&user_id=${userID}`)
                 .replyWithError("UNKNOWN ERROR");
-            const virtualDeviceValidator = new VirtualDeviceValidator(token, userID,
+            const virtualDeviceValidator = new BatchValidator(token, userID,
                 BASE_URL, SOURCE_API_BASE_URL);
             try {
                 await virtualDeviceValidator.checkAuth("simple player");

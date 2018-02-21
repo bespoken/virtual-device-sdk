@@ -18,6 +18,10 @@
   "nyc": {
     "exclude": [
       "lib/test/**"
+    ],
+    "reporter": [
+      "json",
+      "html"
     ]
   },
   "repository": {
