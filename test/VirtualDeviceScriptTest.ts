@@ -308,12 +308,14 @@ describe("VirtualDeviceScript", function() {
     describe("#execute() with configuration",  () => {
         beforeEach(() => {
             process.env.VIRTUAL_DEVICE_TOKEN = process.env.TEST_TOKEN;
-            process.env.VIRTUAL_DEVICE_TOKEN_EN_GB = process.env.TEST_TOKEN_GB;
+            process.env["VIRTUAL_DEVICE_TOKEN.EN-GB"]  = process.env.TEST_TOKEN_GB;
+            process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"]  = process.env.TEST_TOKEN_DE;
         });
 
         afterEach(() => {
             process.env.VIRTUAL_DEVICE_TOKEN = undefined;
-            process.env.VIRTUAL_DEVICE_TOKEN_EN_GB = undefined;
+            process.env["VIRTUAL_DEVICE_TOKEN.EN-GB"] = undefined;
+            process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] = undefined;
         });
 
         it("Uses explicit voice and language code", async () => {
@@ -327,6 +329,7 @@ describe("VirtualDeviceScript", function() {
             const virtualDeviceScript = new VirtualDeviceScript();
             const result = await virtualDeviceScript.execute(scriptContents);
             assert.isDefined(result);
+            assert.equal(result.result, "success");
         });
 
         it("Uses explicit voice and language code, UK", async () => {
@@ -340,21 +343,24 @@ describe("VirtualDeviceScript", function() {
             const virtualDeviceScript = new VirtualDeviceScript();
             const result = await virtualDeviceScript.execute(scriptContents);
             assert.isDefined(result);
+            assert.equal(result.result, "success");
         });
 
         it("Uses explicit voice and language code, Germany", async () => {
             const scriptContents = `
 "config":
-  "voiceID": "Geraint"
+  "voiceID": "Hans"
   "locale": "de-DE"
   
-"hello world": "*"
+"hallo welt": "*"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript();
             const result = await virtualDeviceScript.execute(scriptContents);
             assert.isDefined(result);
+            assert.equal(result.result, "success");
         });
     });
+
     describe("#executeDir()", () => {
         let sandbox: any;
         before(() => {
