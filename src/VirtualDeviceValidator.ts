@@ -212,20 +212,13 @@ export class Validator {
         if (Array.isArray(expected)) {
             const expectedArray = expected;
             for (const expectedValue of expectedArray) {
-                if (expectedValue.trim() === "*" || expectedValue.trim() === "") {
-                    return undefined;
-                }
-
-                if (value.includes(expectedValue)) {
+                if (Validator.toRegex(expectedValue).test(value)) {
                     return undefined;
                 }
             }
             return ValidatorError.propertyError(property, expected, value);
         } else {
-            if (expected.trim() === "*" || expected.trim() === "") {
-                return undefined;
-            }
-            const matches = (value.includes(expected as string));
+            const matches = Validator.toRegex(expected).test(value);
             if (matches) {
                 return undefined;
             } else {
@@ -264,6 +257,10 @@ export class Validator {
 
         }
         return undefined;
+    }
+
+    private static toRegex(expectedValue: string) {
+        return new RegExp(expectedValue.trim().split("*").join(".*"));
     }
 
     public resultItem: IVirtualDeviceValidatorResultItem;

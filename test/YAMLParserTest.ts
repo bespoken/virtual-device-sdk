@@ -31,9 +31,11 @@ describe("YAMLParser", function() {
             assert.equal(result[0].string(), "value");
         });
 
-        it("Parses multi-line", async () => {
+        it("Parses multi-line with comments", async () => {
             const content = "name: value\n" +
                 "name2: value2\n" +
+                "#name2: another value\n" +
+                "# a crazy comment\n" +
                 "name3: value3\n";
             const parser = new YAMLParser(content);
             const result = parser.parse();
