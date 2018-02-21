@@ -338,7 +338,7 @@ describe("VirtualDeviceScript", function() {
   "voiceID": "Geraint"
   "locale": "en-GB"
   
-"hello world": "*"
+"open ariel": "*"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript();
             const result = await virtualDeviceScript.execute(scriptContents);
