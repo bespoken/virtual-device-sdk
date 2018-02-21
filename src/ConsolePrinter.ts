@@ -4,10 +4,11 @@ import {
     IVirtualDeviceValidatorResult, IVirtualDeviceValidatorResultItem, ValidatorError,
 } from "./VirtualDeviceValidator";
 
+// Configured to force a max line length of 120
 const TEST_NAME_LENGTH = 20;
 const TEST_PROPERTY_LENGTH = 10;
-const TEST_ACTUAL_LENGTH = 30;
-const TEST_EXPECTED_LENGTH = 30;
+const TEST_ACTUAL_LENGTH = 37;
+const TEST_EXPECTED_LENGTH = 37;
 const TAB = "  ";
 export class ConsolePrinter {
     private static rpad(s: string | string [] | null | undefined, padString: string, length: number) {
@@ -65,15 +66,18 @@ export class ConsolePrinter {
             if (testResult.result !== "success") {
                 const error = (testResult.errors as ValidatorError[])[0];
                 line += ConsolePrinter.rpad(testResult.test.input, " ", TEST_NAME_LENGTH)
-                    + "  " + ConsolePrinter.rpad(error.property, " ", TEST_PROPERTY_LENGTH)
-                    + "  Actual: " + ConsolePrinter.rpad(error.actual, " ", TEST_ACTUAL_LENGTH)
-                    + "  Expected: " + ConsolePrinter.rpad(error.expected, " ", TEST_EXPECTED_LENGTH);
+                    + "  " + ConsolePrinter.rpad(error.property, " ", TEST_PROPERTY_LENGTH);
+
+                // When there are errors, we put the actual and expected on their own lines
+                const actualLine = TAB + TAB + TAB + "Actual:   " + error.actual;
+                const expectedLine = TAB + TAB + TAB + "Expected: " + error.expected;
                 output = ConsolePrinter.concat(output, line, true);
+                output = ConsolePrinter.concat(output, actualLine, true);
+                output = ConsolePrinter.concat(output, expectedLine, true);
             } else {
                 const actual = testResult.actual ? testResult.actual.transcript : "";
                 const expected = testResult.test.expected ? testResult.test.expected.transcript : "";
                 line += ConsolePrinter.rpad(testResult.test.input, " ", TEST_NAME_LENGTH)
-                    + "  " + ConsolePrinter.rpad("transcript", " ", TEST_PROPERTY_LENGTH)
                     + "  Actual: " + ConsolePrinter.rpad(actual, " ", TEST_ACTUAL_LENGTH)
                     + "  Expected: " + ConsolePrinter.rpad(expected, " ", TEST_EXPECTED_LENGTH);
                 output = ConsolePrinter.concat(output, line, false);

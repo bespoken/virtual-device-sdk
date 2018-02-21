@@ -224,10 +224,10 @@ describe("VirtualDeviceScript", function() {
         it("success", async () => {
             const tests = [`
 "open test player":
-  transcript: "welcome to the simple audio player"
+  transcript: "welcome to the si*le audio* player"
   card:
     imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png"
-    subTitle: "Simple Player Unit Test"
+    subTitle: "Simple Player * Test"
     mainTitle: "Title of the card"
     textField: "Text content for a standard card"
     type: "BodyTemplate2"
@@ -600,6 +600,7 @@ describe("VirtualDeviceScript", function() {
                     `&user_id=${userID}`)
                 .reply(200, "AUTHORIZED");
             sevCheckAuthSpy = Sinon.spy(VirtualDeviceScript.prototype, "checkAuth");
+            MessageMock.enable();
         });
 
         after(() => {
@@ -607,6 +608,7 @@ describe("VirtualDeviceScript", function() {
             nock.cleanAll();
             sevCheckAuthSpy.reset();
             sevCheckAuthSpy.restore();
+            MessageMock.disable();
         });
 
         it("success", async () => {
@@ -624,10 +626,12 @@ describe("VirtualDeviceScript", function() {
         before(() => {
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
+            MessageMock.enable();
         });
 
         after(() => {
             checkAuthStub.restore();
+            MessageMock.disable();
         });
 
         it("success", async () => {
