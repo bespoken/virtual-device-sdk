@@ -8,7 +8,7 @@ describe("ConsolePrinter", function() {
         (chalk as any).enabled = false;
     });
 
-    beforeEach(() => {
+    afterEach(() => {
         (chalk as any).enabled = true;
     });
 
@@ -72,6 +72,7 @@ describe("ConsolePrinter", function() {
 
         const printer = new ConsolePrinter();
         const output = printer.printResult("Launch", result as IVirtualDeviceValidatorResult);
+        console.log(output);
         assert.isDefined(output);
         const lines = output.split("\n");
         // Can't get this test to work right because of weirdness that chalk does
