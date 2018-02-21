@@ -176,7 +176,7 @@ describe("VirtualDeviceValidator", function() {
             MessageMock.enableIfConfigured();
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
-            seMessageStub = Sinon.stub(VirtualDevice.prototype, "message")
+            seMessageStub = Sinon.stub(VirtualDevice.prototype, "batchMessage")
                 .callsFake((message: string): Promise<any> => {
                     if (message.includes("Alexa") || message.includes("alexa quit")) {
                         return Promise.resolve();
