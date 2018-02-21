@@ -324,7 +324,7 @@ describe("VirtualDeviceScript", function() {
   "voiceID": "Matthew"
   "locale": "en-US"
   
-"hello world": "*"
+"what time is it": "*"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript();
             const result = await virtualDeviceScript.execute(scriptContents);
@@ -338,7 +338,7 @@ describe("VirtualDeviceScript", function() {
   "voiceID": "Geraint"
   "locale": "en-GB"
   
-"open ariel": "*"
+"what time is it": "*"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript();
             const result = await virtualDeviceScript.execute(scriptContents);
