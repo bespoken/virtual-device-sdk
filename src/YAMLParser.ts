@@ -29,6 +29,10 @@ export class YAMLParser {
         const context = new YAMLContext();
         context.push(new Value(0, 0, undefined, []));
         for (const line of lines) {
+            // Just ignore comments
+            if (line.startsWith("#")) {
+                continue;
+            }
             context.lineNumber++;
             this.parseLine(line, context);
         }
