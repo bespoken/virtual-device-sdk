@@ -263,7 +263,7 @@ describe("VirtualDeviceScript", function() {
 "alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
 
-"alexa Hi": "*"
+"hello world": "*"
 
 "alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
