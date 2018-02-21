@@ -26,7 +26,7 @@ export class VirtualDeviceScript {
     private virtualDeviceValidator: VirtualDeviceValidator;
     private tokens: {[id: string]: string} = {};
 
-    constructor(token?: string, userID?: string, baseURL?: string, sourceAPIBaseURL?: string, batch: boolean = true) {
+    constructor(token?: string, userID?: string, baseURL?: string, sourceAPIBaseURL?: string, batch: boolean = false) {
         baseURL = baseURL ? baseURL : "https://virtual-device.bespoken.io";
         if (batch) {
             this.virtualDeviceValidator = new BatchValidator(token, userID, baseURL, sourceAPIBaseURL);
