@@ -125,9 +125,10 @@ describe("VirtualDeviceScript", function() {
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             assert.deepEqual(virtualDeviceScript.tests(scripContents), expected);
         });
+
         describe("#invocationName", () => {
             it("success", async () => {
-                const scripContents = `
+                const scriptContents = `
 "open test player": "welcome to the simple audio player"
 
 "Open test player": "welcome to the simple audio player"
@@ -204,7 +205,7 @@ describe("VirtualDeviceScript", function() {
                     },
                 ];
                 const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
-                assert.deepEqual(virtualDeviceScript.tests(scripContents), expected);
+                assert.deepEqual(virtualDeviceScript.tests(scriptContents), expected);
             });
         });
     });
@@ -262,7 +263,7 @@ describe("VirtualDeviceScript", function() {
 "alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
 
-"alexa Hi": "*"
+"hello world": "*"
 
 "alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
@@ -301,6 +302,62 @@ describe("VirtualDeviceScript", function() {
             assertSequenceInfo(1, 2);
             assertSequenceInfo(2, 1);
             assertSequenceInfo(3, 3);
+        });
+    });
+
+    describe("#execute() with configuration",  () => {
+        beforeEach(() => {
+            process.env.VIRTUAL_DEVICE_TOKEN = process.env.TEST_TOKEN;
+            process.env["VIRTUAL_DEVICE_TOKEN.EN-GB"]  = process.env.TEST_TOKEN_GB;
+            process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"]  = process.env.TEST_TOKEN_DE;
+        });
+
+        afterEach(() => {
+            process.env.VIRTUAL_DEVICE_TOKEN = undefined;
+            process.env["VIRTUAL_DEVICE_TOKEN.EN-GB"] = undefined;
+            process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] = undefined;
+        });
+
+        it("Uses explicit voice and language code", async () => {
+            const scriptContents = `
+"config":
+  "voiceID": "Matthew"
+  "locale": "en-US"
+  
+"what time is it": "*"
+	        `;
+            const virtualDeviceScript = new VirtualDeviceScript();
+            const result = await virtualDeviceScript.execute(scriptContents);
+            assert.isDefined(result);
+            assert.equal(result.result, "success");
+        });
+
+        it("Uses explicit voice and language code, UK", async () => {
+            const scriptContents = `
+"config":
+  "voiceID": "Geraint"
+  "locale": "en-GB"
+  
+"what time is it": "*"
+	        `;
+            const virtualDeviceScript = new VirtualDeviceScript();
+            const result = await virtualDeviceScript.execute(scriptContents);
+            assert.isDefined(result);
+            assert.equal(result.result, "success");
+        });
+
+        it("Uses explicit voice and language code, Germany", async () => {
+            const scriptContents = `
+"config":
+  "voiceID": "Hans"
+  "locale": "de-DE"
+  
+"hallo welt": "*"
+	        `;
+            const virtualDeviceScript = new VirtualDeviceScript();
+            const result = await virtualDeviceScript.execute(scriptContents);
+            assert.isDefined(result);
+            assert.equal(result.result, "success");
         });
     });
 

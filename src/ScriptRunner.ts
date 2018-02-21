@@ -25,13 +25,11 @@ const TestRunner = {
         }
     },
     run: (path?: string) => {
-        TestRunner.checkEnvironment("BESPOKEN_USER_ID");
         TestRunner.checkEnvironment("VIRTUAL_DEVICE_TOKEN");
 
         const script = new VirtualDeviceScript(process.env.VIRTUAL_DEVICE_TOKEN as string,
             process.env.BESPOKEN_USER_ID as string);
         TestRunner.addTokens(script);
-        script.findReplace("INVOCATION_NAME", process.env.INVOCATION_NAME as string);
 
         script.on("result", (error, resultItem) => {
             console.log("ResultItem: " + JSON.stringify(resultItem, null, 2));
@@ -76,6 +74,13 @@ const TestRunner = {
 process.on("unhandledRejection", (error) => {
     console.log("unhandledRejection", error);
 });
+
+if (process.argv.length < 3) {
+    console.log("");
+    console.log("Bespoken Virtual Device test runner installed!");
+    console.log("");
+    process.exit(0);
+}
 
 const file = process.argv.length > 2 ? process.argv[2] : undefined;
 TestRunner.run(file);

@@ -7,6 +7,8 @@ Use the Virtual Device SDK to test Alexa without using our voice.
 
 The SDK can be used via [NodeJS](#nodejs-sdk) or [HTTP](#http-sdk).
 
+You can also write simple test scripts if you are not a programmer - [learn about them here](docs/test_scripts.md).
+
 # NodeJS SDK
 ## Installation
 Add the Virtual Device SDK to your project:

@@ -24,7 +24,7 @@ export class VirtualDeviceScript {
     private virtualDeviceValidator: VirtualDeviceValidator;
     private tokens: {[id: string]: string} = {};
 
-    constructor(token: string, userID: string, baseURL?: string, sourceAPIBaseURL?: string) {
+    constructor(token?: string, userID?: string, baseURL?: string, sourceAPIBaseURL?: string) {
         baseURL = baseURL ? baseURL : "https://virtual-device.bespoken.io/process";
         this.virtualDeviceValidator = new VirtualDeviceValidator(token, userID, baseURL, sourceAPIBaseURL);
     }
@@ -50,9 +50,16 @@ export class VirtualDeviceScript {
         let absoluteIndex: number = 0;
         const utteranceTests = new YAMLParser(scriptContents).parse();
         let utteranceCount: number = 0;
+        let config: any = {};
         // Takes results from parsing YAML and turns it into tests
         for (const utteranceTest of utteranceTests) {
             utteranceCount += 1;
+
+            // The first test may not be a test - may be the config
+            if (utteranceCount === 1 && utteranceTest.name() === "config") {
+                config = utteranceTest.object();
+                continue;
+            }
 
             // Null means a blank line and a new sequence is starting
             // Otherwise, it is considered a test
@@ -93,6 +100,7 @@ export class VirtualDeviceScript {
                 currentSequence.tests.push(test);
                 sequenceIndex += 1;
             }
+
             // If this a blank line, or the last utterance, we tie up this sequence
             if (utteranceTest.isNull() || utteranceCount === utteranceTests.length) {
                 if (currentSequence.tests.length) {
@@ -102,7 +110,16 @@ export class VirtualDeviceScript {
                         && currentSequence.tests[0]
                         && currentSequence.tests[0].input) || "";
                     currentSequence.invocationName = this.detectInvocationName(firstInput);
+                    if (config.voiceID) {
+                        currentSequence.voiceID = config.voiceID;
+                    }
+
+                    if (config.locale) {
+                        currentSequence.locale = config.locale;
+                    }
                     sequences.push({...currentSequence});
+
+                    // Setup a new sequence
                     currentSequence = {tests: [], invocationName: ""};
                     sequenceIndex = 1;
                 }
