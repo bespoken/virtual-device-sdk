@@ -22,29 +22,11 @@ interface ISubscribers {
 }
 
 export class VirtualDeviceValidator {
-    private static languageCode(locale: string): string | undefined {
-        let languageCode = undefined;
-        if (locale) {
-            languageCode = locale.split("_")[0];
-        }
-        return undefined;
-    }
-
-    private static virtualDevice(sequence: IVirtualDeviceTestSequence) {
-        // Lookup token by locale
-        if (sequence.locale) {
-
-        }
-    }
-
-    private virtualDevice: VirtualDevice;
     private subscribers: ISubscribers;
     private sourceAPIBaseURL: string;
-    private userID: string;
+    private userID?: string;
 
-    constructor(token: string, userID?: string, baseURL?: string, sourceAPIBaseURL?: string) {
-        this.virtualDevice = new VirtualDevice(token);
-        this.virtualDevice.baseURL = baseURL ? baseURL : "https://virtual-device.bespoken.io/process";
+    constructor(private token?: string, userID?: string, private baseURL?: string, sourceAPIBaseURL?: string) {
         this.subscribers = {message: [], result: [], unauthorized: []};
         this.sourceAPIBaseURL = sourceAPIBaseURL ? sourceAPIBaseURL : "https://source-api.bespoken.tools";
         this.userID = userID;
@@ -63,9 +45,9 @@ export class VirtualDeviceValidator {
     public async execute(virtualDeviceTestSequences: IVirtualDeviceTestSequence[],
                          context?: any): Promise<IVirtualDeviceValidatorResult> {
         const result: IVirtualDeviceValidatorResult = {tests: []};
-        const totalSequences: number = virtualDeviceTestSequences.length;
-        let currentSequenceIndex: number = 0;
         for (const sequence of virtualDeviceTestSequences) {
+            const virtualDevice = this.virtualDevice(sequence);
+
             let checkAuthResult: string;
             try {
                 checkAuthResult = await this.checkAuth(sequence.invocationName);
@@ -74,22 +56,23 @@ export class VirtualDeviceValidator {
                     undefined, context);
                 return Promise.reject(err);
             }
+
             if (checkAuthResult !== "AUTHORIZED") {
                 this.emit("unauthorized", VirtualDeviceScriptUnauthorizedError,
                     undefined, context);
                 return Promise.reject(VirtualDeviceScriptUnauthorizedError);
             }
-            currentSequenceIndex += 1;
-            if (currentSequenceIndex === 1) {
-                await this.virtualDevice.resetSession();
-            }
+
+            // Reset the session before each sequence
+            await virtualDevice.resetSession();
+
             for (const test of sequence.tests) {
                 try {
                     const resultItem: IVirtualDeviceValidatorResultItem = {test};
                     resultItem.status = "running";
                     const validator: Validator = new Validator(resultItem, undefined);
                     this.emit("message", undefined, validator.resultItem, context);
-                    resultItem.actual = await this.virtualDevice.message(test.input);
+                    resultItem.actual = await virtualDevice.message(test.input);
                     const errors = validator.check();
                     validator.resultItem.errors = errors;
                     if (validator.resultItem && errors.length === 0) {
@@ -108,9 +91,6 @@ export class VirtualDeviceValidator {
                     result.tests.push(validator.resultItem);
                     this.emit("result", undefined, validator.resultItem, context);
                 }
-            }
-            if (totalSequences > currentSequenceIndex) {
-                await this.virtualDevice.message("Alexa, exit");
             }
         }
         const failures = result.tests.filter((test) => test.result === "failure");
@@ -160,6 +140,32 @@ export class VirtualDeviceValidator {
                 subscriber(error, data, context);
             });
         }
+    }
+
+    // Creates a Virtual Device based on the test sequence
+    private virtualDevice(sequence: IVirtualDeviceTestSequence): VirtualDevice {
+        // Lookup token by locale
+        let token = this.token ? this.token : process.env.VIRTUAL_DEVICE_TOKEN;
+        let tokenName;
+        if (sequence.locale) {
+            tokenName = "VIRTUAL_DEVICE_TOKEN_" + sequence.locale.toUpperCase();
+            if (process.env[tokenName]) {
+                token = process.env.tokenName;
+            }
+        }
+
+        if (!token) {
+            if  (tokenName) {
+                throw new Error("No environment variable specified for VIRTUAL_DEVICE_TOKEN or " + tokenName);
+            } else {
+                throw new Error("No environment variable specified for VIRTUAL_DEVICE_TOKEN");
+            }
+        }
+        const virtualDevice = new VirtualDevice(token,
+            sequence.locale,
+            sequence.voiceID);
+        virtualDevice.baseURL = this.baseURL ? this.baseURL : "https://virtual-device.bespoken.io/process";
+        return virtualDevice;
     }
 }
 

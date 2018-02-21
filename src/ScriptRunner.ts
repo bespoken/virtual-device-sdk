@@ -30,7 +30,6 @@ const TestRunner = {
         const script = new VirtualDeviceScript(process.env.VIRTUAL_DEVICE_TOKEN as string,
             process.env.BESPOKEN_USER_ID as string);
         TestRunner.addTokens(script);
-        script.findReplace("INVOCATION_NAME", process.env.INVOCATION_NAME as string);
 
         script.on("result", (error, resultItem) => {
             console.log("ResultItem: " + JSON.stringify(resultItem, null, 2));

@@ -125,9 +125,10 @@ describe("VirtualDeviceScript", function() {
             const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
             assert.deepEqual(virtualDeviceScript.tests(scripContents), expected);
         });
+
         describe("#invocationName", () => {
             it("success", async () => {
-                const scripContents = `
+                const scriptContents = `
 "open test player": "welcome to the simple audio player"
 
 "Open test player": "welcome to the simple audio player"
@@ -204,7 +205,7 @@ describe("VirtualDeviceScript", function() {
                     },
                 ];
                 const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
-                assert.deepEqual(virtualDeviceScript.tests(scripContents), expected);
+                assert.deepEqual(virtualDeviceScript.tests(scriptContents), expected);
             });
         });
     });
@@ -304,6 +305,56 @@ describe("VirtualDeviceScript", function() {
         });
     });
 
+    describe("#execute() with configuration",  () => {
+        beforeEach(() => {
+            process.env.VIRTUAL_DEVICE_TOKEN = process.env.TEST_TOKEN;
+            process.env.VIRTUAL_DEVICE_TOKEN_EN_GB = process.env.TEST_TOKEN_GB;
+        });
+
+        afterEach(() => {
+            process.env.VIRTUAL_DEVICE_TOKEN = undefined;
+            process.env.VIRTUAL_DEVICE_TOKEN_EN_GB = undefined;
+        });
+
+        it("Uses explicit voice and language code", async () => {
+            const scriptContents = `
+"config":
+  "voiceID": "Matthew"
+  "locale": "en-US"
+  
+"hello world": "*"
+	        `;
+            const virtualDeviceScript = new VirtualDeviceScript();
+            const result = await virtualDeviceScript.execute(scriptContents);
+            assert.isDefined(result);
+        });
+
+        it("Uses explicit voice and language code, UK", async () => {
+            const scriptContents = `
+"config":
+  "voiceID": "Geraint"
+  "locale": "en-GB"
+  
+"hello world": "*"
+	        `;
+            const virtualDeviceScript = new VirtualDeviceScript();
+            const result = await virtualDeviceScript.execute(scriptContents);
+            assert.isDefined(result);
+        });
+
+        it("Uses explicit voice and language code, Germany", async () => {
+            const scriptContents = `
+"config":
+  "voiceID": "Geraint"
+  "locale": "de-DE"
+  
+"hello world": "*"
+	        `;
+            const virtualDeviceScript = new VirtualDeviceScript();
+            const result = await virtualDeviceScript.execute(scriptContents);
+            assert.isDefined(result);
+        });
+    });
     describe("#executeDir()", () => {
         let sandbox: any;
         before(() => {

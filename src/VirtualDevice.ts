@@ -3,7 +3,7 @@ import * as https from "https";
 
 export class VirtualDevice {
     public baseURL: string;
-    public constructor(public token: string) {
+    public constructor(public token: string, public languageCode?: string, public voiceID?: string) {
         this.baseURL = "https://virtual-device.bespoken.io/process";
     }
 
@@ -15,10 +15,7 @@ export class VirtualDevice {
 
     }
 
-    public message(message: string,
-                   languageCode?: string,
-                   voiceID?: string,
-                   debug?: boolean): Promise<IVirtualDeviceResult> {
+    public message(message: string, debug?: boolean): Promise<IVirtualDeviceResult> {
         message = this.normalizeMessage(message);
 
         let url = this.baseURL + "?message=" + message + "&user_id=" + this.token;
@@ -27,12 +24,12 @@ export class VirtualDevice {
             url += "&debug=true";
         }
 
-        if (languageCode) {
-            url += "&language_code=" + languageCode;
+        if (this.languageCode) {
+            url += "&language_code=" + this.languageCode;
         }
 
-        if (voiceID) {
-            url += "&voice_id=" + voiceID;
+        if (this.voiceID) {
+            url += "&voice_id=" + this.voiceID;
         }
 
         const promise = new Promise<IVirtualDeviceResult>((resolve, reject) => {
