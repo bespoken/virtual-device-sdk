@@ -1,10 +1,11 @@
 import {IncomingMessage} from "http";
 import * as https from "https";
+import * as URL from "url";
 
 export class VirtualDevice {
     public baseURL: string;
     public constructor(public token: string, public languageCode?: string, public voiceID?: string) {
-        this.baseURL = "https://virtual-device.bespoken.io/process";
+        this.baseURL = "https://virtual-device.bespoken.io";
     }
 
     public normalizeMessage(message: string): string {
@@ -18,7 +19,7 @@ export class VirtualDevice {
     public message(message: string, debug?: boolean): Promise<IVirtualDeviceResult> {
         message = this.normalizeMessage(message);
 
-        let url = this.baseURL + "?message=" + message + "&user_id=" + this.token;
+        let url = this.baseURL + "/process?message=" + message + "&user_id=" + this.token;
 
         if (debug) {
             url += "&debug=true";
@@ -63,8 +64,81 @@ export class VirtualDevice {
         return promise;
     }
 
+    public batchMessage(messages: string[], debug?: boolean): Promise<IVirtualDeviceResult []> {
+        for (let i = 0; i < messages.length; i++) {
+            messages[i] = this.normalizeMessage(messages[i]);
+        }
+
+        let path = "/batch_process?user_id=" + this.token;
+
+        if (debug) {
+            path += "&debug=true";
+        }
+
+        if (this.languageCode) {
+            path += "&language_code=" + this.languageCode;
+        }
+
+        if (this.voiceID) {
+            path += "&voice_id=" + this.voiceID;
+        }
+
+        const url = URL.parse(this.baseURL);
+        const promise = new Promise<IVirtualDeviceResult []>((resolve, reject) => {
+            const callback = (response: IncomingMessage) => {
+                let data = "";
+
+                response.on("data", (chunk) => {
+                    data += chunk;
+                });
+
+                response.on("end", () => {
+                    if (response.statusCode === 200) {
+                        resolve(this.handleBatchResponse(data as string));
+                    } else {
+                        reject(data);
+                    }
+                });
+            };
+
+            const requestOptions = {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                host: url.hostname,
+                method: "POST",
+                path,
+                port: 443,
+            };
+
+            const request = https.request(requestOptions, callback);
+            request.on("error", function(error: string) {
+                reject(error);
+            });
+
+            const input = {
+                messages,
+            };
+
+            request.write(JSON.stringify(input));
+            request.end();
+        });
+
+        return promise;
+    }
+
     public resetSession(): Promise<IVirtualDeviceResult> {
         return this.message("alexa quit");
+    }
+
+    private handleBatchResponse(data: string): IVirtualDeviceResult[] {
+        const json = JSON.parse(data);
+        const results = [];
+        for (const result of json.results) {
+            result.transcript = this.normalizeTranscript(result.transcript);
+            results.push(result);
+        }
+        return results;
     }
 
     private normalizeTranscript(transcript: string | null): string | null {
