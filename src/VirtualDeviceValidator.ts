@@ -44,7 +44,7 @@ export abstract class VirtualDeviceValidator {
                 throw err;
             }
 
-            await this.executeSequence(sequence, result);
+            await this.executeSequence(sequence, result, context);
         }
 
         const failures = result.tests.filter((test) => test.result === "failure");
@@ -107,7 +107,8 @@ export abstract class VirtualDeviceValidator {
     }
 
     protected abstract async executeSequence(sequence: IVirtualDeviceTestSequence,
-                                             result: IVirtualDeviceValidatorResult): Promise<void>;
+                                             result: IVirtualDeviceValidatorResult,
+                                             context?: any): Promise<void>;
 
     // Creates a Virtual Device based on the test sequence
     protected virtualDevice(sequence: IVirtualDeviceTestSequence): VirtualDevice {

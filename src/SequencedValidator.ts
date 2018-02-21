@@ -5,7 +5,8 @@ import {
 
 export class SequencedValidator extends VirtualDeviceValidator {
     protected async executeSequence(sequence: IVirtualDeviceTestSequence,
-                                    result: IVirtualDeviceValidatorResult): Promise<void> {
+                                    result: IVirtualDeviceValidatorResult,
+                                    context?: any): Promise<void> {
         const virtualDevice = this.virtualDevice(sequence);
 
         // Reset the session before each sequence
