@@ -69,12 +69,12 @@ token.INVOCATION_NAME=invoke me
 This will cause any instances of the value INVOCATION_NAME to be replaced by Invoke Me in the test scripts.
 
 So a script that looks like this:
-```
+```yaml
 "open INVOCATION_NAME and say hello": "*"
 ```
 
 Will be turned into this:
-```
+```yaml
 "open invoke me and say hello": "*"
 ```
 
@@ -86,7 +86,7 @@ Tests go into files with a suffix ".yml". One or many tests can be contained in 
 
 ### Test-Specific Configuration
 The first line in a test can optional be the config. It should look like this:  
-```
+```yaml
 config:
   voiceID: <The Polly Voice ID to use for TTS>
   locale: <en-US, en-GB, de-DE, etc.>
