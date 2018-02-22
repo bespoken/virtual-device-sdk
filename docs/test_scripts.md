@@ -3,19 +3,18 @@
 The Virtual Device Test Scripts are meant to make it easy for anyone to write automated tests for Alexa (and Google Assistant, soon).
 
 They use a simple YAML syntax for allowing anyone to write complex (but still readable) end-to-end tests.
-
-Contents:  
+ 
 * [Installation](#installation)
 * [Configuration](#configuration)
-* [Test Structure](#test-structure)
-  * [Test Configuration](#test-configuration)
+* [Test Structure](#test-file-structure)
+  * [Test-Specific Configuration](#test-specific-configuration)
   * [Test Sequences](#test-sequences)
   * [Comments](#comments)
 * [Test Syntax](#test-syntax)
   * [String Comparisons](#string-comparisons)
   * [List Comparisons](#list-comparisons)
   * [Object Comparisons](#object-comparisons)
-* [Running](#running)
+* [Running Tests](#running-tests)
 * [Best Practices](#best-practices)
 
 ## Installation
@@ -85,12 +84,17 @@ This is a useful feature for tests that are run against multiple instances of th
 ## Test File Structure
 Tests go into files with a suffix ".yml". One or many tests can be contained in each test.
 
-### Test Config
+### Test-Specific Configuration
 The first line in a test can optional be the config. It should look like this:  
 ```
 config:
   voiceID: <The Polly Voice ID to use for TTS>
+  locale: <en-US, en-GB, de-DE, etc.>
 ```
+
+This is a place to put things that vary between sets of tests - such as the voice to use for Speech-To-Text or the locale.
+
+The list of available voices is [found here](https://docs.aws.amazon.com/polly/latest/dg/voicelist.html).
 
 ### Test Sequences
 Each set of lines represents a sequence of tests, which represent a conversation with Alexa.
@@ -100,7 +104,7 @@ A blank line represents a new sequence (and therefore, a new session). Here is a
 ```
 config:
   voiceID: Matthew
-  languageCode: en-US
+  locale: en-US
   
 # Sequence 01. Test scenario: launch and play music
 "open test player": "say play to listen to some music"
@@ -183,7 +187,7 @@ Their values are fairly simple to map between skills and AVS though.
 
 Additionally, the imageURL always returns the large image URL.
 
-## Running
+## Running Tests
 Once you have created your tests, you can run a particular file by entering:
 ```
 bvd my-test-file.yml
@@ -198,6 +202,7 @@ That command will run all yml files that are contained within that directory.
 
 ## Best Practices
 We recommend:
+* Organizing sets of test files by locale - so one top-level directory per locale (en-US, de-DE, etc.)
 * Organizing test files by intent - so each intent has its own set of tests
 * Commenting tests to explain what they do
 * Putting tests under some sort of version control (whether it be Github or Dropbox)
