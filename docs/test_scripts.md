@@ -22,12 +22,12 @@ They use a simple YAML syntax for allowing anyone to write complex (but still re
 * [npm](https://www.npmjs.com/get-npm)
 
 ### Install
-```
+```bash
 npm install virtual-device-sdk -g
 ```
 
 To test to see if it is installed correctly, then try typing:
-```
+```bash
 bvd
 ```
 
@@ -101,7 +101,7 @@ Each set of lines represents a sequence of tests, which represent a conversation
 As long as the tests are part of one sequence, the skill will stay in-session.
 
 A blank line represents a new sequence (and therefore, a new session). Here is an example test file:
-```
+```yaml
 config:
   voiceID: Matthew
   locale: en-US
@@ -136,7 +136,7 @@ A string comparison compares the actual to the expected output. It has the follo
 1\) It is a "contains" test - that is, if the actual result contains the expected, that is a pass.
   
 So, a test like this:   
-```
+```yaml
 "hi": "hello"
 ```
 
@@ -145,7 +145,7 @@ It will not pass if the result is "hell".
 
 2\) It supports wildcards with a *
 A test like this:
-```
+```yaml
 "hi": "hello * welcome back"
 ```
 Will pass when the actual result is "hello john welcome back" or "hello frank welcome back".  
@@ -157,7 +157,7 @@ A list comparison is a set of string tests, but allows for multiple valid respon
 A list is specified on a newline, with a two-space indent, and starts with "-".
 
 This is useful for skills that vary their response to the same input. For example:
-```
+```yaml
 "hi":
   - hi there
   - welcome
@@ -171,7 +171,7 @@ Wildcards and partial matches are supported with lists, same as with string test
 
 ### Object comparisons
 An object comparisons allows for testing more than just the transcript. Here is a sample:
-```
+```yaml
 "hi":
   transcript: hi there
   streamURL: https://mystream.com/stream.mp3
@@ -189,12 +189,12 @@ Additionally, the imageURL always returns the large image URL.
 
 ## Running Tests
 Once you have created your tests, you can run a particular file by entering:
-```
+```bash
 bvd my-test-file.yml
 ```
 
 To run a directory containing many tests, provide the directory path instead:
-```
+```bash
 bvd test-directory
 ```
 
