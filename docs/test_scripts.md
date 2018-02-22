@@ -4,6 +4,20 @@ The Virtual Device Test Scripts are meant to make it easy for anyone to write au
 
 They use a simple YAML syntax for allowing anyone to write complex (but still readable) end-to-end tests.
 
+Contents:  
+* [Installation](#installation)
+* [Configuration](#configuration)
+* [Test Structure](#test-structure)
+  * [Test Configuration](#test-configuration)
+  * [Test Sequences](#test-sequences)
+  * [Comments](#comments)
+* [Test Syntax](#test-syntax)
+  * [String Comparisons](#string-comparisons)
+  * [List Comparisons](#list-comparisons)
+  * [Object Comparisons](#object-comparisons)
+* [Running](#running)
+* [Best Practices](#best-practices)
+
 ## Installation
 ### Prerequisites
 * [npm](https://www.npmjs.com/get-npm)
@@ -68,8 +82,10 @@ Will be turned into this:
 This is a useful feature for tests that are run against multiple instances of the same skill, where there are slight variations in the input or output.
 
 
-## Test Structure
-### Configuration
+## Test File Structure
+Tests go into files with a suffix ".yml". One or many tests can be contained in each test.
+
+### Test Config
 The first line in a test can optional be the config. It should look like this:  
 ```
 config:
@@ -77,11 +93,31 @@ config:
 ```
 
 ### Test Sequences
-Each set of lines represents a sequence of tests, as part of one conversation.
+Each set of lines represents a sequence of tests, which represent a conversation with Alexa.
+As long as the tests are part of one sequence, the skill will stay in-session.
 
-A blank line represents a new sequence
+A blank line represents a new sequence (and therefore, a new session). Here is an example test file:
+```
+config:
+  voiceID: Matthew
+  languageCode: en-US
+  
+# Sequence 01. Test scenario: launch and play music
+"open test player": "say play to listen to some music"
+"play":
+  streamURL: "https://stream.com/music.mp3"
 
-### Tests
+# Sequence 02. Test scenario: straight to play intent
+tell test player to play:
+  streamURL: "https://stream.com/music.mp3"
+```
+
+This test file has two test sequences, with two tests in the first sequence, and one test in the second sequence.
+
+### Comments
+Comments can be inserted in tests by putting a `#` at the start of the line, as seen in the example above.
+
+## Test Syntax
 A test contains an input and an expected output.
 
 The input is on the left-hand side, and the expected output is on the right-hand side.
@@ -91,8 +127,8 @@ The expected output can be:
 * A list
 * An object test
 
-#### String tests
-A string test does a comparison on the expected output. It has the following rules:  
+### String comparisons
+A string comparison compares the actual to the expected output. It has the following rules:  
 1\) It is a "contains" test - that is, if the actual result contains the expected, that is a pass.
   
 So, a test like this:   
@@ -111,8 +147,8 @@ A test like this:
 Will pass when the actual result is "hello john welcome back" or "hello frank welcome back".  
 It will not pass if the result is "hellowelcome back".
 
-#### List tests
-A list test is a set of string tests, but allows for multiple valid responses. 
+### List comparisons
+A list comparison is a set of string tests, but allows for multiple valid responses. 
 
 A list is specified on a newline, with a two-space indent, and starts with "-".
 
@@ -129,8 +165,8 @@ this will ensure that it will pass no matter what is returned.
 
 Wildcards and partial matches are supported with lists, same as with string tests.
 
-#### Object tests
-An object test allows for testing more than just the transcript. Here is a sample:
+### Object comparisons
+An object comparisons allows for testing more than just the transcript. Here is a sample:
 ```
 "hi":
   transcript: hi there
@@ -146,3 +182,23 @@ The values for the card are based on what AVS returns, so they vary in their nam
 Their values are fairly simple to map between skills and AVS though.
 
 Additionally, the imageURL always returns the large image URL.
+
+## Running
+Once you have created your tests, you can run a particular file by entering:
+```
+bvd my-test-file.yml
+```
+
+To run a directory containing many tests, provide the directory path instead:
+```
+bvd test-directory
+```
+
+That command will run all yml files that are contained within that directory.
+
+## Best Practices
+We recommend:
+* Organizing test files by intent - so each intent has its own set of tests
+* Commenting tests to explain what they do
+* Putting tests under some sort of version control (whether it be Github or Dropbox)
+
