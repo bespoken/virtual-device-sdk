@@ -4,48 +4,20 @@ import * as dotenv from "dotenv";
 import * as nock from "nock";
 import * as Sinon from "sinon";
 import * as sinonChai from "sinon-chai";
-import {IVirtualDeviceResult, VirtualDevice} from "../src/VirtualDevice";
 import {IVirtualDeviceScriptCallback,
     VirtualDeviceScript} from "../src/VirtualDeviceScript";
 import {IVirtualDeviceValidatorResultItem,
     VirtualDeviceScriptUnauthorizedError,
     VirtualDeviceValidator,
 } from "../src/VirtualDeviceValidator";
-import * as fixtures from "./fixtures";
+import {MessageMock} from "./MessageMock";
 
 chai.use(sinonChai);
 const expect = chai.expect;
 
-// We put the MessageMock in its own class
-// This may be enabled all tests, or just for some, so we need some extra safety and logic around it
-class MessageMock {
-    public static enable() {
-        if (MessageMock.sandbox) {
-            return;
-        }
-
-        const messageMock = (message: string, debug: boolean = false): Promise<IVirtualDeviceResult> => {
-            return fixtures.message(message);
-        };
-
-        MessageMock.sandbox = Sinon.sandbox.create();
-        MessageMock.sandbox.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
-    }
-
-    public static disable() {
-        if (!MessageMock.sandbox) {
-            return;
-        }
-        MessageMock.sandbox.restore();
-        MessageMock.sandbox = undefined;
-    }
-
-    private static sandbox: any;
-}
-
 describe("VirtualDeviceScript", function() {
     this.timeout(120000);
-    const BASE_URL = "https://virtual-device.bespoken.io/process";
+    const BASE_URL = "https://virtual-device.bespoken.io";
     const SOURCE_API_BASE_URL = process.env.SOURCE_API_BASE_URL;
 
     let token: string;
@@ -58,15 +30,11 @@ describe("VirtualDeviceScript", function() {
             assert.fail("No TEST_TOKEN defined");
         }
 
-        if (process.env.ENABLE_MESSAGES_MOCK) {
-            MessageMock.enable();
-        }
+        MessageMock.enableIfConfigured();
     });
 
     after(() => {
-        if (process.env.ENABLE_MESSAGES_MOCK) {
-            MessageMock.disable();
-        }
+        MessageMock.disable();
     });
 
     describe("#tests()", () => {
@@ -263,7 +231,7 @@ describe("VirtualDeviceScript", function() {
 "alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
 
-"hello world": "*"
+"what time is it": "*"
 
 "alexa Hi": "*"
 "open test player": "welcome to the simple audio player"
@@ -472,20 +440,20 @@ describe("VirtualDeviceScript", function() {
 "tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
             ];
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL, undefined, false);
             const messageCallback: IVirtualDeviceScriptCallback = (
                 error: Error,
                 resultItem: IVirtualDeviceValidatorResultItem,
                 context?: any) => {
-                    assert.equal(resultItem.status, "running");
-                };
+                assert.equal(resultItem.status, "running");
+            };
             const messageCallbackSpy = Sinon.spy(messageCallback);
             const resultCallback: IVirtualDeviceScriptCallback = (
                 error: Error,
                 resultItem: IVirtualDeviceValidatorResultItem,
                 context?: any) => {
-                    assert.equal(resultItem.status, "done");
-                };
+                assert.equal(resultItem.status, "done");
+            };
             const resultCallbackSpy = Sinon.spy(resultCallback);
             virtualDeviceScript.on("message", messageCallbackSpy);
             virtualDeviceScript.on("result", resultCallbackSpy);
@@ -506,7 +474,7 @@ describe("VirtualDeviceScript", function() {
 
         before(() => {
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
-                .returns(Promise.resolve("UNAUTHORIZED"));
+                .throws("UNAUTHORIZED");
         });
 
         after(() => {
@@ -524,7 +492,7 @@ describe("VirtualDeviceScript", function() {
             try {
                 await virtualDeviceScript.execute(`"Hi": "*"`);
             } catch (err) {
-                assert.equal(err, VirtualDeviceScriptUnauthorizedError);
+                assert.equal(err, "UNAUTHORIZED");
             }
             expect(unauthorizedCallbackSpy).to.have.been.callCount(1);
         });
