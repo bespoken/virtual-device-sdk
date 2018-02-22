@@ -2,13 +2,14 @@ import {assert} from "chai";
 import * as dotenv from "dotenv";
 import {VirtualDevice} from "../src/VirtualDevice";
 import {MessageMock} from "./MessageMock";
+import {TestHelper} from "./TestHelper";
+
+dotenv.config();
 
 describe("VirtualDevice", function() {
     this.timeout(60000);
-    const BASE_URL = "https://virtual-device.bespoken.io";
 
     before(() => {
-        dotenv.config();
         MessageMock.enableIfConfigured();
     });
 
@@ -18,15 +19,13 @@ describe("VirtualDevice", function() {
 
     describe("#message()", () => {
         it("Should return a transcript", async () => {
-            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
-            sdk.baseURL = BASE_URL;
+            const sdk = TestHelper.virtualDevice();
             const results = await sdk.message("hi");
             assert.isDefined(results);
         });
 
         it("Should have stream URL", async () => {
-            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
-            sdk.baseURL = BASE_URL;
+            const sdk = TestHelper.virtualDevice();
             const result = await sdk.message("tell test player to play");
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.streamURL);
@@ -35,8 +34,7 @@ describe("VirtualDevice", function() {
         });
 
         it("Should have debug info", async () => {
-            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
-            sdk.baseURL = BASE_URL;
+            const sdk = TestHelper.virtualDevice();
             const result = await sdk.message("hi", true);
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.debug);
@@ -45,10 +43,12 @@ describe("VirtualDevice", function() {
     });
 
     describe("#batchMessage()", () => {
-        it("Should return a transcript", async () => {
-            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
-            sdk.baseURL = BASE_URL;
-            const results = await sdk.batchMessage(["hi", "what time is it", "tell test player to play"]);
+        it("Should return from several inputs", async () => {
+            const sdk = TestHelper.virtualDevice();
+
+            const results = await sdk.batchMessage(
+                ["what is the weather", "what time is it", "tell test player to play"]
+            );
             console.log("Output: " + JSON.stringify(results));
             assert.equal(results.length, 3);
             assert.equal(results[2].message, "tell test player to play");

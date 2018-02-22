@@ -101,8 +101,13 @@ export class VirtualDevice {
                 });
             };
 
+            const input = {
+                messages,
+            };
+            const inputString = JSON.stringify(input);
             const requestOptions = {
                 headers: {
+                    "Content-Length": new Buffer(inputString).length,
                     "Content-Type": "application/json",
                 },
                 host: url.hostname,
@@ -116,11 +121,7 @@ export class VirtualDevice {
                 reject(error);
             });
 
-            const input = {
-                messages,
-            };
-
-            request.write(JSON.stringify(input));
+            request.write(inputString);
             request.end();
         });
 
