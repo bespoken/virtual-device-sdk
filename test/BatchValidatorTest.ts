@@ -14,20 +14,9 @@ import {MessageMock} from "./MessageMock";
 
 describe("BatchValidator", function() {
     this.timeout(60000);
-    const BASE_URL = "https://virtual-device.bespoken.io";
-    const SOURCE_API_BASE_URL = process.env.SOURCE_API_BASE_URL;
-
-    let token: string;
-    const userID: string = "abc";
+    dotenv.config();
 
     before(() => {
-        dotenv.config();
-        if (process.env.TEST_TOKEN) {
-            token = process.env.TEST_TOKEN as string;
-        } else {
-            assert.fail("No TEST_TOKEN defined");
-        }
-
         MessageMock.enableIfConfigured();
     });
 
@@ -66,7 +55,7 @@ describe("BatchValidator", function() {
                     }],
                 },
             ];
-            const virtualDeviceValidator = new BatchValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new BatchValidator();
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
             for (const test of validatorResult.tests) {
@@ -88,7 +77,7 @@ describe("BatchValidator", function() {
                     }],
                 },
             ];
-            const virtualDeviceValidator = new BatchValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new BatchValidator();
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
@@ -115,7 +104,7 @@ describe("BatchValidator", function() {
                     }],
                 },
             ];
-            const virtualDeviceValidator = new BatchValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new BatchValidator();
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
@@ -152,7 +141,7 @@ describe("BatchValidator", function() {
         });
 
         it("handles #checkAuth() errors", async () => {
-            const virtualDeviceValidator = new BatchValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new BatchValidator();
             try {
                 await virtualDeviceValidator.execute(sequences);
                 assert.fail("This should never be reached");
@@ -195,7 +184,7 @@ describe("BatchValidator", function() {
             checkAuthStub.restore();
         });
         it("handles virtual device errors", async () => {
-            const virtualDeviceValidator = new BatchValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new BatchValidator();
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
@@ -215,21 +204,19 @@ describe("BatchValidator", function() {
 
         it("success", async () => {
             nock("https://source-api.bespoken.tools")
-                .get("/v1/skillAuthorized?invocation_name=simple%20player" +
-                    `&user_id=${userID}`)
+                .get("/v1/skillAuthorized")
+                .query(true)
                 .reply(200, "AUTHORIZED");
-            const virtualDeviceValidator = new BatchValidator(token, userID,
-                BASE_URL, SOURCE_API_BASE_URL);
+            const virtualDeviceValidator = new BatchValidator();
             const checkAuthResult = await virtualDeviceValidator.checkAuth("simple player");
             assert.equal(checkAuthResult, "AUTHORIZED");
         });
         it("handles replied errors", async () => {
             nock("https://source-api.bespoken.tools")
-                .get("/v1/skillAuthorized?invocation_name=simple%20player" +
-                    `&user_id=${userID}`)
+                .get("/v1/skillAuthorized")
+                .query(true)
                 .reply(401, "UNAUTHORIZED");
-            const virtualDeviceValidator = new BatchValidator(token, userID,
-                BASE_URL, SOURCE_API_BASE_URL);
+            const virtualDeviceValidator = new BatchValidator();
             try {
                 await virtualDeviceValidator.checkAuth("simple player");
             } catch (err) {
@@ -239,11 +226,10 @@ describe("BatchValidator", function() {
         });
         it("handles request errors", async () => {
             nock("https://source-api.bespoken.tools")
-                .get("/v1/skillAuthorized?invocation_name=simple%20player" +
-                    `&user_id=${userID}`)
+                .get("/v1/skillAuthorized")
+                .query(true)
                 .replyWithError("UNKNOWN ERROR");
-            const virtualDeviceValidator = new BatchValidator(token, userID,
-                BASE_URL, SOURCE_API_BASE_URL);
+            const virtualDeviceValidator = new BatchValidator();
             try {
                 await virtualDeviceValidator.checkAuth("simple player");
             } catch (err) {

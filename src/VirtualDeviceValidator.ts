@@ -26,9 +26,11 @@ export abstract class VirtualDeviceValidator {
     private subscribers: ISubscribers;
     private userID?: string;
 
-    constructor(protected token?: string, userID?: string, protected baseURL?: string, sourceAPIBaseURL?: string) {
+    constructor(protected token?: string, userID?: string) {
         this.subscribers = {message: [], result: [], unauthorized: []};
-        this.sourceAPIBaseURL = sourceAPIBaseURL ? sourceAPIBaseURL : "https://source-api.bespoken.tools";
+        this.sourceAPIBaseURL = process.env.SOURCE_API_BASE_URL
+            ? process.env.SOURCE_API_BASE_URL
+            : "https://source-api.bespoken.tools";
         this.userID = userID;
     }
 
@@ -132,7 +134,6 @@ export abstract class VirtualDeviceValidator {
         const virtualDevice = new VirtualDevice(token,
             sequence.locale,
             sequence.voiceID);
-        virtualDevice.baseURL = this.baseURL ? this.baseURL : "https://virtual-device.bespoken.io/process";
         return virtualDevice;
     }
 }

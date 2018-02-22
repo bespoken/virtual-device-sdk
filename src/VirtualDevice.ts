@@ -4,8 +4,11 @@ import * as URL from "url";
 
 export class VirtualDevice {
     public baseURL: string;
-    public constructor(public token: string, public languageCode?: string, public voiceID?: string) {
-        this.baseURL = "https://virtual-device.bespoken.io";
+    public constructor(public token: string, public locale?: string, public voiceID?: string) {
+        this.baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
+            ? process.env.VIRTUAL_DEVICE_BASE_URL
+            : "https://virtual-device.bespoken.io";
+
     }
 
     public normalizeMessage(message: string): string {
@@ -25,15 +28,15 @@ export class VirtualDevice {
             url += "&debug=true";
         }
 
-        if (this.languageCode) {
-            url += "&language_code=" + this.languageCode;
+        if (this.locale) {
+            url += "&language_code=" + this.locale;
         }
 
         if (this.voiceID) {
             url += "&voice_id=" + this.voiceID;
         }
 
-        const promise = new Promise<IVirtualDeviceResult>((resolve, reject) => {
+        return new Promise<IVirtualDeviceResult>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
 
@@ -60,8 +63,6 @@ export class VirtualDevice {
 
             request.end();
         });
-
-        return promise;
     }
 
     public batchMessage(messages: string[], debug?: boolean): Promise<IVirtualDeviceResult []> {
@@ -75,8 +76,8 @@ export class VirtualDevice {
             path += "&debug=true";
         }
 
-        if (this.languageCode) {
-            path += "&language_code=" + this.languageCode;
+        if (this.locale) {
+            path += "&language_code=" + this.locale;
         }
 
         if (this.voiceID) {
@@ -84,7 +85,7 @@ export class VirtualDevice {
         }
 
         const url = URL.parse(this.baseURL);
-        const promise = new Promise<IVirtualDeviceResult []>((resolve, reject) => {
+        return new Promise<IVirtualDeviceResult []>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
 
@@ -124,8 +125,6 @@ export class VirtualDevice {
             request.write(inputString);
             request.end();
         });
-
-        return promise;
     }
 
     public resetSession(): Promise<IVirtualDeviceResult> {

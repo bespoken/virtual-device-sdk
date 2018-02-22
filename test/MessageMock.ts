@@ -17,8 +17,11 @@ export class MessageMock {
             nock.activate();
         }
 
+        const baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
+            ? process.env.VIRTUAL_DEVICE_BASE_URL
+            : "https://virtual-device.bespoken.io";
         // Mock for batch process call
-        nock("https://virtual-device.bespoken.io")
+        nock(baseURL)
             .persist()
             .post("/batch_process")
             .query(true)
@@ -27,7 +30,7 @@ export class MessageMock {
             });
 
         // Mock for process call
-        nock("https://virtual-device.bespoken.io")
+        nock(baseURL)
             .persist()
             .get("/process")
             .query(true)

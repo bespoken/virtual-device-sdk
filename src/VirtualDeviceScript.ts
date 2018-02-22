@@ -26,12 +26,11 @@ export class VirtualDeviceScript {
     private virtualDeviceValidator: VirtualDeviceValidator;
     private tokens: {[id: string]: string} = {};
 
-    constructor(token?: string, userID?: string, baseURL?: string, sourceAPIBaseURL?: string, batch: boolean = false) {
-        baseURL = baseURL ? baseURL : "https://virtual-device.bespoken.io";
+    constructor(token?: string, userID?: string, batch: boolean = false) {
         if (batch) {
-            this.virtualDeviceValidator = new BatchValidator(token, userID, baseURL, sourceAPIBaseURL);
+            this.virtualDeviceValidator = new BatchValidator(token, userID);
         } else {
-            this.virtualDeviceValidator = new SequencedValidator(token, userID, baseURL, sourceAPIBaseURL);
+            this.virtualDeviceValidator = new SequencedValidator(token, userID);
         }
     }
 

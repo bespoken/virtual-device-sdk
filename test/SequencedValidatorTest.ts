@@ -8,18 +8,9 @@ import {MessageMock} from "./MessageMock";
 
 describe("SequencedValidator", function() {
     this.timeout(60000);
-    const BASE_URL = "https://virtual-device.bespoken.io";
-    let token: string;
-    const userID: string = "abc";
+    dotenv.config();
 
     before(() => {
-        dotenv.config();
-        if (process.env.TEST_TOKEN) {
-            token = process.env.TEST_TOKEN as string;
-        } else {
-            assert.fail("No TEST_TOKEN defined");
-        }
-
         MessageMock.enableIfConfigured();
     });
 
@@ -58,7 +49,7 @@ describe("SequencedValidator", function() {
                         }],
                 },
             ];
-            const virtualDeviceValidator = new SequencedValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new SequencedValidator();
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
             for (const test of validatorResult.tests) {
@@ -80,7 +71,7 @@ describe("SequencedValidator", function() {
                     }],
                 },
             ];
-            const virtualDeviceValidator = new SequencedValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new SequencedValidator();
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
@@ -125,7 +116,7 @@ describe("SequencedValidator", function() {
             checkAuthStub.restore();
         });
         it("handles virtual device errors", async () => {
-            const virtualDeviceValidator = new SequencedValidator(token, userID, BASE_URL);
+            const virtualDeviceValidator = new SequencedValidator();
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
