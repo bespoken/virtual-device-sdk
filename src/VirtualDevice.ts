@@ -13,8 +13,9 @@ export class VirtualDevice {
 
     public normalizeMessage(message: string): string {
         if (message.trim().toLowerCase() === "no") {
-            return "alexa no";
+            message = "alexa no";
         }
+
         return message;
 
     }
@@ -36,6 +37,7 @@ export class VirtualDevice {
             url += "&voice_id=" + this.voiceID;
         }
 
+        url = encodeURI(url);
         return new Promise<IVirtualDeviceResult>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";

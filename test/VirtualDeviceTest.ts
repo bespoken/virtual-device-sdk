@@ -34,10 +34,18 @@ describe("VirtualDevice", function() {
 
         it("Should have debug info", async () => {
             const sdk = newVirtualDevice();
-            const result = await sdk.message("hi", true);
+            const result = await sdk.message("what is the weather", true);
             console.log("Output: " + JSON.stringify(result));
-            assert.isDefined(result.debug);
+            assert.isDefined(result.transcript);
             assert.isDefined((result.debug as any).rawJSON.messageBody);
+        });
+
+        it("Should handle weird characters", async () => {
+            const token = process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] as string;
+            const sdk = new VirtualDevice(token, "de-DE");
+            const result = await sdk.message("wie spät ist es", true);
+            console.log("Output: " + JSON.stringify(result));
+            assert.isDefined(result.transcript);
         });
     });
 
@@ -65,6 +73,17 @@ describe("VirtualDevice", function() {
             assert.equal(results.length, 3);
             assert.equal(results[2].message, "tell test player to play");
             assert.include(results[2].streamURL as string, "https://feeds.soundcloud.com/stream/");
+        });
+
+        it("Should return from batch with weird characters", async () => {
+            // Setting the language code forces V2
+            const token = process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] as string;
+            const sdk = new VirtualDevice(token, "de-DE");
+
+            const results = await sdk.batchMessage(["wie spät ist es", "Wie ist das Wetter"]);
+            console.log("Output: " + JSON.stringify(results));
+            assert.equal(results.length, 2);
+            assert.isNotNull(results[1].transcript);
         });
     });
 

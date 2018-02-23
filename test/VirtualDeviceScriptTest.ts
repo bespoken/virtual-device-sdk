@@ -14,22 +14,12 @@ import {MessageMock} from "./MessageMock";
 
 chai.use(sinonChai);
 const expect = chai.expect;
+dotenv.config();
 
 describe("VirtualDeviceScript", function() {
     this.timeout(120000);
-    const BASE_URL = "https://virtual-device.bespoken.io";
-    const SOURCE_API_BASE_URL = process.env.SOURCE_API_BASE_URL;
 
-    let token: string;
-    const userID: string = "abc";
     before(() => {
-        dotenv.config();
-        if (process.env.TEST_TOKEN) {
-            token = process.env.TEST_TOKEN as string;
-        } else {
-            assert.fail("No TEST_TOKEN defined");
-        }
-
         MessageMock.enableIfConfigured();
     });
 
@@ -90,7 +80,7 @@ describe("VirtualDeviceScript", function() {
                     }],
                 },
             ];
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript();
             assert.deepEqual(virtualDeviceScript.tests(scripContents), expected);
         });
 
@@ -172,7 +162,7 @@ describe("VirtualDeviceScript", function() {
                         }],
                     },
                 ];
-                const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+                const virtualDeviceScript = new VirtualDeviceScript();
                 assert.deepEqual(virtualDeviceScript.tests(scriptContents), expected);
             });
         });
@@ -203,7 +193,7 @@ describe("VirtualDeviceScript", function() {
   streamURL: "https://feeds.soundcloud.com/stream/"  
                 `,
             ];
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript();
             for (const test of tests) {
                 const validatorResult = await virtualDeviceScript.execute(test);
                 assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
@@ -221,23 +211,23 @@ describe("VirtualDeviceScript", function() {
     title: Title of the card
     imageURL: https://incorrect.url/
 `;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript();
             const validatorResult = await virtualDeviceScript.execute(test);
             assert.equal(validatorResult.result, "failure", `${JSON.stringify(validatorResult)}`);
         });
 
         it("success sequence", async () => {
             const scripContents = `
-"alexa Hi": "*"
+"what is the weather": "*"
 "open test player": "welcome to the simple audio player"
 
 "what time is it": "*"
 
-"alexa Hi": "*"
+"what is the weather": "*"
 "open test player": "welcome to the simple audio player"
 "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript();
             const validatorResult = await virtualDeviceScript.execute(scripContents);
             assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
             for (const test of validatorResult.tests) {
@@ -272,20 +262,44 @@ describe("VirtualDeviceScript", function() {
             assertSequenceInfo(3, 3);
         });
     });
+    describe("#execute() in batch", () => {
+        let checkAuthStub: any;
+        before(() => {
+            checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
+                .returns(Promise.resolve("AUTHORIZED"));
+        });
+
+        after(() => {
+            checkAuthStub.restore();
+        });
+
+        it("success", async () => {
+            const tests = [`
+"open test player":
+  transcript: "welcome to the si*le audio* player"
+  card:
+    imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png"
+    subTitle: "Simple Player * Test"
+    mainTitle: "Title of the card"
+    textField: "Text content for a standard card"
+    type: "BodyTemplate2"
+"tell test player to play": 
+  streamURL: "https://feeds.soundcloud.com/stream/" 
+"what time is it": "*"  
+                `,
+            ];
+            const virtualDeviceScript = new VirtualDeviceScript(process.env.VIRTUAL_DEVICE_TOKEN, undefined, true);
+            for (const test of tests) {
+                const validatorResult = await virtualDeviceScript.execute(test);
+                assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+                for (const t of validatorResult.tests) {
+                    assert.equal(t.result, "success", `${JSON.stringify(t)}`);
+                }
+            }
+        });
+    });
 
     describe("#execute() with configuration",  () => {
-        beforeEach(() => {
-            process.env.VIRTUAL_DEVICE_TOKEN = process.env.TEST_TOKEN;
-            process.env["VIRTUAL_DEVICE_TOKEN.EN-GB"]  = process.env.TEST_TOKEN_GB;
-            process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"]  = process.env.TEST_TOKEN_DE;
-        });
-
-        afterEach(() => {
-            process.env.VIRTUAL_DEVICE_TOKEN = undefined;
-            process.env["VIRTUAL_DEVICE_TOKEN.EN-GB"] = undefined;
-            process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] = undefined;
-        });
-
         it("Uses explicit voice and language code", async () => {
             const scriptContents = `
 "config":
@@ -320,7 +334,7 @@ describe("VirtualDeviceScript", function() {
   "voiceID": "Hans"
   "locale": "de-DE"
   
-"hallo welt": "*"
+"wie spät ist es": "*"
 	        `;
             const virtualDeviceScript = new VirtualDeviceScript();
             const result = await virtualDeviceScript.execute(scriptContents);
@@ -440,7 +454,7 @@ describe("VirtualDeviceScript", function() {
 "tell test player to play": "https://feeds.soundcloud.com/stream/"
                 `,
             ];
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL, undefined, false);
+            const virtualDeviceScript = new VirtualDeviceScript();
             const messageCallback: IVirtualDeviceScriptCallback = (
                 error: Error,
                 resultItem: IVirtualDeviceValidatorResultItem,
@@ -482,7 +496,7 @@ describe("VirtualDeviceScript", function() {
         });
 
         it("returns unauthorized error", async () => {
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript();
             const unauthorizedCallback: any = (error: Error,
                 resultItem: IVirtualDeviceValidatorResultItem, context?: any) => {
                     assert.equal(error, VirtualDeviceScriptUnauthorizedError);
@@ -509,7 +523,7 @@ describe("VirtualDeviceScript", function() {
                 `,
                 }];
             for (const test of tests) {
-                const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+                const virtualDeviceScript = new VirtualDeviceScript();
                 assert.equal(virtualDeviceScript.validate(test.scriptContents), test.expected);
             }
         });
@@ -546,7 +560,7 @@ describe("VirtualDeviceScript", function() {
                 },
                 ];
             for (const test of tests) {
-                const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+                const virtualDeviceScript = new VirtualDeviceScript();
                 const output = virtualDeviceScript.validate(test.scriptContents);
                 if (test.expected) {
                     assert.equal((output as Error).message, test.expected, `test: ${JSON.stringify(test)}`);
@@ -564,8 +578,8 @@ describe("VirtualDeviceScript", function() {
 
         before(() => {
             nockScope = nock("https://source-api.bespoken.tools")
-                .get("/v1/skillAuthorized?invocation_name=test%20player" +
-                    `&user_id=${userID}`)
+                .get("/v1/skillAuthorized")
+                .query(true)
                 .reply(200, "AUTHORIZED");
             sevCheckAuthSpy = Sinon.spy(VirtualDeviceScript.prototype, "checkAuth");
             MessageMock.enable();
@@ -580,9 +594,9 @@ describe("VirtualDeviceScript", function() {
         });
 
         it("success", async () => {
-            const scripContents = `"open test player": "*"`;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL, SOURCE_API_BASE_URL);
-            const checkAuthResult = await virtualDeviceScript.checkAuth(scripContents);
+            const scriptContents = `"open test player": "*"`;
+            const virtualDeviceScript = new VirtualDeviceScript(process.env.VIRTUAL_DEVICE_TOKEN, "ABC");
+            const checkAuthResult = await virtualDeviceScript.checkAuth(scriptContents);
             assert.deepEqual(checkAuthResult, "AUTHORIZED");
             expect(sevCheckAuthSpy).to.have.been.callCount(1);
         });
@@ -604,8 +618,7 @@ describe("VirtualDeviceScript", function() {
 
         it("success", async () => {
             const scripContents = `"open test player": "*"`;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL,
-                SOURCE_API_BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript(process.env.VIRTUAL_DEVICE_TOKEN, "USER_ID");
             const events = ["message", "result", "unauthorized"];
             const spies = [];
             for (const e of events) {

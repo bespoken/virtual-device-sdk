@@ -7,13 +7,10 @@ import {MessageMock} from "./MessageMock";
 
 describe("PrettyPrinter", function() {
     this.timeout(120000);
-    const BASE_URL = "https://virtual-device.bespoken.io";
-    const token = "DUMMY_TOKEN";
-    const userID = "abc";
 
     before(() => {
         dotenv.config();
-        MessageMock.enableIfConfigured();
+        MessageMock.enable();
     });
 
     after(() => {
@@ -34,7 +31,7 @@ describe("PrettyPrinter", function() {
 "open test player": "welcome to the simple audio player"
 "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript();
             const validatorResult = await virtualDeviceScript.execute(scripContents);
             // tslint:disable:max-line-length
             const expected = `
@@ -90,7 +87,7 @@ describe("PrettyPrinter", function() {
 "open test player": "welcome to the simple audio player"
 "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript();
             // tslint:disable:max-line-length
             const expected = `
             <div>
@@ -144,7 +141,7 @@ describe("PrettyPrinter", function() {
 "open test player": "welcome to the simple audio player"
 "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript();
             // tslint:disable:max-line-length
             const expected = `
             <div>
@@ -212,7 +209,7 @@ describe("PrettyPrinter", function() {
 "open test player": "welcome to the simple audio player"
 "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript();
             // tslint:disable:max-line-length
             const expected = `
             <div>
@@ -280,7 +277,7 @@ describe("PrettyPrinter", function() {
 "open test player": "welcome to the simple audio player"
 "tell test player to play": "https://feeds.soundcloud.com/stream/"
 	        `;
-            const virtualDeviceScript = new VirtualDeviceScript(token, userID, BASE_URL);
+            const virtualDeviceScript = new VirtualDeviceScript();
             // tslint:disable:max-line-length
             const expected = `
             <div>

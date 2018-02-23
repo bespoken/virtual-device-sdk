@@ -118,7 +118,7 @@ export abstract class VirtualDeviceValidator {
         let token = this.token ? this.token : process.env.VIRTUAL_DEVICE_TOKEN;
         let tokenName;
         if (sequence.locale) {
-            tokenName = "VIRTUAL_DEVICE_TOKEN." + sequence.locale.toUpperCase();
+            tokenName = "VIRTUAL_DEVICE_TOKEN_" + sequence.locale.toUpperCase().replace("-", "_");
             if (process.env[tokenName]) {
                 token = process.env[tokenName];
             }
