@@ -60,8 +60,8 @@ export class VirtualDeviceScript {
         for (const utteranceTest of utteranceTests) {
             utteranceCount += 1;
 
-            // The first test may not be a test - may be the config
-            if (utteranceCount === 1 && utteranceTest.name() === "config") {
+            // Special handling if this is called config
+            if (utteranceTest.name() === "config") {
                 config = utteranceTest.object();
                 continue;
             }
