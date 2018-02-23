@@ -1,43 +1,30 @@
 import {assert} from "chai";
 import * as dotenv from "dotenv";
-import * as nock from "nock";
-import * as Sinon from "sinon";
-import {IVirtualDeviceResult, VirtualDevice} from "../src/VirtualDevice";
-import * as fixtures from "./fixtures";
+import {VirtualDevice} from "../src/VirtualDevice";
+import {MessageMock} from "./MessageMock";
+
+dotenv.config();
 
 describe("VirtualDevice", function() {
     this.timeout(60000);
-    const BASE_URL = "https://virtual-device.bespoken.io/process";
-    let messageStub: any;
-    const messageMock = (message: string, debug: boolean = false): Promise<IVirtualDeviceResult> => {
-        return fixtures.message(message);
-    };
 
     before(() => {
-        dotenv.config();
-        if (process.env.ENABLE_MESSAGES_MOCK) {
-            messageStub = Sinon.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
-        }
+        MessageMock.enableIfConfigured();
     });
 
     after(() => {
-        if (process.env.ENABLE_MESSAGES_MOCK) {
-            messageStub.restore();
-        }
+        MessageMock.disable();
     });
 
     describe("#message()", () => {
         it("Should return a transcript", async () => {
-            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
-            sdk.baseURL = BASE_URL;
-            const result = await sdk.message("Hi");
-            console.log("Output: " + JSON.stringify(result));
-            assert.isDefined(result.transcript);
+            const sdk = newVirtualDevice();
+            const results = await sdk.message("what time is it");
+            assert.isDefined(results);
         });
 
         it("Should have stream URL", async () => {
-            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
-            sdk.baseURL = BASE_URL;
+            const sdk = newVirtualDevice();
             const result = await sdk.message("tell test player to play");
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.streamURL);
@@ -46,44 +33,94 @@ describe("VirtualDevice", function() {
         });
 
         it("Should have debug info", async () => {
-            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
-            sdk.baseURL = BASE_URL;
-            const result = await sdk.message("hi", true);
+            const sdk = newVirtualDevice();
+            const result = await sdk.message("what is the weather", true);
             console.log("Output: " + JSON.stringify(result));
-            assert.isDefined(result.debug);
+            assert.isDefined(result.transcript);
             assert.isDefined((result.debug as any).rawJSON.messageBody);
         });
+
+        it("Should handle weird characters", async () => {
+            const token = process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] as string;
+            const sdk = new VirtualDevice(token, "de-DE");
+            const result = await sdk.message("wie spät ist es", true);
+            console.log("Output: " + JSON.stringify(result));
+            assert.isDefined(result.transcript);
+        });
     });
+
+    describe("#batchMessage()", () => {
+        it("Should return from several inputs, using v1", async () => {
+            const sdk = newVirtualDevice();
+
+            const results = await sdk.batchMessage(
+                ["what is the weather", "what time is it", "tell test player to play"],
+            );
+            console.log("Output: " + JSON.stringify(results));
+            assert.equal(results.length, 3);
+            assert.equal(results[2].message, "tell test player to play");
+            assert.include(results[2].streamURL as string, "https://feeds.soundcloud.com/stream/");
+        });
+
+        it("Should return from several inputs, using v2", async () => {
+            // Setting the language code forces V2
+            const sdk = new VirtualDevice(process.env.VIRTUAL_DEVICE_TOKEN as string, "en-US");
+
+            const results = await sdk.batchMessage(
+                ["what is the weather", "what time is it", "tell test player to play"],
+            );
+            console.log("Output: " + JSON.stringify(results));
+            assert.equal(results.length, 3);
+            assert.equal(results[2].message, "tell test player to play");
+            assert.include(results[2].streamURL as string, "https://feeds.soundcloud.com/stream/");
+        });
+
+        it("Should return from batch with weird characters", async () => {
+            // Setting the language code forces V2
+            const token = process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] as string;
+            const sdk = new VirtualDevice(token, "de-DE");
+
+            const results = await sdk.batchMessage(["wie spät ist es", "Wie ist das Wetter"]);
+            console.log("Output: " + JSON.stringify(results));
+            assert.equal(results.length, 2);
+            assert.isNotNull(results[1].transcript);
+        });
+    });
+
     describe("#normalizeMessage()", () => {
+        before(() => {
+            // Always use mocks for this test
+            MessageMock.enable();
+        });
+
+        after(() => {
+            MessageMock.disable();
+        });
+
         it("Should transform no to 'alexa no'", async () => {
-            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
+            const sdk = newVirtualDevice();
             assert.equal(sdk.normalizeMessage("No"), "alexa no");
         });
     });
+
     describe("#normalizeTranscript()", () => {
-        let nockScope: any;
         before(() => {
-            if (process.env.ENABLE_MESSAGES_MOCK) {
-                messageStub.restore();
-            }
+            // Always use mocks for this test
+            MessageMock.enable();
         });
+
         after(() => {
-            if (process.env.ENABLE_MESSAGES_MOCK) {
-                messageStub = Sinon.stub(VirtualDevice.prototype, "message").callsFake(messageMock);
-            }
+            MessageMock.disable();
         });
-        afterEach(() => {
-            nockScope.done();
-            nock.cleanAll();
-        });
+
         it("lowercase transcript", async () => {
-            nockScope = nock("https://virtual-device.bespoken.io")
-                .get(/process.*/)
-                .reply(200, {transcript: "Test Normalize Transcript"});
-            const sdk = new VirtualDevice(process.env.TEST_TOKEN as string);
-            sdk.baseURL = BASE_URL;
-            const result = await sdk.message("", true);
-            assert.equal(result.transcript, "test normalize transcript");
+            const sdk = newVirtualDevice();
+            const result = await sdk.message("normalize", true);
+            assert.equal(result.transcript, "this should be lowercase");
         });
     });
 });
+
+function newVirtualDevice() {
+    return new VirtualDevice(process.env.VIRTUAL_DEVICE_TOKEN as string);
+}

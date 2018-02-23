@@ -1,7 +1,9 @@
 import * as fs from "fs";
 import * as path from "path";
-import {PrettyPrinter} from "./PrettyPrinter";
 
+import {BatchValidator} from "./BatchValidator";
+import {PrettyPrinter} from "./PrettyPrinter";
+import {SequencedValidator} from "./SequencedValidator";
 import {
     IVirtualDeviceTest,
     IVirtualDeviceTestSequence,
@@ -24,9 +26,12 @@ export class VirtualDeviceScript {
     private virtualDeviceValidator: VirtualDeviceValidator;
     private tokens: {[id: string]: string} = {};
 
-    constructor(token?: string, userID?: string, baseURL?: string, sourceAPIBaseURL?: string) {
-        baseURL = baseURL ? baseURL : "https://virtual-device.bespoken.io/process";
-        this.virtualDeviceValidator = new VirtualDeviceValidator(token, userID, baseURL, sourceAPIBaseURL);
+    constructor(token?: string, userID?: string, batch: boolean = false) {
+        if (batch) {
+            this.virtualDeviceValidator = new BatchValidator(token, userID);
+        } else {
+            this.virtualDeviceValidator = new SequencedValidator(token, userID);
+        }
     }
 
     /**
@@ -55,8 +60,8 @@ export class VirtualDeviceScript {
         for (const utteranceTest of utteranceTests) {
             utteranceCount += 1;
 
-            // The first test may not be a test - may be the config
-            if (utteranceCount === 1 && utteranceTest.name() === "config") {
+            // Special handling if this is called config
+            if (utteranceTest.name() === "config") {
                 config = utteranceTest.object();
                 continue;
             }

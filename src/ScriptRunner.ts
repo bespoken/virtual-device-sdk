@@ -19,16 +19,9 @@ const TestRunner = {
             }
         }
     },
-    checkEnvironment: (name: string) => {
-        if (!process.env[name]) {
-            throw new Error(name + " environment variable must be set");
-        }
-    },
     run: (path?: string) => {
-        TestRunner.checkEnvironment("VIRTUAL_DEVICE_TOKEN");
-
         const script = new VirtualDeviceScript(process.env.VIRTUAL_DEVICE_TOKEN as string,
-            process.env.BESPOKEN_USER_ID as string);
+            process.env.BESPOKEN_USER_ID as string, (process.env.BATCH_MODE !== undefined));
         TestRunner.addTokens(script);
 
         script.on("result", (error, resultItem) => {
