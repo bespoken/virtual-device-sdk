@@ -21,7 +21,7 @@ const TestRunner = {
     },
     run: (path?: string) => {
         const script = new VirtualDeviceScript(process.env.VIRTUAL_DEVICE_TOKEN as string,
-            process.env.BESPOKEN_USER_ID as string);
+            process.env.BESPOKEN_USER_ID as string, (process.env.BATCH_MODE !== undefined));
         TestRunner.addTokens(script);
 
         script.on("result", (error, resultItem) => {
