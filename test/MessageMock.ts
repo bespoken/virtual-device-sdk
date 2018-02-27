@@ -26,6 +26,9 @@ export class MessageMock {
             .post("/batch_process")
             .query(true)
             .reply(200, function(uri: string, requestBody: any) {
+                if (MessageMock.onCallCallback) {
+                    MessageMock.onCallCallback(uri, requestBody);
+                }
                 return processBatchMessages(requestBody);
             });
 
@@ -35,17 +38,33 @@ export class MessageMock {
             .get("/process")
             .query(true)
             .reply(200, function(uri: string, requestBody: any) {
+                if (MessageMock.onCallCallback) {
+                    MessageMock.onCallCallback(uri, requestBody);
+                }
+
                 const url = URL.parse(uri);
                 const params: any = qs.parse(url.query as string);
                 return processMessage(params.message);
             });
     }
 
+    /**
+     * Add an interceptor to the nock callback for additional testing
+     * @param {(uri: string, requestBody: any) => void} callback
+     */
+    public static onCall(callback?: (uri: string, requestBody: any) => void) {
+        MessageMock.onCallCallback = callback;
+    }
+
     public static disable() {
+        MessageMock.onCallCallback = undefined;
         // Turn off Nock and remove all interceptors
         nock.cleanAll();
         nock.restore();
     }
+
+    private static onCallCallback?: (uri: string, requestBody: any) => void;
+
 }
 
 function processMessage(message: string): IVirtualDeviceResult {
@@ -97,6 +116,33 @@ function messageHandler(message: string): IVirtualDeviceResult {
             sessionTimeout: 0,
             streamURL: null,
             transcript: "the time is 12:40 pm",
+        };
+    } else if (message.includes("wie spät ist es")) {
+        return {
+            card: null,
+            debug: {rawJSON: {messageBody: ""}},
+            message,
+            sessionTimeout: 0,
+            streamURL: null,
+            transcript: "es ist Mittag",
+        };
+    } else if (message.includes("what is the weather")) {
+        return {
+            card: null,
+            debug: {rawJSON: {messageBody: ""}},
+            message,
+            sessionTimeout: 0,
+            streamURL: null,
+            transcript: "the weather is nice",
+        };
+    } else if (message.includes("Wie ist das Wetter")) {
+        return {
+            card: null,
+            debug: {rawJSON: {messageBody: ""}},
+            message,
+            sessionTimeout: 0,
+            streamURL: null,
+            transcript: "das Wetter ist schön",
         };
     } else if (message.includes("open")) {
         return {

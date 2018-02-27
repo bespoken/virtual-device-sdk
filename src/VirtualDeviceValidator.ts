@@ -24,7 +24,9 @@ interface ISubscribers {
 export abstract class VirtualDeviceValidator {
     private sourceAPIBaseURL: string;
     private subscribers: ISubscribers;
+    private _locale?: string;
     private userID?: string;
+    private _voiceID?: string;
 
     constructor(protected token?: string, userID?: string) {
         this.subscribers = {message: [], result: [], unauthorized: []};
@@ -58,6 +60,10 @@ export abstract class VirtualDeviceValidator {
         return Promise.resolve(result);
     }
 
+    public locale(locale: string) {
+        this._locale = locale;
+    }
+
     public subscribe(event: string, cb: any) {
         if (event in this.subscribers) {
             this.subscribers[event].push(cb);
@@ -66,6 +72,10 @@ export abstract class VirtualDeviceValidator {
 
     public unsubscribe(event: string) {
         this.subscribers[event] = [];
+    }
+
+    public voiceID(voiceID: string) {
+        this._voiceID = voiceID;
     }
 
     // checkAuth checks whether given invocation name can be invoked
@@ -131,10 +141,12 @@ export abstract class VirtualDeviceValidator {
                 throw new Error("No environment variable specified for VIRTUAL_DEVICE_TOKEN");
             }
         }
-        const virtualDevice = new VirtualDevice(token,
-            sequence.locale,
-            sequence.voiceID);
-        return virtualDevice;
+
+        const locale = this._locale ? this._locale : sequence.locale;
+        const voiceID = this._voiceID ? this._voiceID : sequence.voiceID;
+        return new VirtualDevice(token,
+            locale,
+            voiceID);
     }
 }
 
@@ -208,8 +220,7 @@ export class Validator {
         }
 
         if (Array.isArray(expected)) {
-            const expectedArray = expected;
-            for (const expectedValue of expectedArray) {
+            for (const expectedValue of expected) {
                 if (Validator.toRegex(expectedValue).test(value)) {
                     return undefined;
                 }
