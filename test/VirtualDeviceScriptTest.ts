@@ -343,6 +343,45 @@ describe("VirtualDeviceScript", function() {
         });
     });
 
+    describe("#execute() with programmatic configuration",  () => {
+        beforeEach(() => {
+            MessageMock.enable();
+        });
+
+        afterEach(() => {
+            MessageMock.disable();
+        });
+
+        it("Uses explicit voice and language code programmatically", function(done) {
+            MessageMock.onCall((url) => {
+                assert.include(url, "language_code=en-GB");
+                assert.include(url, "voice_id=Matthew");
+                done();
+            });
+
+            const scriptContents = `"what time is it": "*"`;
+            const virtualDeviceScript = new VirtualDeviceScript("TEST", undefined, true);
+            virtualDeviceScript.locale("en-GB");
+            virtualDeviceScript.voiceID("Matthew");
+            virtualDeviceScript.execute(scriptContents);
+        });
+
+        it("Uses explicit voice and language code programmatically, non-batch", function(done) {
+            MessageMock.onCall((url) => {
+                assert.include(url, "/process?");
+                assert.include(url, "language_code=en-GB");
+                assert.include(url, "voice_id=Matthew");
+                done();
+            });
+
+            const scriptContents = `"what time is it": "*"`;
+            const virtualDeviceScript = new VirtualDeviceScript("TEST", undefined, false);
+            virtualDeviceScript.locale("en-GB");
+            virtualDeviceScript.voiceID("Matthew");
+            virtualDeviceScript.execute(scriptContents);
+        });
+    });
+
     describe("#executeDir()", () => {
         let sandbox: any;
         before(() => {

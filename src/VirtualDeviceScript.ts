@@ -24,7 +24,7 @@ export type IVirtualDeviceScriptCallback = (
 
 export class VirtualDeviceScript {
     private virtualDeviceValidator: VirtualDeviceValidator;
-    private tokens: {[id: string]: string} = {};
+    private findReplaceMap: {[id: string]: string} = {};
 
     constructor(token?: string, userID?: string, batch: boolean = false) {
         if (batch) {
@@ -36,11 +36,19 @@ export class VirtualDeviceScript {
 
     /**
      * Set tokens that will be replaced in the script
-     * @param {string} token The token will be searched for with angle brackets on either side (NAME -> <NAME>)
-     * @param {string} value
+     * @param {string} find The string to be searched for
+     * @param {string} replace
      */
-    public findReplace(token: string, value: string) {
-        this.tokens[token] = value;
+    public findReplace(find: string, replace: string) {
+        this.findReplaceMap[find] = replace;
+    }
+
+    public locale(locale: string) {
+        this.virtualDeviceValidator.locale(locale);
+    }
+
+    public voiceID(voiceID: string) {
+        return this.virtualDeviceValidator.voiceID(voiceID);
     }
 
     public tests(scriptContents: string): IVirtualDeviceTestSequence[] {
@@ -235,10 +243,9 @@ export class VirtualDeviceScript {
     }
 
     private tokenize(script: string): string {
-        for (const token of Object.keys(this.tokens)) {
-            const fullToken = token;
-            const value = this.tokens[token];
-            script = script.split(fullToken).join(value);
+        for (const find of Object.keys(this.findReplaceMap)) {
+            const value = this.findReplaceMap[find];
+            script = script.split(find).join(value);
         }
         return script;
     }

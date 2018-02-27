@@ -63,7 +63,7 @@ Additionally, find/replace values can be specified in the .env file.
 
 They will look like this:
 ```
-token.INVOCATION_NAME=invoke me
+replace.INVOCATION_NAME=invoke me
 ```
 
 This will cause any instances of the value INVOCATION_NAME to be replaced by Invoke Me in the test scripts.

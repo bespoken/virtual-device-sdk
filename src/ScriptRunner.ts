@@ -11,7 +11,7 @@ dotenv.config();
 const TestRunner = {
     addTokens: (script: VirtualDeviceScript) => {
         for (const key of Object.keys(process.env)) {
-            if (key.startsWith("token.")) {
+            if (key.startsWith("token.") || key.startsWith("replace.")) {
                 const value = process.env[key] as string;
                 const token = key.substr(key.indexOf(".") + 1);
                 console.log("Replacing token: " + token + " with: " + value);
