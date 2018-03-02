@@ -6,7 +6,6 @@ import {
 
 // Configured to force a max line length of 120
 const TEST_NAME_LENGTH = 20;
-const TEST_PROPERTY_LENGTH = 10;
 const TEST_ACTUAL_LENGTH = 37;
 const TEST_EXPECTED_LENGTH = 37;
 const TAB = "  ";
@@ -66,7 +65,7 @@ export class ConsolePrinter {
             if (testResult.result !== "success") {
                 const error = (testResult.errors as ValidatorError[])[0];
                 line += ConsolePrinter.rpad(testResult.test.input, " ", TEST_NAME_LENGTH)
-                    + "  " + ConsolePrinter.rpad(error.property, " ", TEST_PROPERTY_LENGTH);
+                    + "  " + error.property;
 
                 // When there are errors, we put the actual and expected on their own lines
                 const actualLine = TAB + TAB + TAB + "Actual:   " + error.actual;

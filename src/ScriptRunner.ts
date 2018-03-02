@@ -51,13 +51,11 @@ const TestRunner = {
         if (file) {
             console.log("Running Test:" + file);
             script.executeFile(file).then((result) => {
-                console.log("Result: " + JSON.stringify(result, null, 2));
                 console.log(printer.printResult(file as string, result));
             });
         } else {
             console.log("Running Tests from: " + Path.resolve(directory));
             script.executeDir(directory).then((results) => {
-                console.log("Result: " + JSON.stringify(results, null, 2));
                 console.log(printer.printResultsByFile(results));
             });
         }
