@@ -44,6 +44,9 @@ export class BatchValidator extends VirtualDeviceValidator {
             }
             validator.resultItem.status = "done";
             result.tests.push(resultItem);
+
+            // Send a notification for each result:
+            this.emit("result", undefined, validator.resultItem, context);
         }
     }
 }
