@@ -67,9 +67,9 @@ export class VirtualDevice {
         });
     }
 
-    public batchMessage(messages: string[], debug?: boolean): Promise<IVirtualDeviceResult []> {
-        for (let i = 0; i < messages.length; i++) {
-            messages[i] = this.normalizeMessage(messages[i]);
+    public batchMessage(messages: IMessage[], debug?: boolean): Promise<IVirtualDeviceResult []> {
+        for (const message of messages) {
+            message.text = this.normalizeMessage(message.text);
         }
 
         let path = "/batch_process?user_id=" + this.token;
@@ -169,4 +169,9 @@ export interface ICard {
     subTitle: string | null;
     textField: string | null;
     type: string;
+}
+
+export interface IMessage {
+    text: string;
+    phrases?: string[];
 }

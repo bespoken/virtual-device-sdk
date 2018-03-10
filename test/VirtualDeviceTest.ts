@@ -54,7 +54,7 @@ describe("VirtualDevice", function() {
             const sdk = newVirtualDevice();
 
             const results = await sdk.batchMessage(
-                ["what is the weather", "what time is it", "tell test player to play"],
+                [{text: "what is the weather"}, {text:  "what time is it"}, {text: "tell test player to play"}],
             );
             console.log("Output: " + JSON.stringify(results));
             assert.equal(results.length, 3);
@@ -67,7 +67,7 @@ describe("VirtualDevice", function() {
             const sdk = new VirtualDevice(process.env.VIRTUAL_DEVICE_TOKEN as string, "en-US");
 
             const results = await sdk.batchMessage(
-                ["what is the weather", "what time is it", "tell test player to play"],
+                [{text: "what is the weather"}, {text:  "what time is it"}, {text: "tell test player to play"}],
             );
             console.log("Output: " + JSON.stringify(results));
             assert.equal(results.length, 3);
@@ -80,7 +80,7 @@ describe("VirtualDevice", function() {
             const token = process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] as string;
             const sdk = new VirtualDevice(token, "de-DE");
 
-            const results = await sdk.batchMessage(["wie spät ist es", "Wie ist das Wetter"]);
+            const results = await sdk.batchMessage([{text: "wie spät ist es"}, {text: "Wie ist das Wetter"}]);
             console.log("Output: " + JSON.stringify(results));
             assert.equal(results.length, 2);
             assert.isNotNull(results[1].transcript);
