@@ -57,7 +57,8 @@ describe("BatchValidator", function() {
                 },
             ];
 
-            // Test to make sure the batch process endpoint is running well - we can intercept the requests
+            // Test to make sure the batch process endpoint is being called correctly - we intercept the requests
+            // The asserts don't work quite properly - if they fail, the error shows up on validationResult.errorMessage
             MessageMock.onCall((uri, body) => {
                 // Ignore the call to Alexa quit
                 if (uri.includes("/process")) {
@@ -75,7 +76,7 @@ describe("BatchValidator", function() {
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
 
-            // This is where the error comes back from the MessageMock tests
+            // This is where any errors comes back from the MessageMock tests
             assert.isUndefined(validatorResult.errorMessage, validatorResult.errorMessage);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "success", `${JSON.stringify(test)}`);
@@ -97,7 +98,8 @@ describe("BatchValidator", function() {
                 },
             ];
 
-            // Test to make sure the batch process endpoint is running well - we can intercept the requests
+            // Test to make sure the batch process endpoint is being called correctly - we intercept the requests
+            // The asserts don't work quite properly - if they fail, the error shows up on validationResult.errorMessage
             MessageMock.onCall((uri, body) => {
                 // Ignore the call to Alexa quit
                 if (uri.includes("/process")) {
@@ -113,7 +115,7 @@ describe("BatchValidator", function() {
             const virtualDeviceValidator = new BatchValidator();
             const validatorResult = await virtualDeviceValidator.execute(sequences);
 
-            // This is where the error comes back from the MessageMock tests
+            // This is where any errors comes back from the MessageMock tests
             assert.isUndefined(validatorResult.errorMessage, validatorResult.errorMessage);
         });
 

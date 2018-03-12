@@ -14,7 +14,8 @@ export class BatchValidator extends VirtualDeviceValidator {
         await virtualDevice.resetSession();
 
         const messages = [];
-        // Do one pass on the sequence to turn the sequences into messages to send to the virtual device
+        // Do one pass on the sequence to turn the tests into messages to send to the virtual device
+        // Each message has the input and the expected response phrases
         for (const test of sequence.tests) {
             const message: IMessage = {
                 text: test.input,
