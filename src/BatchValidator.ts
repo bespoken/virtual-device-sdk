@@ -1,3 +1,4 @@
+import {IMessage} from "./VirtualDevice";
 import {
     IVirtualDeviceTestSequence,
     IVirtualDeviceValidatorResult, IVirtualDeviceValidatorResultItem, Validator,
@@ -13,9 +14,22 @@ export class BatchValidator extends VirtualDeviceValidator {
         await virtualDevice.resetSession();
 
         const messages = [];
-        // Do one pass on the sequence
+        // Do one pass on the sequence to turn the tests into messages to send to the virtual device
+        // Each message has the input and the expected response phrases
         for (const test of sequence.tests) {
-            messages.push(test.input);
+            const message: IMessage = {
+                text: test.input,
+            };
+
+            if (test.expected && test.expected.transcript) {
+                if (Array.isArray(test.expected.transcript)) {
+                    message.phrases = test.expected.transcript;
+                } else {
+                    message.phrases = [];
+                    message.phrases.push(test.expected.transcript as string);
+                }
+            }
+            messages.push(message);
         }
 
         let results;
