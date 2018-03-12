@@ -67,7 +67,8 @@ describe("VirtualDevice", function() {
             const sdk = new VirtualDevice(process.env.VIRTUAL_DEVICE_TOKEN as string, "en-US");
 
             const results = await sdk.batchMessage(
-                [{text: "what is the weather"}, {text:  "what time is it"}, {text: "tell test player to play"}],
+                [{ phrases: ["in westlake it's 48 degrees fahrenheit with clear skies"], text: "what is the weather"},
+                    {text:  "what time is it"}, {text: "tell test player to play"}],
             );
             console.log("Output: " + JSON.stringify(results));
             assert.equal(results.length, 3);
