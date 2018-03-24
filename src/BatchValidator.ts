@@ -10,7 +10,7 @@ export class BatchValidator extends VirtualDeviceValidator {
                                     context?: any): Promise<void> {
         const virtualDevice = this.virtualDevice(sequence);
         // Reset the session before each sequence
-        await virtualDevice.resetSession();
+        await virtualDevice.resetSession(sequence.locale);
 
         const messages = [];
         // Do one pass on the sequence

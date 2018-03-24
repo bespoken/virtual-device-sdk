@@ -183,6 +183,14 @@ function messageHandler(message: string): IVirtualDeviceResult {
             streamURL: "",
             transcript: "",
         };
+    } else if (message.includes("alexa stopp")) {
+        return {
+            card: null,
+            message,
+            sessionTimeout: 0,
+            streamURL: "",
+            transcript: "",
+        };
     } else if (message.includes("alexa quit")) {
         return {
             card: null,
