@@ -104,7 +104,7 @@ describe("SequencedValidator", function() {
                 .returns(Promise.resolve("AUTHORIZED"));
             seMessageStub = Sinon.stub(VirtualDevice.prototype, "message")
                 .callsFake((message: string): Promise<any> => {
-                    if (message.includes("Alexa") || message.includes("alexa quit")) {
+                    if (message.includes("alexa") || message.includes("quit")) {
                         return Promise.resolve();
                     }
                     return Promise.reject("something went wrong");

@@ -12,8 +12,9 @@ export class VirtualDevice {
     }
 
     public normalizeMessage(message: string): string {
-        if (message.trim().toLowerCase() === "no") {
-            message = "alexa no";
+        // If there is just one word, prefix it with alexa
+        if (message.trim().split(" ").length === 1) {
+            message = "alexa " + message;
         }
 
         return message;
@@ -129,8 +130,12 @@ export class VirtualDevice {
         });
     }
 
-    public resetSession(): Promise<IVirtualDeviceResult> {
-        return this.message("alexa quit");
+    public resetSession(locale?: string): Promise<IVirtualDeviceResult> {
+        let message = "quit";
+        if (locale && locale === "de-DE") {
+            message = "stopp";
+        }
+        return this.message(message);
     }
 
     private handleBatchResponse(data: string): IVirtualDeviceResult[] {

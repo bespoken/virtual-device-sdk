@@ -52,11 +52,20 @@ const TestRunner = {
             console.log("Running Test:" + file);
             script.executeFile(file).then((result) => {
                 console.log(printer.printResult(file as string, result));
+                if (result.result !== "success") {
+                    process.exit(1);
+                }
             });
         } else {
             console.log("Running Tests from: " + Path.resolve(directory));
             script.executeDir(directory).then((results) => {
                 console.log(printer.printResultsByFile(results));
+                for (const resultFile of Object.keys(results)) {
+                    const result = results[resultFile];
+                    if (result.result !== "success") {
+                        process.exit(1);
+                    }
+                }
             });
         }
     },
