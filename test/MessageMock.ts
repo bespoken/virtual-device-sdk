@@ -79,7 +79,7 @@ function processBatchMessages(payload: any): any {
     const messages = payload.messages;
     const results: IVirtualDeviceResult[] = [];
     for (const message of messages) {
-        results.push(messageHandler(message));
+        results.push(messageHandler(message.text));
     }
     return { results };
 }

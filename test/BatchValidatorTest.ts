@@ -33,6 +33,7 @@ describe("BatchValidator", function() {
         after(() => {
             checkAuthStub.restore();
         });
+
         it("success", async () => {
             const sequences = [
                 {
@@ -55,12 +56,67 @@ describe("BatchValidator", function() {
                     }],
                 },
             ];
+
+            // Test to make sure the batch process endpoint is being called correctly - we intercept the requests
+            // The asserts don't work quite properly - if they fail, the error shows up on validationResult.errorMessage
+            MessageMock.onCall((uri, body) => {
+                // Ignore the call to Alexa quit
+                if (uri.includes("/process")) {
+                    return;
+                }
+
+                assert.equal(body.messages.length, 2);
+                assert.equal(body.messages[0].text, "open test player");
+                assert.equal(body.messages[0].phrases.length, 1);
+                assert.equal(body.messages[0].phrases[0], "welcome to the simple audio player");
+                assert.equal(body.messages[1].text, "tell test player to play");
+            });
+
             const virtualDeviceValidator = new BatchValidator();
             const validatorResult = await virtualDeviceValidator.execute(sequences);
             assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+
+            // This is where any errors comes back from the MessageMock tests
+            assert.isUndefined(validatorResult.errorMessage, validatorResult.errorMessage);
             for (const test of validatorResult.tests) {
                 assert.equal(test.result, "success", `${JSON.stringify(test)}`);
             }
+        });
+
+        it("success with multiple expected phrases", async () => {
+            const sequences = [
+                {
+                    invocationName: "test player",
+                    tests: [{
+                        comparison: "contains",
+                        expected: {
+                            transcript: ["welcome to the simple audio player", "welcome"],
+                        },
+                        input: "open test player",
+                        sequence: 1,
+                    }],
+                },
+            ];
+
+            // Test to make sure the batch process endpoint is being called correctly - we intercept the requests
+            // The asserts don't work quite properly - if they fail, the error shows up on validationResult.errorMessage
+            MessageMock.onCall((uri, body) => {
+                // Ignore the call to Alexa quit
+                if (uri.includes("/process")) {
+                    return;
+                }
+
+                assert.equal(body.messages[0].text, "open test player");
+                assert.equal(body.messages[0].phrases.length, 2);
+                assert.equal(body.messages[0].phrases[0], "welcome to the simple audio player");
+                assert.equal(body.messages[0].phrases[1], "welcome");
+            });
+
+            const virtualDeviceValidator = new BatchValidator();
+            const validatorResult = await virtualDeviceValidator.execute(sequences);
+
+            // This is where any errors comes back from the MessageMock tests
+            assert.isUndefined(validatorResult.errorMessage, validatorResult.errorMessage);
         });
 
         it("failure", async () => {
@@ -171,8 +227,8 @@ describe("BatchValidator", function() {
             checkAuthStub = Sinon.stub(VirtualDeviceValidator.prototype, "checkAuth")
                 .returns(Promise.resolve("AUTHORIZED"));
             seMessageStub = Sinon.stub(VirtualDevice.prototype, "batchMessage")
-                .callsFake((message: string): Promise<any> => {
-                    if (message.includes("Alexa") || message.includes("alexa quit")) {
+                .callsFake((message: any): Promise<any> => {
+                    if (message.text.includes("Alexa") || message.text.includes("alexa quit")) {
                         return Promise.resolve();
                     }
                     return Promise.reject("something went wrong");

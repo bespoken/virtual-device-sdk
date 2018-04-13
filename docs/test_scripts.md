@@ -85,7 +85,7 @@ This is a useful feature for tests that are run against multiple instances of th
 Tests go into files with a suffix ".yml". One or many tests can be contained in each test.
 
 ### Test-Specific Configuration
-The first line in a test can optional be the config. It should look like this:  
+The test file can optionally have a config section, which contains setup data about the test. It looks like this:  
 ```yaml
 config:
   voiceID: <The Polly Voice ID to use for TTS>
