@@ -71,34 +71,180 @@ Save the token that is generated - you will use it in the step below.
 The Base URL is:  
 https://virtual-device.bespoken.io
 
-* /process
-  * Method: GET
-  * Parameters:
-    * user_id: string - VirtualDevice token
-    * message: string - The message to send to VirtualDevice
-    * debug: string [Optional] - If set, returns debug output
-  * Response:
-    * Status: 200 (If successful)
-    * Payload: JSON conforming to [this description](#result-payload)
+**Process**
 
-## Example
-HTTP Request:
+  Takes a single message and returns the AVS response in text form.
+* **URL**
+
+  /process
+
+* **Method:**
+  
+  `GET` 
+  
+*  **URL Params**
+
+   **Required:**
+ 
+   `message=[string]`: the message that we want to send to Alexa
+   
+   `user_id=[string]`: "validation token" obtained from bespoken's dashboard (http://apps.bespoken.io/dashboard)
+   
+   
+   **Optional:**
+ 
+   `language_code=[string]`: one of Alexa's supported locales (e.g. en-US, de-DE, etc.). Default value: "en-US". Taken from https://developer.amazon.com/docs/custom-skills/develop-skills-in-multiple-languages.html#h2-code-changes
+   
+   `voice_id=[string]`: one of Amazon Polly's supported voices (e.g. Joey, Vicki, Hans, etc.). Default value: "Joey". MUST correspond with the language_code. Taken from: https://docs.aws.amazon.com/polly/latest/dg/voicelist.html
+
+	`phrases=[string]`: a word or phrase used as a hint so that the speech recognition is more likely to recognize them as part of the alexa response. You can use this multiple times in the query string to send more than one.
+
+* **Success Response:**
+  
+
+  * **Code:** 200 <br />
+    **Content:** 
+	```json
+	 {
+            "streamURL": "string",
+            "sessionTimeout": 0,
+            "transcriptAudioURL": "string",
+            "message": "string",
+            "transcript": "string",
+            "card": {
+                "subTitle": "string",
+                "mainTitle": "string",
+                "textField": "string",
+                "type": "string",
+                "imageURL": "string"
+            }
+        }
+	```
+   
+ 
+* **Error Response:**
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Content:** `"message is required"`
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Content:** `"user_id is required"`
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Content:** `"Invalid user_id"`
+
+  * **Code:** 500 INTERNAL SERVER ERROR <br />
+    **Content:** `{error: 'error message in case of an exception'}`
+ 
+
+* **Sample Call:**
 ```
-https://virtual-device.bespoken.io/process
-    ?user_id=<TOKEN>
-    &message=hello there
+curl "http://virtual-device.bespoken.io/process?message="what time is it"&user_id=<your user id>&voice_id=Joey&language_code=en-US" ; 
 ```
 
-HTTP Response:
-```
+* **Notes:**
+
+  * Not sending the language_code or voice_id will default **both** to en-US and Joey. 
+  
+
+**Batch process**
+
+Receives multiple messages and expected phrases in an object array. The goal of this endpoint to handle a complete interaction with Alexa. By sending all messages to the endpoint, it is able to sequence them faster, avoiding session timeouts.
+
+* **URL**
+
+  /batch_process
+
+* **Method:**
+  
+ `POST` 
+  
+*  **URL Params**
+
+   **Required:**
+ 
+      `user_id=[string]`: "validation token" obtained from bespoken's dashboard (http://apps.bespoken.io/dashboard)
+
+   **Optional:**
+ 
+   `language_code=[string]`: one of Alexa's supported locales (e.g. en-US, de-DE, etc.). Default value: "en-US". Taken from https://developer.amazon.com/docs/custom-skills/develop-skills-in-multiple-languages.html#h2-code-changes
+   
+   `voice_id=[string]`: one of Amazon Polly's supported voices (e.g. Joey, Vicki, Hans, etc.). Default value: "Joey". MUST correspond with the language_code. Taken from: https://docs.aws.amazon.com/polly/latest/dg/voicelist.html
+
+* **Data Params**
+
+   **Required:**
+ 
+    `messages=[array]`: object array where each object "text" property represents the message sent to Alexa (required) and each "phrases" property is an array of strings representing words or phrases used as hint for the speech recognition library to recognize them better (optional.
+
+```json
 {
-    "card": null,
-    "sessionTimeout": 0,
-    "streamURL": null,
-    "transcript": "hi",
-    "transcriptAudioURL": "https://storage.googleapis.com/raw_audio/7898e6fb-2d3d-4039-9b4a-00641fa1c249.mp3"
+  "messages": [
+    {"text":"string", "phrases":["string"]}
+  ]
 }
 ```
+
+* **Success Response:**
+  
+
+  * **Code:** 200 <br />
+    **Content:** 
+	```javascript
+	{
+	    "results": [
+		    {
+		       "streamURL": "string",
+		       "sessionTimeout": 0,
+		       "transcriptAudioURL": "string",
+		       "message": "string",
+		       "transcript": "string",
+		       "card": {
+		           "subTitle": "string",
+		           "mainTitle": "string",
+		           "textField": "string",
+		           "type": "string",
+		           "imageURL": "string"
+			       }
+		      }
+	   ]
+	}
+	```
+ 
+* **Error Response:**
+	* **Code:** 400 BAD REQUEST <br />
+    **Content:** `"Invalid message"`
+
+  * **Code:** 400 BAD REQUEST <br />
+    **Content:** `"Invalid user_id"`
+
+  * **Code:** 500 INTERNAL SERVER ERROR <br />
+    **Content:** `{error: 'error message in case of an exception'}`
+
+* **Sample Call:**
+
+```javascript
+const userId = <your user id>;
+const voiceId = "Joey";
+const languageCode = "en-US":
+
+$.post(`https://virtual-device.bespoken.io/batch_process?user_id=${userId}&voice_id=${voiceId}&language_code=${laguangeCode}`,  
+{  
+	"messages": [
+	    {"text":"open guess the price", "phrases":["how many persons"]},
+	    {"text":"one"} 
+    ]
+},  
+function(data, status){  
+	console.log("Got: " + data.results.length + " responses!");  
+});
+```
+
+* **Notes:**
+
+  * Not sending the language_code or voice_id will default **both** to en-US and Joey. 
+  
+
 
 # What's Next
 * Keep the session open longer for deep skill interactions
