@@ -71,7 +71,7 @@ Save the token that is generated - you will use it in the step below.
 The Base URL is:  
 https://virtual-device.bespoken.io
 
-**Process**
+### **Process**
 
   Takes a single message and returns the AVS response in text form.
 * **URL**
@@ -147,7 +147,7 @@ curl "http://virtual-device.bespoken.io/process?message="what time is it"&user_i
   * Not sending the language_code or voice_id will default **both** to en-US and Joey. 
   
 
-**Batch process**
+### **Batch process**
 
 Receives multiple messages and expected phrases in an object array. The goal of this endpoint to handle a complete interaction with Alexa. By sending all messages to the endpoint, it is able to sequence them faster, avoiding session timeouts.
 
@@ -177,13 +177,13 @@ Receives multiple messages and expected phrases in an object array. The goal of 
  
     `messages=[array]`: object array where each object "text" property represents the message sent to Alexa (required) and each "phrases" property is an array of strings representing words or phrases used as hint for the speech recognition library to recognize them better (optional.
 
-```json
-{
-  "messages": [
-    {"text":"string", "phrases":["string"]}
-  ]
-}
-```
+    ```json
+    {
+      "messages": [
+        {"text":"string", "phrases":["string"]}
+      ]
+    }
+    ```
 
 * **Success Response:**
   
@@ -223,22 +223,22 @@ Receives multiple messages and expected phrases in an object array. The goal of 
 
 * **Sample Call:**
 
-```javascript
-const userId = <your user id>;
-const voiceId = "Joey";
-const languageCode = "en-US":
+    ```javascript
+    const userId = <your user id>;
+    const voiceId = "Joey";
+    const languageCode = "en-US":
 
-$.post(`https://virtual-device.bespoken.io/batch_process?user_id=${userId}&voice_id=${voiceId}&language_code=${laguangeCode}`,  
-{  
-	"messages": [
-	    {"text":"open guess the price", "phrases":["how many persons"]},
-	    {"text":"one"} 
-    ]
-},  
-function(data, status){  
-	console.log("Got: " + data.results.length + " responses!");  
-});
-```
+    $.post(`https://virtual-device.bespoken.io/batch_process?user_id=${userId}&voice_id=${voiceId}&language_code=${laguangeCode}`,  
+    {  
+        "messages": [
+            {"text":"open guess the price", "phrases":["how many persons"]},
+            {"text":"one"} 
+        ]
+    },  
+    function(data, status){  
+        console.log("Got: " + data.results.length + " responses!");  
+    });
+    ```
 
 * **Notes:**
 
