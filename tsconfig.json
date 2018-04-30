@@ -1,18 +1,21 @@
 {
-  "compileOnSave": true,
-  "compilerOptions": {
-    "allowUnreachableCode": false,
-    "allowJs": false,
-    "declaration": true,
-    "module": "commonjs",
-    "noImplicitAny": true,
-    "noUnusedLocals": true,
-    "noImplicitReturns": true,
-    "outDir": "lib",
-    "preserveConstEnums": true,
-    "removeComments": true,
-    "sourceMap": true,
-    "strictNullChecks" :true,
-    "target": "ES6"
-  }
+    "compileOnSave": true,
+    "compilerOptions": {
+        "allowUnreachableCode": false,
+        "allowJs": false,
+        "declaration": true,
+        "lib": [
+            "es2015"
+        ],
+        "module": "commonjs",
+        "noImplicitAny": true,
+        "noUnusedLocals": true,
+        "noImplicitReturns": true,
+        "outDir": "lib",
+        "preserveConstEnums": true,
+        "removeComments": true,
+        "sourceMap": true,
+        "strictNullChecks": true,
+        "target": "ES5"
+    }
 }
