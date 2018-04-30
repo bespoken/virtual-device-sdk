@@ -90,7 +90,7 @@ https://virtual-device.bespoken.io
  
    `message=[string]`: the message that we want to send to Alexa
    
-   `user_id=[string]`: "validation token" obtained from bespoken's dashboard (http://apps.bespoken.io/dashboard)
+   `user_id=[string]`: "validation token" obtained from Bespoken Dashboard (http://apps.bespoken.io/dashboard)
    
    
    **Optional:**
@@ -165,7 +165,7 @@ Receives multiple messages and expected phrases in an object array. The goal of 
 
    **Required:**
  
-      `user_id=[string]`: "validation token" obtained from bespoken's dashboard (http://apps.bespoken.io/dashboard)
+      `user_id=[string]`: "validation token" obtained from Bespoken Dashboard (http://apps.bespoken.io/dashboard)
 
    **Optional:**
  
@@ -177,7 +177,7 @@ Receives multiple messages and expected phrases in an object array. The goal of 
 
    **Required:**
  
-    `messages=[array]`: object array where each object "text" property represents the message sent to Alexa (required) and each "phrases" property is an array of strings representing words or phrases used as hint for the speech recognition library to recognize them better (optional.
+    `messages=[array]`: object array where each object's "text" field is a required property that represents the message sent to Alexa and each "phrases" property is an optional array of strings representing words or phrases used as hint for the speech recognition library to recognize them better.
 
     ```json
     {
@@ -230,7 +230,7 @@ Receives multiple messages and expected phrases in an object array. The goal of 
     const voiceId = "Joey";
     const languageCode = "en-US":
 
-    $.post(`https://virtual-device.bespoken.io/batch_process?user_id=${userId}&voice_id=${voiceId}&language_code=${laguangeCode}`,  
+    $.post(`https://virtual-device.bespoken.io/batch_process?user_id=${userId}&voice_id=${voiceId}&language_code=${languageCode}`,  
     {  
         "messages": [
             {"text":"open guess the price", "phrases":["how many persons"]},
