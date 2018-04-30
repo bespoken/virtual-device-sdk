@@ -27,7 +27,9 @@ Save the token that is generated - you will use it in the step below.
 Here is a simple example in Javascript:
 ```javascript
 const vdSDK = require("virtual-device-sdk");
-const virtualDevice = new vdSDK.VirtualDevice("<PUT_YOUR_TOKEN_HERE>");
+const locale = "en-US";
+const voiceId = "Joey"
+const virtualDevice = new vdSDK.VirtualDevice("<PUT_YOUR_TOKEN_HERE>", locale, voiceId);
 virtualDevice.message(message).then((result) => {
     console.log("Reply Transcript: " + result.transcript);
     console.log("Reply Audio: " + result.transcript_audio_url);
