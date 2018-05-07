@@ -21,10 +21,16 @@ export class VirtualDevice {
 
     }
 
-    public message(message: string, debug?: boolean): Promise<IVirtualDeviceResult> {
+    public message(message: string, debug?: boolean, phrases?: string): Promise<IVirtualDeviceResult> {
         message = this.normalizeMessage(message);
 
-        let url = this.baseURL + "/process?message=" + message + "&user_id=" + this.token;
+        let url = this.baseURL + "/process"
+            + "?message=" + message
+            + "&user_id=" + this.token;
+
+        if (phrases) {
+            url += "&phrases=" + phrases;
+        }
 
         if (debug) {
             url += "&debug=true";
