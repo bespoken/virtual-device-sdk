@@ -245,6 +245,8 @@ export class Validator {
             return ValidatorError.propertyError(parentProperty, expected, value);
         }
 
+        console.log("CheckObject" + parentProperty);
+
         for (const property of Object.keys(expected)) {
             const expectedPropertyValue = expected[property];
             const actualPropertyValue = value[property];
@@ -269,7 +271,14 @@ export class Validator {
     }
 
     private static toRegex(expectedValue: string) {
-        return new RegExp(expectedValue.trim().split("*").join(".*"));
+        // Turn * into .* on regex
+        let regex = expectedValue.trim().split("*").join(".*");
+        // Escape special values that we do NOT want to treat as a wildcard
+        regex = regex.split("+").join("\\+");
+        regex = regex.split("^").join("\\^");
+        regex = regex.split("$").join("\\$");
+        regex = regex.split("?").join("\\?");
+        return new RegExp(regex);
     }
 
     public resultItem: IVirtualDeviceValidatorResultItem;

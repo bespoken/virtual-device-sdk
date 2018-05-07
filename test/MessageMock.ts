@@ -144,7 +144,21 @@ function messageHandler(message: string): IVirtualDeviceResult {
             streamURL: null,
             transcript: "das Wetter ist schön",
         };
-    } else if (message.includes("open")) {
+    } else if (message.includes("special characters")) {
+        return {
+            card: {
+                imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
+                mainTitle: "Title of the card",
+                subTitle: "Simple Player Unit Test",
+                textField: "Text content for a standard card",
+                type: "BodyTemplate2",
+            },
+            message,
+            sessionTimeout: 0,
+            streamURL: "",
+            transcript: "welcome ^ to $ weird wildcard + characters?",
+        };
+    }else if (message.includes("open")) {
         return {
             card: {
                 imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
