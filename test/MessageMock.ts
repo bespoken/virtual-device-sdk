@@ -44,7 +44,7 @@ export class MessageMock {
 
                 const url = URL.parse(uri);
                 const params: any = qs.parse(url.query as string);
-                return processMessage(params.message);
+                return processMessage(params.message, params.phrases);
             });
     }
 
@@ -67,12 +67,12 @@ export class MessageMock {
 
 }
 
-function processMessage(message: string): IVirtualDeviceResult {
+function processMessage(message: string, phrases?: string): IVirtualDeviceResult {
     // if (message.includes("nonsense")) {
     //     return Promise.reject("Invalid token for user_id");
     // }
 
-    return messageHandler(message);
+    return messageHandler(message, phrases);
 }
 
 function processBatchMessages(payload: any): any {
@@ -84,7 +84,7 @@ function processBatchMessages(payload: any): any {
     return { results };
 }
 
-function messageHandler(message: string): IVirtualDeviceResult {
+function messageHandler(message: string, phrases?: string): IVirtualDeviceResult {
     if (message.includes("Hi")) {
         return {
             card: null,
@@ -126,6 +126,15 @@ function messageHandler(message: string): IVirtualDeviceResult {
             streamURL: null,
             transcript: "es ist Mittag",
         };
+    } else if (message.includes("phrases")) {
+        return {
+            card: null,
+            debug: {rawJSON: {messageBody: ""}},
+            message,
+            sessionTimeout: 0,
+            streamURL: null,
+            transcript: phrases as string,
+        };
     } else if (message.includes("what is the weather")) {
         return {
             card: null,
@@ -144,7 +153,21 @@ function messageHandler(message: string): IVirtualDeviceResult {
             streamURL: null,
             transcript: "das Wetter ist schön",
         };
-    } else if (message.includes("open")) {
+    } else if (message.includes("special characters")) {
+        return {
+            card: {
+                imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
+                mainTitle: "Title of the card",
+                subTitle: "Simple Player Unit Test",
+                textField: "Text content for a standard card",
+                type: "BodyTemplate2",
+            },
+            message,
+            sessionTimeout: 0,
+            streamURL: "",
+            transcript: "welcome ^ to $ weird wildcard + characters?",
+        };
+    }else if (message.includes("open")) {
         return {
             card: {
                 imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",

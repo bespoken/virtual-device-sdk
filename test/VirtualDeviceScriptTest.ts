@@ -352,6 +352,22 @@ describe("VirtualDeviceScript", function() {
             MessageMock.disable();
         });
 
+        it("succeeds with special characters", async () => {
+            const tests = [`
+"open special characters":
+  transcript: "welcome ^ to $ weird * + characters?"
+                `,
+            ];
+            const virtualDeviceScript = new VirtualDeviceScript(process.env.VIRTUAL_DEVICE_TOKEN, undefined, true);
+            for (const test of tests) {
+                const validatorResult = await virtualDeviceScript.execute(test);
+                assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+                for (const t of validatorResult.tests) {
+                    assert.equal(t.result, "success", `${JSON.stringify(t)}`);
+                }
+            }
+        });
+
         it("Uses explicit voice and language code programmatically", function(done) {
             MessageMock.onCall((url) => {
                 assert.include(url, "language_code=en-GB");
