@@ -21,7 +21,7 @@ export class VirtualDevice {
 
     }
 
-    public message(message: string, debug?: boolean, phrases?: string): Promise<IVirtualDeviceResult> {
+    public message(message: string, debug?: boolean, phrases?: string[]): Promise<IVirtualDeviceResult> {
         message = this.normalizeMessage(message);
 
         let url = this.baseURL + "/process"
@@ -29,7 +29,9 @@ export class VirtualDevice {
             + "&user_id=" + this.token;
 
         if (phrases) {
-            url += "&phrases=" + phrases;
+            for (const phrase of phrases) {
+                url += "&phrases=" + phrase;
+            }
         }
 
         if (debug) {
