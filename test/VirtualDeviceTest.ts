@@ -57,7 +57,7 @@ describe("VirtualDevice", function() {
         it("Should handle phrases correctly", async () => {
             const token = process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] as string;
             const sdk = new VirtualDevice(token, "de-DE");
-            const result = await sdk.message("phrases", false, "phrases being passed");
+            const result = await sdk.message("phrases", false, ["phrases being passed"]);
             console.log("Output: " + JSON.stringify(result));
             assert.equal(result.transcript, "phrases being passed");
         });

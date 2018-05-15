@@ -19,7 +19,15 @@ export class SequencedValidator extends VirtualDeviceValidator {
                 const validator: Validator = new Validator(resultItem, undefined);
                 this.emit("message", undefined, validator.resultItem, context);
 
-                const phrases = test.expected ? test.expected.transcript as string : undefined;
+                let phrases: string[] = [];
+                if (test.expected && test.expected.transcript) {
+                    if (Array.isArray(test.expected.transcript)) {
+                        phrases = test.expected.transcript as string[];
+                    } else if (test.expected.transcript) {
+                        phrases.push(test.expected.transcript);
+                    }
+                }
+
                 resultItem.actual = await virtualDevice.message(test.input, false, phrases);
                 const errors = validator.check();
                 validator.resultItem.errors = errors;
