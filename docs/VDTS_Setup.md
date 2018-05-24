@@ -1,10 +1,10 @@
-# Setting up Virtual Device Test Scripts
+# Setting up Virtual Device
 ## Background
-We need a Virtual Device in order to run your skill test scripts. What is a Virtual Device (VD)? it is like an Amazon Echo but made with code.
+We need a Virtual Device in order to test your Alexa skills, for example by running test scripts. What is a Virtual Device (VD)? it is like an Amazon Echo but made with code.
 
 We'll create a complimentary VD for your, the only thing we need you to do is to allow this VD to access your Amazon Skills. This is done through the creation of an authorization token.
 
-The authorization token represents the permission you give to the VD to execute the test scripts on your skills.
+The authorization token represents the permission you give to the VD to execute the tests on your skills.
 
 ## Getting an authorization token
 1. The way to get a token is through [Bespoken Dashboard](https://apps.bespoken.io/dashboard). Sign up for free or login; you will see a screen like this:
@@ -19,7 +19,7 @@ The authorization token represents the permission you give to the VD to execute 
 4. After providing your credentials you will return to Bespoken dashboard and the **"Validation Token"** will be retrieved automatically:
 ![Skill source with token retrieved](../assets/sourceWithToken.png "Token is retrieved automatically")
 
-5. Now that you have the token, you need to use it in the **`.env`** file of your test scripts project. If you are testing your English locale you can add an entry to the .env file using the `VIRTUAL_DEVICE_TOKEN_EN_US` parameter like in here:
+5. If you are creating Virtual Device Test Scripts, you need to use the token in the **`.env`** file of your test scripts project. For example, if you are testing your English locale you can add an entry to the .env file using the `VIRTUAL_DEVICE_TOKEN_EN_US` parameter like in here:
 ![Using the token in the configuration file](../assets/envFile.png "Using the token in the configuration file")
 
-And that is all you need in the setup process, now you can continue with the creation of your test scripts, launching your skill and interacting with it.
+And that is all you need in the setup process, now you can continue with the creation of your test scripts, or using Virtual Device programmatically.
