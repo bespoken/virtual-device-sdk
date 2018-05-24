@@ -1,8 +1,8 @@
 # Setting up Virtual Device
 ## Background
-We need a Virtual Device in order to test your Alexa skills. What is a Virtual Device? It is like a physical Amazon Echo, but one that can be interacted with programmatically.
+We need to create a Virtual Device in order to test your Alexa skills. What is a Virtual Device? It is like a physical Amazon Echo, but one that can be interacted with programmatically.
 
-We'll create a complimentary Virtual Device for you, the only thing we need you to do is to grant us to access to your Amazon Alexa account - and it is just your Alexa account. Once completed, you will have a Virtual Device token you can use in your tests.
+We'll create a complimentary Virtual Device for you, the only thing we need you to do is to grant us to access to your Amazon Alexa account - and it is just your Alexa account. Once completed, you will have a token, which uniquely identifies the Virtual Device, that you can use in your tests.
 
 
 ## Getting an authorization token
