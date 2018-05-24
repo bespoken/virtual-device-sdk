@@ -15,7 +15,7 @@ You can also write simple test scripts if you are not a programmer - [learn abou
     ```bash
     npm install virtual-device-sdk --save
     ```
-2. Get your token: Follow the instructions [here](/docs/VDTS_Setup.md).
+2. Get your token: Follow the instructions [here](/docs/setup.md).
 
 ## Sending a Message
 Here is a simple example in Javascript:
@@ -56,7 +56,7 @@ export interface ICard {
 # HTTP SDK
 The VirtualDevice service can also be called directly via HTTP.
 
-To use it, first get your token: Follow the instructions [here](/docs/VDTS_Setup.md).
+To use it, first get your token: Follow the instructions [here](/docs/setup.md).
 
 ## Requests
 The Base URL is:  

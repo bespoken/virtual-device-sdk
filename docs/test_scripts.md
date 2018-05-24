@@ -39,7 +39,7 @@ That means it was installed successfully!
 
 ## Configuration
 ### Virtual Device Token
-First, you need to get a token. See [here for instructions](VDTS_Setup.md).  
+First, you need to get a token. See [here for instructions](setup.md).  
 
 ### Environment Variables
 Create a file ".env" where you run the scripts.
