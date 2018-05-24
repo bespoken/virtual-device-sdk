@@ -1,6 +1,6 @@
 # Setting up Virtual Device
 ## Background
-We need a Virtual Device in order to test your Alexa skills, for example by running test scripts. What is a Virtual Device (VD)? it is like an Amazon Echo but made with code.
+We need a Virtual Device in order to test your Alexa skills. What is a Virtual Device (VD)? it is like an Amazon Echo but made with code.
 
 We'll create a complimentary VD for your, the only thing we need you to do is to allow this VD to access your Amazon Skills. This is done through the creation of an authorization token.
 
