@@ -11,17 +11,11 @@ You can also write simple test scripts if you are not a programmer - [learn abou
 
 # NodeJS SDK
 ## Installation
-Add the Virtual Device SDK to your project:
-```bash
-npm install virtual-device-sdk --save
-```
-
-Get your token:
-* Sign into the [Bespoken Dashboard](https://apps.bespoken.io/dashboard)
-* Create a source
-* Select the Validation tab and follow the instructions there
-
-Save the token that is generated - you will use it in the step below.
+1. Add the Virtual Device SDK to your project:
+    ```bash
+    npm install virtual-device-sdk --save
+    ```
+2. Get your token: Follow the instructions [here](/docs/VDTS_Setup.md).
 
 ## Sending a Message
 Here is a simple example in Javascript:
@@ -62,12 +56,7 @@ export interface ICard {
 # HTTP SDK
 The VirtualDevice service can also be called directly via HTTP.
 
-To use it, first get your token:
-* Sign into the [Bespoken Dashboard](https://apps.bespoken.io/dashboard)
-* Create a source
-* Select the Validation tab and follow the instructions there
-
-Save the token that is generated - you will use it in the step below.
+To use it, first get your token: Follow the instructions [here](/docs/VDTS_Setup.md).
 
 ## Requests
 The Base URL is:  
