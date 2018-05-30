@@ -138,12 +138,15 @@ export class VirtualDevice {
         });
     }
 
-    public resetSession(locale?: string): Promise<IVirtualDeviceResult> {
-        let message = "quit";
-        if (locale && locale === "de-DE") {
-            message = "stopp";
+    public waitForSessionToEnd() {
+        const ms: number = process.env.SESSION_IDLE_MS
+        ? parseInt(process.env.SESSION_IDLE_MS, 10)
+        : 5000;
+        const start = new Date().getTime();
+        let end = start;
+        while (end < start + ms) {
+          end = new Date().getTime();
         }
-        return this.message(message);
     }
 
     private handleBatchResponse(data: string): IVirtualDeviceResult[] {
