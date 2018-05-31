@@ -10,7 +10,7 @@ export class SequencedValidator extends VirtualDeviceValidator {
         const virtualDevice = this.virtualDevice(sequence);
 
         // Reset the session before each sequence
-        virtualDevice.waitForSessionToEnd();
+        await virtualDevice.waitForSessionToEnd();
 
         for (const test of sequence.tests) {
             try {

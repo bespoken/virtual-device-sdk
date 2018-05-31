@@ -11,7 +11,7 @@ export class BatchValidator extends VirtualDeviceValidator {
                                     context?: any): Promise<void> {
         const virtualDevice = this.virtualDevice(sequence);
         // Reset the session before each sequence
-        virtualDevice.waitForSessionToEnd();
+        await virtualDevice.waitForSessionToEnd();
 
         const messages = [];
         // Do one pass on the sequence to turn the tests into messages to send to the virtual device

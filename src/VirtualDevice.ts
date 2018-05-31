@@ -1,4 +1,4 @@
-import {IncomingMessage} from "http";
+import { IncomingMessage } from "http";
 import * as https from "https";
 import * as URL from "url";
 
@@ -76,7 +76,7 @@ export class VirtualDevice {
         });
     }
 
-    public batchMessage(messages: IMessage[], debug?: boolean): Promise<IVirtualDeviceResult []> {
+    public batchMessage(messages: IMessage[], debug?: boolean): Promise<IVirtualDeviceResult[]> {
         for (const message of messages) {
             message.text = this.normalizeMessage(message.text);
         }
@@ -96,7 +96,7 @@ export class VirtualDevice {
         }
 
         const url = URL.parse(this.baseURL);
-        return new Promise<IVirtualDeviceResult []>((resolve, reject) => {
+        return new Promise<IVirtualDeviceResult[]>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
 
@@ -138,15 +138,11 @@ export class VirtualDevice {
         });
     }
 
-    public waitForSessionToEnd() {
+    public async waitForSessionToEnd() {
         const ms: number = process.env.SESSION_IDLE_MS
-        ? parseInt(process.env.SESSION_IDLE_MS, 10)
-        : 8000;
-        const start = new Date().getTime();
-        let end = start;
-        while (end < start + ms) {
-          end = new Date().getTime();
-        }
+            ? parseInt(process.env.SESSION_IDLE_MS, 10)
+            : 8000;
+        return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     private handleBatchResponse(data: string): IVirtualDeviceResult[] {
