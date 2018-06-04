@@ -221,13 +221,13 @@ export class Validator {
 
         if (Array.isArray(expected)) {
             for (const expectedValue of expected) {
-                if (Validator.toRegex(expectedValue).test(value)) {
+                if (Validator.toRegex(expectedValue.toLowerCase()).test(value)) {
                     return undefined;
                 }
             }
             return ValidatorError.propertyError(property, expected, value);
         } else {
-            const matches = Validator.toRegex(expected).test(value);
+            const matches = Validator.toRegex(expected.toLowerCase()).test(value);
             if (matches) {
                 return undefined;
             } else {

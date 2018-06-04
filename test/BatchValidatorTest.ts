@@ -41,7 +41,7 @@ describe("BatchValidator", function() {
                     tests: [{
                         comparison: "contains",
                         expected: {
-                            transcript: "welcome to the simple audio player",
+                            transcript: "Welcome to the Simple Audio Player",
                         },
                         input: "open test player",
                         sequence: 1,

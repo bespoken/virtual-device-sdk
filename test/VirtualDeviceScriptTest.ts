@@ -52,7 +52,7 @@ describe("VirtualDeviceScript", function() {
                                 imageURL: "https://bespoken.io/wp-content/",
                                 title: "Title of the card",
                             },
-                            transcript: "welcome to the simple audio player",
+                            transcript: "Welcome to the Simple Audio Player",
                         },
                         input: "open test player",
                         sequence: 1,
