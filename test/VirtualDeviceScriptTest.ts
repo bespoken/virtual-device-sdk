@@ -31,7 +31,7 @@ describe("VirtualDeviceScript", function() {
         it("success", async () => {
             const scripContents = `
 "open test player": 
-  transcript: "welcome to the simple audio player"
+  transcript: "Welcome to the Simple Audio Player"
   card:
     title: Title of the card
     imageURL: https://bespoken.io/wp-content/
