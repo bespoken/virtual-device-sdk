@@ -121,23 +121,6 @@ describe("VirtualDevice", function() {
             assert.equal(sdk.normalizeMessage("hello"), "alexa hello");
         });
     });
-
-    describe("#normalizeTranscript()", () => {
-        before(() => {
-            // Always use mocks for this test
-            MessageMock.enable();
-        });
-
-        after(() => {
-            MessageMock.disable();
-        });
-
-        it("lowercase transcript", async () => {
-            const sdk = newVirtualDevice();
-            const result = await sdk.message("normalize", true);
-            assert.equal(result.transcript, "this should be lowercase");
-        });
-    });
 });
 
 function newVirtualDevice() {

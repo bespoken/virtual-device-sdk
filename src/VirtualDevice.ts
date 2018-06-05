@@ -58,7 +58,7 @@ export class VirtualDevice {
                 response.on("end", () => {
                     if (response.statusCode === 200) {
                         const result: IVirtualDeviceResult = JSON.parse(data);
-                        result.transcript = this.normalizeTranscript(result.transcript);
+                        result.transcript = result.transcript;
                         result.message = message;
                         resolve(result);
                     } else {
@@ -149,17 +149,10 @@ export class VirtualDevice {
         const json = JSON.parse(data);
         const results = [];
         for (const result of json.results) {
-            result.transcript = this.normalizeTranscript(result.transcript);
+            result.transcript = result.transcript;
             results.push(result);
         }
         return results;
-    }
-
-    private normalizeTranscript(transcript: string | null): string | null {
-        if (!transcript) {
-            return null;
-        }
-        return transcript.toLowerCase();
     }
 }
 
