@@ -58,7 +58,6 @@ export class VirtualDevice {
                 response.on("end", () => {
                     if (response.statusCode === 200) {
                         const result: IVirtualDeviceResult = JSON.parse(data);
-                        result.transcript = result.transcript;
                         result.message = message;
                         resolve(result);
                     } else {
@@ -147,12 +146,7 @@ export class VirtualDevice {
 
     private handleBatchResponse(data: string): IVirtualDeviceResult[] {
         const json = JSON.parse(data);
-        const results = [];
-        for (const result of json.results) {
-            result.transcript = result.transcript;
-            results.push(result);
-        }
-        return results;
+        return json.results;
     }
 }
 
