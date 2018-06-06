@@ -41,7 +41,7 @@ describe("BatchValidator", function() {
                     tests: [{
                         comparison: "contains",
                         expected: {
-                            transcript: "welcome to the simple audio player",
+                            transcript: "Welcome to the Simple Audio Player",
                         },
                         input: "open test player",
                         sequence: 1,
@@ -68,7 +68,7 @@ describe("BatchValidator", function() {
                 assert.equal(body.messages.length, 2);
                 assert.equal(body.messages[0].text, "open test player");
                 assert.equal(body.messages[0].phrases.length, 1);
-                assert.equal(body.messages[0].phrases[0], "welcome to the simple audio player");
+                assert.equal(body.messages[0].phrases[0], "Welcome to the Simple Audio Player");
                 assert.equal(body.messages[1].text, "tell test player to play");
             });
 

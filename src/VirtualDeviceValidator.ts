@@ -210,7 +210,8 @@ export interface IVirtualDeviceValidatorResult {
 export class Validator {
     private static checkString(property: string,
                                value: string | null,
-                               expected: undefined | string | string []): ValidatorError | undefined {
+                               expected: undefined | string | string [],
+                               caseSensitive: boolean = true): ValidatorError | undefined {
         if (!expected) {
             return undefined;
         }
@@ -219,14 +220,24 @@ export class Validator {
             return ValidatorError.propertyError(property, expected, value);
         }
 
+        if (!caseSensitive) {
+            value = value.toLowerCase();
+        }
+
         if (Array.isArray(expected)) {
-            for (const expectedValue of expected) {
+            for (let expectedValue of expected) {
+                if (!caseSensitive) {
+                    expectedValue = expectedValue.toLowerCase();
+                }
                 if (Validator.toRegex(expectedValue).test(value)) {
                     return undefined;
                 }
             }
             return ValidatorError.propertyError(property, expected, value);
         } else {
+            if (!caseSensitive) {
+                expected = expected.toLowerCase();
+            }
             const matches = Validator.toRegex(expected).test(value);
             if (matches) {
                 return undefined;
@@ -310,7 +321,8 @@ export class Validator {
         // Checks the transcript, stream and card - all must pass to be good!
         const transcriptError = Validator.checkString("transcript",
             this.resultItem.actual.transcript,
-            this.resultItem.test.expected.transcript);
+            this.resultItem.test.expected.transcript,
+            false);
         const streamError = Validator.checkString("streamURL",
             this.resultItem.actual.streamURL,
             this.resultItem.test.expected.streamURL);
