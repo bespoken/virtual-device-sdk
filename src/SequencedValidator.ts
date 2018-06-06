@@ -1,12 +1,17 @@
 import {
-    IVirtualDeviceTestSequence, IVirtualDeviceValidatorResult, IVirtualDeviceValidatorResultItem, Validator,
+    IVirtualDeviceTestSequence,
+    IVirtualDeviceValidatorResult,
+    IVirtualDeviceValidatorResultItem,
+    Validator,
+    ValidatorError,
     VirtualDeviceValidator,
 } from "./VirtualDeviceValidator";
 
 export class SequencedValidator extends VirtualDeviceValidator {
-    protected async executeSequence(sequence: IVirtualDeviceTestSequence,
-                                    result: IVirtualDeviceValidatorResult,
-                                    context?: any): Promise<void> {
+    protected async executeSequence(
+        sequence: IVirtualDeviceTestSequence,
+        result: IVirtualDeviceValidatorResult,
+        context?: any): Promise<void> {
         const virtualDevice = this.virtualDevice(sequence);
 
         // Reset the session before each sequence
@@ -14,7 +19,7 @@ export class SequencedValidator extends VirtualDeviceValidator {
 
         for (const test of sequence.tests) {
             try {
-                const resultItem: IVirtualDeviceValidatorResultItem = {test};
+                const resultItem: IVirtualDeviceValidatorResultItem = { test };
                 resultItem.status = "running";
                 const validator: Validator = new Validator(resultItem, undefined);
                 this.emit("message", undefined, validator.resultItem, context);
@@ -40,10 +45,12 @@ export class SequencedValidator extends VirtualDeviceValidator {
                 result.tests.push(validator.resultItem);
                 this.emit("result", undefined, validator.resultItem, context);
             } catch (err) {
-                const resultItem: IVirtualDeviceValidatorResultItem = {test};
+                const resultItem: IVirtualDeviceValidatorResultItem = { test };
                 const validator: Validator = new Validator(resultItem, err);
                 validator.resultItem.result = "failure";
                 validator.resultItem.status = "done";
+                const error = new ValidatorError(test.input, undefined, undefined, `SystemError: ${err.message}`);
+                validator.resultItem.errors = [error];
                 result.tests.push(validator.resultItem);
                 this.emit("result", undefined, validator.resultItem, context);
             }

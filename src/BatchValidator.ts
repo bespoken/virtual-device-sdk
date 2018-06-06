@@ -1,7 +1,11 @@
 import {IMessage} from "./VirtualDevice";
+
 import {
     IVirtualDeviceTestSequence,
-    IVirtualDeviceValidatorResult, IVirtualDeviceValidatorResultItem, Validator,
+    IVirtualDeviceValidatorResult,
+    IVirtualDeviceValidatorResultItem,
+    Validator,
+    ValidatorError,
     VirtualDeviceValidator,
 } from "./VirtualDeviceValidator";
 
@@ -38,6 +42,12 @@ export class BatchValidator extends VirtualDeviceValidator {
         } catch (e) {
             result.result = "failure";
             result.errorMessage = e.toString();
+            const test = sequence.tests[0];
+            const resultItem: IVirtualDeviceValidatorResultItem = {test};
+            resultItem.result = "failure";
+            resultItem.status = "done";
+            resultItem.errors = [new ValidatorError(test.input, undefined, undefined, `SystemError: ${e.message}`)];
+            result.tests = [resultItem];
             return;
         }
 
