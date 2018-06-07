@@ -158,15 +158,16 @@ export class VirtualDevice {
     }
 
     private applyHomophones(result: IVirtualDeviceResult) {
+        if (!result.debug) {
+            result.debug = {};
+        }
+
         if (!result.transcript) {
             return;
         }
+
         const keys = Object.keys(this.homophones);
-        if (result.debug) {
-            result.debug.rawTranscript = result.transcript;
-        } else {
-            result.debug = { rawTranscript: result.transcript };
-        }
+        result.debug.rawTranscript = result.transcript;
 
         for (const key of keys) {
             const homophones = this.homophones[key];

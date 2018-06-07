@@ -88,6 +88,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     if (message.includes("Hi")) {
         return {
             card: null,
+            debug: {},
             message: "Hi",
             sessionTimeout: 0,
             streamURL: null,
@@ -120,6 +121,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("homophone")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: null,
@@ -170,6 +172,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
                 textField: "Text content for a standard card",
                 type: "BodyTemplate2",
             },
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -184,6 +187,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
                 textField: "Text content for a standard card",
                 type: "BodyTemplate2",
             },
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -192,6 +196,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("tell")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "https://feeds.soundcloud.com/stream/309340878-user-652822799" +
@@ -201,6 +206,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("pause")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -209,6 +215,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("Alexa, exit")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -217,6 +224,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("alexa stopp")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -225,6 +233,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("alexa quit")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -233,6 +242,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("normalize")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -241,6 +251,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("hallo welt")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
