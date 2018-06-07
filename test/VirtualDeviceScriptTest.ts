@@ -482,6 +482,33 @@ describe("VirtualDeviceScript", function() {
         });
     });
 
+    describe("test homophones", () => {
+        beforeEach(() => {
+            MessageMock.enable();
+        });
+
+        afterEach(() => {
+            MessageMock.disable();
+        });
+
+        it("tests homophones replaced", async () => {
+            process.env["homophones.test"] = "tess, teds";
+            const tests = [`
+"homophone":
+  transcript: "the test is a good test"
+                `,
+            ];
+            const virtualDeviceScript = new VirtualDeviceScript(process.env.VIRTUAL_DEVICE_TOKEN, undefined, true);
+            for (const test of tests) {
+                const validatorResult = await virtualDeviceScript.execute(test);
+                assert.equal(validatorResult.result, "success", `${JSON.stringify(validatorResult)}`);
+                for (const t of validatorResult.tests) {
+                    assert.equal(t.result, "success", `${JSON.stringify(t)}`);
+                }
+            }
+        });
+    });
+
     describe("#on()", () => {
         let checkAuthStub: any;
         before(() => {

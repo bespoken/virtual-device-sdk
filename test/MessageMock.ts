@@ -102,7 +102,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
                 textField: "Text content for a standard card",
                 type: "BodyTemplate2",
             },
-            debug: {rawJSON: {messageBody: ""}},
+            debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
             message: "Hi",
             sessionTimeout: 0,
             streamURL: null,
@@ -111,16 +111,24 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("what time")) {
         return {
             card: null,
-            debug: {rawJSON: {messageBody: ""}},
+            debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
             message,
             sessionTimeout: 0,
             streamURL: null,
             transcript: "the time is 12:40 pm",
         };
+    } else if (message.includes("homophone")) {
+        return {
+            card: null,
+            message,
+            sessionTimeout: 0,
+            streamURL: null,
+            transcript: "the teds is a good tess",
+        };
     } else if (message.includes("wie spät ist es")) {
         return {
             card: null,
-            debug: {rawJSON: {messageBody: ""}},
+            debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
             message,
             sessionTimeout: 0,
             streamURL: null,
@@ -129,7 +137,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("phrases")) {
         return {
             card: null,
-            debug: {rawJSON: {messageBody: ""}},
+            debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
             message,
             sessionTimeout: 0,
             streamURL: null,
@@ -138,7 +146,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("what is the weather")) {
         return {
             card: null,
-            debug: {rawJSON: {messageBody: ""}},
+            debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
             message,
             sessionTimeout: 0,
             streamURL: null,
@@ -147,7 +155,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("Wie ist das Wetter")) {
         return {
             card: null,
-            debug: {rawJSON: {messageBody: ""}},
+            debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
             message,
             sessionTimeout: 0,
             streamURL: null,

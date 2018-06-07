@@ -144,9 +144,22 @@ export abstract class VirtualDeviceValidator {
 
         const locale = this._locale ? this._locale : sequence.locale;
         const voiceID = this._voiceID ? this._voiceID : sequence.voiceID;
-        return new VirtualDevice(token,
+        const virtualDevice = new VirtualDevice(token,
             locale,
             voiceID);
+
+        // Apply homophones
+        for (const key of Object.keys(process.env)) {
+            if (key.startsWith("homophones")) {
+                const word = key.substr("homophones".length + 1);
+                const homophones = process.env[key];
+                if (homophones) {
+                    const homophonesValues = homophones.split(",");
+                    virtualDevice.addHomophones(word, homophonesValues);
+                }
+            }
+        }
+        return virtualDevice;
     }
 }
 

@@ -121,6 +121,32 @@ describe("VirtualDevice", function() {
             assert.equal(sdk.normalizeMessage("hello"), "alexa hello");
         });
     });
+
+    describe("homophone tests", () => {
+        before(() => {
+            MessageMock.enable();
+        });
+
+        it("Should apply homophones on message call", async () => {
+            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE");
+            sdk.addHomophones("test", ["tess", "teds"]);
+            const result = await sdk.message("homophone", false, ["phrases being passed"]);
+            console.log("Output: " + JSON.stringify(result));
+            assert.equal(result.transcript, "the test is a good test");
+            assert.equal((result.debug as any).rawTranscript, "the teds is a good tess");
+        });
+
+        it("Should apply homophones on batch message call", async () => {
+            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE");
+            sdk.addHomophones("test", ["tess", "teds"]);
+            const result = await sdk.batchMessage([{text: "homophone"}, {text:  "homophone"}]);
+            console.log("Output: " + JSON.stringify(result));
+            assert.equal(result[0].transcript, "the test is a good test");
+            assert.equal((result[0].debug as any).rawTranscript, "the teds is a good tess");
+            assert.equal(result[1].transcript, "the test is a good test");
+            assert.equal((result[1].debug as any).rawTranscript, "the teds is a good tess");
+        });
+    });
 });
 
 function newVirtualDevice() {
