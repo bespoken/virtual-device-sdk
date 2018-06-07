@@ -125,7 +125,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
             message,
             sessionTimeout: 0,
             streamURL: null,
-            transcript: "the teds is a good tess",
+            transcript: "the teds tools are good too tess with",
         };
     } else if (message.includes("wie spät ist es")) {
         return {

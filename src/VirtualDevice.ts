@@ -170,10 +170,14 @@ export class VirtualDevice {
         result.debug.rawTranscript = result.transcript;
 
         for (const key of keys) {
+            // Replace underscore with space - because we use environment variables to set these at times,
+            //  underscores are needed
+            const word = key.split("_").join(" ");
+
             const homophones = this.homophones[key];
             for (const homophone of homophones) {
                 // Replace each of the homophones
-                result.transcript = result.transcript.split(homophone).join(key);
+                result.transcript = result.transcript.split(new RegExp("\\b" + homophone + "\\b")).join(word);
             }
         }
     }

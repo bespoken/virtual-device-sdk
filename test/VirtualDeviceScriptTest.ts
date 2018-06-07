@@ -493,9 +493,10 @@ describe("VirtualDeviceScript", function() {
 
         it("tests homophones replaced", async () => {
             process.env["homophones.test"] = "tess, teds";
+            process.env["homophones.to"] = "too";
             const tests = [`
 "homophone":
-  transcript: "the test is a good test"
+  transcript: "the test tools are good to test with"
                 `,
             ];
             const virtualDeviceScript = new VirtualDeviceScript(process.env.VIRTUAL_DEVICE_TOKEN, undefined, true);
