@@ -88,6 +88,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     if (message.includes("Hi")) {
         return {
             card: null,
+            debug: {},
             message: "Hi",
             sessionTimeout: 0,
             streamURL: null,
@@ -102,7 +103,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
                 textField: "Text content for a standard card",
                 type: "BodyTemplate2",
             },
-            debug: {rawJSON: {messageBody: ""}},
+            debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
             message: "Hi",
             sessionTimeout: 0,
             streamURL: null,
@@ -111,16 +112,25 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("what time")) {
         return {
             card: null,
-            debug: {rawJSON: {messageBody: ""}},
+            debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
             message,
             sessionTimeout: 0,
             streamURL: null,
             transcript: "the time is 12:40 pm",
         };
+    } else if (message.includes("homophone")) {
+        return {
+            card: null,
+            debug: {},
+            message,
+            sessionTimeout: 0,
+            streamURL: null,
+            transcript: "the teds tools are good too tess with",
+        };
     } else if (message.includes("wie spät ist es")) {
         return {
             card: null,
-            debug: {rawJSON: {messageBody: ""}},
+            debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
             message,
             sessionTimeout: 0,
             streamURL: null,
@@ -129,7 +139,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("phrases")) {
         return {
             card: null,
-            debug: {rawJSON: {messageBody: ""}},
+            debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
             message,
             sessionTimeout: 0,
             streamURL: null,
@@ -138,7 +148,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("what is the weather")) {
         return {
             card: null,
-            debug: {rawJSON: {messageBody: ""}},
+            debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
             message,
             sessionTimeout: 0,
             streamURL: null,
@@ -147,7 +157,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("Wie ist das Wetter")) {
         return {
             card: null,
-            debug: {rawJSON: {messageBody: ""}},
+            debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
             message,
             sessionTimeout: 0,
             streamURL: null,
@@ -162,6 +172,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
                 textField: "Text content for a standard card",
                 type: "BodyTemplate2",
             },
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -176,6 +187,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
                 textField: "Text content for a standard card",
                 type: "BodyTemplate2",
             },
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -184,6 +196,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("tell")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "https://feeds.soundcloud.com/stream/309340878-user-652822799" +
@@ -193,6 +206,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("pause")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -201,6 +215,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("Alexa, exit")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -209,6 +224,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("alexa stopp")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -217,6 +233,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("alexa quit")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -225,6 +242,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("normalize")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",
@@ -233,6 +251,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
     } else if (message.includes("hallo welt")) {
         return {
             card: null,
+            debug: {},
             message,
             sessionTimeout: 0,
             streamURL: "",

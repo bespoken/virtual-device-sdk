@@ -19,6 +19,7 @@ describe("ConsolePrinter", function() {
                 {
                     actual: {
                         card: null,
+                        debug: {},
                         message: "open test skill",
                         sessionTimeout: 12.709280015945435,
                         streamURL: null,
@@ -42,6 +43,7 @@ describe("ConsolePrinter", function() {
                 {
                     actual: {
                         card: null,
+                        debug: {},
                         message: "now do something",
                         sessionTimeout: 12.709280015945435,
                         streamURL: null,
