@@ -83,7 +83,7 @@ This is a useful feature for tests that are run against multiple instances of th
 ### Homophones
 It is now possible to specify homophone values for transcripts.
 
-This helps when the expected response is mis-understood - for example, the virtual device may come back with "okay" for "ok".
+This helps when the actual response is mis-understood - for example, the virtual device may come back with "okay" for "ok".
 This is because our tool relies on speech recognition for the transcripts, which is imperfect.
 
 Specifying homophones can improve the readability of tests. To set them, just enter values like this:
@@ -91,7 +91,7 @@ Specifying homophones can improve the readability of tests. To set them, just en
 homophones.okay=ok,OK
 ```
 
-And when writing testings, use the value "okay" - it will automatically then accept "ok" and "OK" if that is what comes back from the virtual device.
+And when writing tests, use the value "okay" - it will automatically then accept "ok" and "OK" if that is what comes back from the virtual device.
 
 ## Test File Structure
 Tests go into files with a suffix ".yml". One or many tests can be contained in each test.
