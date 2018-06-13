@@ -83,7 +83,7 @@ This is a useful feature for tests that are run against multiple instances of th
 ### Homophones
 It is now possible to specify homophone values for transcripts.
 
-This helps when the actual response is mis-understood - for example, the virtual device may come back with "okay" for "ok".
+This helps when the actual response is mis-understood - for example, the virtual device may come back with "ok" for "okay".
 This is because our tool relies on speech recognition for the transcripts, which is imperfect.
 
 Specifying homophones can improve the readability of tests. To set them, just enter values like this:
