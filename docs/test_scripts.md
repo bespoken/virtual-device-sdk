@@ -80,6 +80,18 @@ Will be turned into this:
 
 This is a useful feature for tests that are run against multiple instances of the same skill, where there are slight variations in the input or output.
 
+### Homophones
+It is now possible to specify homophone values for transcripts.
+
+This helps when the actual response is mis-understood - for example, the virtual device may come back with "ok" for "okay".
+This is because our tool relies on speech recognition for the transcripts, which is imperfect.
+
+Specifying homophones can improve the readability of tests. To set them, just enter values like this:
+```
+homophones.okay=ok,OK
+```
+
+And when writing tests, use the value "okay" - it will automatically then accept "ok" and "OK" if that is what comes back from the virtual device.
 
 ## Test File Structure
 Tests go into files with a suffix ".yml". One or many tests can be contained in each test.
