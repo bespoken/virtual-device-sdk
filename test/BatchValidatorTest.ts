@@ -16,11 +16,11 @@ describe("BatchValidator", function() {
     this.timeout(60000);
     dotenv.config();
 
-    before(() => {
+    beforeEach(() => {
         MessageMock.enableIfConfigured();
     });
 
-    after(() => {
+    afterEach(() => {
         MessageMock.disable();
     });
 
@@ -267,6 +267,7 @@ describe("BatchValidator", function() {
             const checkAuthResult = await virtualDeviceValidator.checkAuth("simple player");
             assert.equal(checkAuthResult, "AUTHORIZED");
         });
+
         it("handles replied errors", async () => {
             nock("https://source-api.bespoken.tools")
                 .get("/v1/skillAuthorized")
