@@ -51,7 +51,6 @@ jobs:
           prefix: coverage
       - store_test_results: # special step to upload test results for display in Test Summary
           path: test-results.xml
-  
   node8:
     docker:
       # specify the version you desire here
