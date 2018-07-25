@@ -1,0 +1,112 @@
+version: 2
+jobs:
+  node6:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:6
+
+    steps:
+      - checkout
+      
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run:
+          name: install-npm-wee
+          command: npm install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
+      - run:
+          name: set env variables
+          command: |
+             echo 'export CODECOV_TOKEN=$CODECOV_TOKEN' >> $BASH_ENV
+             echo 'export TEST_TOKEN=$TEST_TOKEN' >> $BASH_ENV
+             echo 'export TEST_TOKEN_DE=$TEST_TOKEN_DE' >> $BASH_ENV
+             echo 'export TEST_TOKEN_GB=$TEST_TOKEN_GB' >> $BASH_ENV
+             echo 'export VIRTUAL_DEVICE_BASE_URL=$VIRTUAL_DEVICE_BASE_URL' >> $BASH_ENV
+             echo 'export VIRTUAL_DEVICE_TOKEN=$VIRTUAL_DEVICE_TOKEN' >> $BASH_ENV
+             echo 'export VIRTUAL_DEVICE_TOKEN_DE_DE=$VIRTUAL_DEVICE_TOKEN_DE_DE' >> $BASH_ENV
+             echo 'export VIRTUAL_DEVICE_TOKEN_EN_GB=$VIRTUAL_DEVICE_TOKEN_EN_GB' >> $BASH_ENV
+             source $BASH_ENV
+
+      # run tests!
+      - run: npm run tsc
+      - run: npm run test
+
+      - run: npm run posttest
+
+      - store_artifacts: # special step to save test results as as artifact
+          path: test-results.xml
+          prefix: tests
+      - store_artifacts:
+          path: coverage
+          prefix: coverage
+      - store_test_results: # special step to upload test results for display in Test Summary
+          path: test-results.xml
+  node8:
+    docker:
+      # specify the version you desire here
+      - image: circleci/node:8
+
+    steps:
+      - checkout
+      
+      # Download and cache dependencies
+      - restore_cache:
+          keys:
+          - v1-dependencies-{{ checksum "package.json" }}
+          # fallback to using the latest cache if no exact match is found
+          - v1-dependencies-
+
+      - run:
+          name: install-npm-wee
+          command: npm install
+
+      - save_cache:
+          paths:
+            - node_modules
+          key: v1-dependencies-{{ checksum "package.json" }}
+
+      - run:
+          name: set env variables
+          command: |
+             echo 'export CODECOV_TOKEN=$CODECOV_TOKEN' >> $BASH_ENV
+             echo 'export TEST_TOKEN=$TEST_TOKEN' >> $BASH_ENV
+             echo 'export TEST_TOKEN_DE=$TEST_TOKEN_DE' >> $BASH_ENV
+             echo 'export TEST_TOKEN_GB=$TEST_TOKEN_GB' >> $BASH_ENV
+             echo 'export VIRTUAL_DEVICE_BASE_URL=$VIRTUAL_DEVICE_BASE_URL' >> $BASH_ENV
+             echo 'export VIRTUAL_DEVICE_TOKEN=$VIRTUAL_DEVICE_TOKEN' >> $BASH_ENV
+             echo 'export VIRTUAL_DEVICE_TOKEN_DE_DE=$VIRTUAL_DEVICE_TOKEN_DE_DE' >> $BASH_ENV
+             echo 'export VIRTUAL_DEVICE_TOKEN_EN_GB=$VIRTUAL_DEVICE_TOKEN_EN_GB' >> $BASH_ENV
+             source $BASH_ENV
+      # run tests!
+      - run: npm run tsc
+      - run: npm run test
+
+      - run: npm run posttest
+
+      - store_artifacts: # special step to save test results as as artifact
+          path: test-results.xml
+          prefix: tests
+      - store_artifacts:
+          path: coverage
+          prefix: coverage
+      - store_test_results: # special step to upload test results for display in Test Summary
+          path: test-results.xml          
+
+workflows:
+  version: 2
+  build_and_test:
+    jobs:
+      - node6
+      - node8:
+        requires:
+            - node6
