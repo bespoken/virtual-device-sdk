@@ -104,7 +104,9 @@ jobs:
 
 workflows:
   version: 2
-  build_and_test:
+  build-and-test:
     jobs:
       - node6
-      - node8
+      - node8:
+          requires:
+            - node6
