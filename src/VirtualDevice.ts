@@ -114,7 +114,7 @@ export class VirtualDevice {
                 host: url.hostname,
                 method: "POST",
                 path,
-                port: 3000,
+                port: 443,
             };
 
             const request = https.request(requestOptions, callback);
