@@ -23,7 +23,7 @@ describe("VirtualDevice", function() {
             assert.isDefined(results);
         });
 
-        it("Should have stream URL", async () => {
+        it.skip("Should have stream URL", async () => {
             const sdk = newVirtualDevice();
             const result = await sdk.message("tell test player to play");
             console.log("Output: " + JSON.stringify(result));
@@ -32,7 +32,7 @@ describe("VirtualDevice", function() {
                 "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010"));
         });
 
-        it("Should have debug info", async () => {
+        it.skip("Should have debug info", async () => {
             const sdk = newVirtualDevice();
             const result = await sdk.message("what is the weather", true);
             console.log("Output: " + JSON.stringify(result));
