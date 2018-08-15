@@ -11,23 +11,12 @@ export class VirtualDevice {
             : "https://virtual-device.bespoken.io";
     }
 
-    public normalizeMessage(message: string): string {
-        // If there is just one word, prefix it with alexa
-        if (message.trim().split(" ").length === 1) {
-            message = "alexa " + message;
-        }
-
-        return message;
-    }
-
     public addHomophones(word: string, homophones: string[]) {
         homophones = homophones.map((s) => s.trim());
         this.homophones[word] = homophones;
     }
 
     public message(message: string, debug?: boolean, phrases?: string[]): Promise<IVirtualDeviceResult> {
-        message = this.normalizeMessage(message);
-
         let url = this.baseURL + "/process"
             + "?message=" + message
             + "&user_id=" + this.token;
@@ -81,10 +70,6 @@ export class VirtualDevice {
     }
 
     public batchMessage(messages: IMessage[], debug?: boolean): Promise<IVirtualDeviceResult[]> {
-        for (const message of messages) {
-            message.text = this.normalizeMessage(message.text);
-        }
-
         let path = "/batch_process?user_id=" + this.token;
 
         if (debug) {

@@ -110,16 +110,6 @@ describe("VirtualDevice", function() {
         after(() => {
             MessageMock.disable();
         });
-
-        it("Should transform no to 'alexa no'", async () => {
-            const sdk = newVirtualDevice();
-            assert.equal(sdk.normalizeMessage("No"), "alexa No");
-        });
-
-        it("Should transform hello to 'alexa hello'", async () => {
-            const sdk = newVirtualDevice();
-            assert.equal(sdk.normalizeMessage("hello"), "alexa hello");
-        });
     });
 
     describe("homophone tests", () => {
