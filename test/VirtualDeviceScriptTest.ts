@@ -179,7 +179,7 @@ describe("VirtualDeviceScript", function() {
             checkAuthStub.restore();
         });
 
-        it.skip("success", async () => {
+        it("success", async () => {
             const tests = [`
 "open test player":
   transcript: "welcome to the si*le audio* player"
@@ -216,7 +216,7 @@ describe("VirtualDeviceScript", function() {
             assert.equal(validatorResult.result, "failure", `${JSON.stringify(validatorResult)}`);
         });
 
-        it.skip("success sequence", async () => {
+        it("success sequence", async () => {
             const scripContents = `
 "what is the weather": "*"
 "open test player": "welcome to the simple audio player"
@@ -273,7 +273,7 @@ describe("VirtualDeviceScript", function() {
             checkAuthStub.restore();
         });
 
-        it.skip("success", async () => {
+        it("success", async () => {
             const tests = [`
 "open test player":
   transcript: "welcome to the si*le audio* player"

@@ -34,7 +34,7 @@ describe("BatchValidator", function() {
             checkAuthStub.restore();
         });
 
-        it.skip("success", async () => {
+        it("success", async () => {
             const sequences = [
                 {
                     invocationName: "test player",
@@ -119,7 +119,7 @@ describe("BatchValidator", function() {
             assert.isUndefined(validatorResult.errorMessage, validatorResult.errorMessage);
         });
 
-        it.skip("failure", async () => {
+        it("failure", async () => {
             const sequences = [
                 {
                     invocationName: "test player",
@@ -144,7 +144,7 @@ describe("BatchValidator", function() {
             }
         });
 
-        it.skip("has deep failure", async () => {
+        it("has deep failure", async () => {
             const sequences = [
                 {
                     invocationName: "test player",

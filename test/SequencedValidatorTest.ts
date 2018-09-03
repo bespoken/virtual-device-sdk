@@ -27,7 +27,7 @@ describe("SequencedValidator", function() {
         after(() => {
             checkAuthStub.restore();
         });
-        it.skip("success", async () => {
+        it("success", async () => {
             const sequences = [
                 {
                     invocationName: "test player",
@@ -57,7 +57,7 @@ describe("SequencedValidator", function() {
             }
         });
 
-        it.skip("failure", async () => {
+        it("failure", async () => {
             const sequences = [
                 {
                     invocationName: "test player",
