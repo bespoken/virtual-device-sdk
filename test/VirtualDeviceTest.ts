@@ -25,14 +25,14 @@ describe("VirtualDevice", function() {
 
         it("Should have stream URL", async () => {
             const sdk = newVirtualDevice();
-            const result = await sdk.message("tell test player to play");
+            const result = await sdk.message("open test player and play");
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.streamURL);
             assert.isTrue((result.streamURL as any).startsWith(
                 "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010"));
         });
 
-        it("Should have debug info", async () => {
+        xit("Should have debug info", async () => {
             const sdk = newVirtualDevice();
             const result = await sdk.message("what is the weather", true);
             console.log("Output: " + JSON.stringify(result));
