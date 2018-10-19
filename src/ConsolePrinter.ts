@@ -3,6 +3,7 @@ import * as path from "path";
 import {
     IVirtualDeviceValidatorResult, IVirtualDeviceValidatorResultItem, ValidatorError,
 } from "./VirtualDeviceValidator";
+import * as package from "../package.json";
 
 // Configured to force a max line length of 120
 const TEST_NAME_LENGTH = 20;
@@ -124,10 +125,10 @@ export class ConsolePrinter {
         return output;
     }
 
-    public printSummary(output: string) {
+    public printSummary(output: string): string {
         // Output summary info
         const summaryPadding = 3;
-        output += "\n";
+        output += `\nvirtual-device-sdk version: ${package.version}\n`;
         const hasErrors = (this.totalTests !== this.successfulTests);
         output = ConsolePrinter.concat(output, "Summary:", hasErrors);
         output = ConsolePrinter.concat(output, "Files:        "
