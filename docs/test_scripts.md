@@ -1,4 +1,8 @@
 # Using the Virtual Device Test Scripts
+**DEPRECATED**  
+*Please note - this feature has been incorporated as part of our core Bespoken CLI, with an updated testing syntax*  
+***Go here - https://read.bespoken.io/end-to-end/getting-started to learn about our new test scripts.***
+
 ## Background
 The Virtual Device Test Scripts are meant to make it easy for anyone to write automated tests for Alexa (and Google Assistant, soon).
 
