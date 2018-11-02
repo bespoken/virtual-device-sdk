@@ -60,7 +60,7 @@ export class VirtualDevice {
         }
 
         url = encodeURI(url);
-        const urlEncoded = URL.parse(this.baseURL);
+        const urlParsed = URL.parse(this.baseURL);
         return new Promise<IVirtualDeviceResult>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
@@ -81,7 +81,7 @@ export class VirtualDevice {
                 });
             };
 
-            const request = this.httpInterface(urlEncoded).get(url as any, callback);
+            const request = this.httpInterface(urlParsed).get(url as any, callback);
             request.on("error", function(error: string) {
                 reject(error);
             });
