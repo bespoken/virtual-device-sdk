@@ -143,17 +143,21 @@ describe("VirtualDevice", function() {
         });
     });
 
-    describe("httpInterfacePort", () => {
-        it("return valid port", async () => {
+    describe("httpInterface and httpInterfacePort", () => {
+        it("return valid interface and port", async () => {
             const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE");
 
             let url = URL.parse("http://localhost:3000");
             let port = sdk.httpInterfacePort(url);
+            let httpInterface = sdk.httpInterface(url);
             assert.equal(port, 3000);
+            assert.isDefined(httpInterface.METHODS);
 
             url = URL.parse("https://virtual-device.bespoken.io");
             port = sdk.httpInterfacePort(url);
             assert.equal(port, 443);
+            httpInterface = sdk.httpInterface(url);
+            assert.isUndefined(httpInterface.METHODS);
 
             url = URL.parse("http://virtual-device.bespoken.io");
             port = sdk.httpInterfacePort(url);
