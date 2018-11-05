@@ -29,8 +29,8 @@ describe("VirtualDevice", function() {
             const result = await sdk.message("open test player and play");
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.streamURL);
-            // assert.isTrue((result.streamURL as any).startsWith(
-            //     "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010"));
+            assert.isTrue((result.streamURL as any).startsWith(
+                "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010"));
         });
 
         xit("Should have debug info", async () => {
@@ -74,7 +74,7 @@ describe("VirtualDevice", function() {
             console.log("Output: " + JSON.stringify(results));
             assert.equal(results.length, 3);
             assert.equal(results[2].message, "tell test player to play");
-            // assert.include(results[2].streamURL as string, "https://feeds.soundcloud.com/stream/");
+            assert.include(results[2].streamURL as string, "https://feeds.soundcloud.com/stream/");
         });
 
         it("Should return from several inputs, using v2", async () => {
