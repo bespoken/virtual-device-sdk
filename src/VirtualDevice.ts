@@ -1,4 +1,5 @@
 import { IncomingMessage } from "http";
+import * as http from "http";
 import * as https from "https";
 import * as URL from "url";
 
@@ -14,6 +15,25 @@ export class VirtualDevice {
     public addHomophones(word: string, homophones: string[]) {
         homophones = homophones.map((s) => s.trim());
         this.homophones[word] = homophones;
+    }
+
+    public httpInterface(url: any): any {
+        if (url.protocol === "https:") {
+            return https;
+        } else {
+            return http;
+        }
+    }
+
+    public httpInterfacePort(url: any): any {
+        if (url.port) {
+            return url.port;
+        }
+        if (url.protocol === "https:") {
+            return 443;
+        } else {
+            return 80;
+        }
     }
 
     public message(message: string, debug?: boolean, phrases?: string[]): Promise<IVirtualDeviceResult> {
@@ -40,6 +60,7 @@ export class VirtualDevice {
         }
 
         url = encodeURI(url);
+        const urlParsed = URL.parse(this.baseURL);
         return new Promise<IVirtualDeviceResult>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
@@ -60,7 +81,7 @@ export class VirtualDevice {
                 });
             };
 
-            const request = https.get(url as any, callback);
+            const request = this.httpInterface(urlParsed).get(url as any, callback);
             request.on("error", function(error: string) {
                 reject(error);
             });
@@ -85,6 +106,7 @@ export class VirtualDevice {
         }
 
         const url = URL.parse(this.baseURL);
+
         return new Promise<IVirtualDeviceResult[]>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
@@ -114,10 +136,10 @@ export class VirtualDevice {
                 host: url.hostname,
                 method: "POST",
                 path,
-                port: 443,
+                port: this.httpInterfacePort(url),
             };
 
-            const request = https.request(requestOptions, callback);
+            const request = this.httpInterface(url).request(requestOptions, callback);
             request.on("error", function(error: string) {
                 reject(error);
             });
@@ -166,7 +188,6 @@ export class VirtualDevice {
             }
         }
     }
-
 }
 
 export interface IVirtualDeviceResult {

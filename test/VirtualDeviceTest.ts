@@ -1,5 +1,6 @@
 import {assert} from "chai";
 import * as dotenv from "dotenv";
+import * as URL from "url";
 import {VirtualDevice} from "../src/VirtualDevice";
 import {MessageMock} from "./MessageMock";
 
@@ -139,6 +140,28 @@ describe("VirtualDevice", function() {
             assert.equal((result[0].debug as any).rawTranscript, "the teds tools are good too tess with");
             assert.equal(result[1].transcript, "the test tools are good to test with");
             assert.equal((result[1].debug as any).rawTranscript, "the teds tools are good too tess with");
+        });
+    });
+
+    describe("httpInterface and httpInterfacePort", () => {
+        it("return valid interface and port", async () => {
+            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE");
+
+            let url = URL.parse("http://localhost:3000");
+            let port = sdk.httpInterfacePort(url);
+            let httpInterface = sdk.httpInterface(url);
+            assert.equal(port, 3000);
+            assert.isDefined(httpInterface.METHODS);
+
+            url = URL.parse("https://virtual-device.bespoken.io");
+            port = sdk.httpInterfacePort(url);
+            assert.equal(port, 443);
+            httpInterface = sdk.httpInterface(url);
+            assert.isUndefined(httpInterface.METHODS);
+
+            url = URL.parse("http://virtual-device.bespoken.io");
+            port = sdk.httpInterfacePort(url);
+            assert.equal(port, 80);
         });
     });
 });
