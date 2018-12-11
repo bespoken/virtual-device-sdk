@@ -37,13 +37,14 @@ export class VirtualDevice {
     }
 
     public message(message: string, debug?: boolean, phrases?: string[]): Promise<IVirtualDeviceResult> {
+        const encodedMessage = encodeURIComponent(message);
         let url = this.baseURL + "/process"
-            + "?message=" + message
+            + "?message=" + encodedMessage
             + "&user_id=" + this.token;
 
         if (phrases) {
             for (const phrase of phrases) {
-                url += "&phrases=" + phrase;
+                url += "&phrases=" + encodeURIComponent(phrase);
             }
         }
 
