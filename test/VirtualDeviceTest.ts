@@ -48,6 +48,19 @@ describe("VirtualDevice", function() {
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.transcript);
         });
+
+        it("Should return a transcript when message has specials characters", async () => {
+            const sdk = newVirtualDevice();
+            const results = await sdk.message("what is rock & roll", false, ["rock & roll", "rock & roll"]);
+            assert.isDefined(results);
+            assert.equal(results.message, "what is rock & roll");
+        });
+
+        it("Should return a transcript when newConversation is active", async () => {
+            const sdk = newVirtualDevice();
+            const results = await sdk.message("what is rock & roll", undefined, undefined, true);
+            assert.isDefined(results);
+        });
     });
 
     describe("#message() with phrases", () => {
@@ -60,7 +73,7 @@ describe("VirtualDevice", function() {
             const sdk = new VirtualDevice(token, "de-DE");
             const result = await sdk.message("phrases", false, ["phrases being passed"]);
             console.log("Output: " + JSON.stringify(result));
-            assert.equal(result.transcript, "phrases being passed");
+            assert.equal(result.transcript, "phrases%20being%20passed");
         });
     });
 

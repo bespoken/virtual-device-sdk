@@ -317,7 +317,7 @@ describe("VirtualDeviceScript", function() {
         it("Uses explicit voice and language code, UK", async () => {
             const scriptContents = `
 "config":
-  "voiceID": "Geraint"
+  "voiceID": "Brian"
   "locale": "en-GB"
   
 "what time is it": "*"
