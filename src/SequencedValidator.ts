@@ -33,7 +33,7 @@ export class SequencedValidator extends VirtualDeviceValidator {
                     }
                 }
 
-                resultItem.actual = await virtualDevice.message(test.input, false, phrases);
+                resultItem.actual = await virtualDevice.message(test.input, false, phrases, test.sequenceIndex === 1);
                 const errors = validator.check();
                 validator.resultItem.errors = errors;
                 if (validator.resultItem && errors.length === 0) {
