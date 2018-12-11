@@ -36,7 +36,8 @@ export class VirtualDevice {
         }
     }
 
-    public message(message: string, debug?: boolean, phrases?: string[]): Promise<IVirtualDeviceResult> {
+    public message(message: string, debug?: boolean,
+                   phrases?: string[], newConversation?: boolean): Promise<IVirtualDeviceResult> {
         const encodedMessage = encodeURIComponent(message);
         let url = this.baseURL + "/process"
             + "?message=" + encodedMessage
@@ -50,6 +51,10 @@ export class VirtualDevice {
 
         if (debug) {
             url += "&debug=true";
+        }
+
+        if (newConversation) {
+            url += "&new_conversation=true";
         }
 
         if (this.locale) {

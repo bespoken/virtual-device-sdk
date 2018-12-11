@@ -55,6 +55,12 @@ describe("VirtualDevice", function() {
             assert.isDefined(results);
             assert.equal(results.message, "what is rock & roll");
         });
+
+        it("Should return a transcript when newConversation is active", async () => {
+            const sdk = newVirtualDevice();
+            const results = await sdk.message("what is rock & roll", undefined, undefined, true);
+            assert.isDefined(results);
+        });
     });
 
     describe("#message() with phrases", () => {
