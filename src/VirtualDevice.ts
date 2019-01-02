@@ -6,7 +6,10 @@ import * as URL from "url";
 export class VirtualDevice {
     public baseURL: string;
     public homophones: {[id: string]: string[]} = {};
-    public constructor(public token: string, public locale?: string, public voiceID?: string) {
+    public constructor(public token: string, 
+        public locale?: string, 
+        public voiceID?: string,
+        public skipSTT?: boolean) {
         this.baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
             ? process.env.VIRTUAL_DEVICE_BASE_URL
             : "https://virtual-device.bespoken.io";
@@ -65,6 +68,10 @@ export class VirtualDevice {
             url += "&voice_id=" + this.voiceID;
         }
 
+        if (this.skipSTT) {
+            url += "&skip_stt=true";
+        }
+
         url = encodeURI(url);
         const urlParsed = URL.parse(this.baseURL);
         return new Promise<IVirtualDeviceResult>((resolve, reject) => {
@@ -109,6 +116,10 @@ export class VirtualDevice {
 
         if (this.voiceID) {
             path += "&voice_id=" + this.voiceID;
+        }
+
+        if (this.skipSTT) {
+            path += "&skip_stt=true";
         }
 
         const url = URL.parse(this.baseURL);

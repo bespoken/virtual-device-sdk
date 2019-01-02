@@ -12,7 +12,6 @@ describe("VirtualDevice", function() {
     before(() => {
         MessageMock.enableIfConfigured();
     });
-
     after(() => {
         MessageMock.disable();
     });
