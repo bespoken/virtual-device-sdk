@@ -176,6 +176,19 @@ describe("VirtualDevice", function() {
             assert.equal(port, 80);
         });
     });
+
+    describe("Async batch process", () => {
+        before(() => {
+            MessageMock.enable();
+        });
+
+        it("return conversation uuid", async () => {
+            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
+
+            const results = await sdk.batchMessage([{text: "wie spät ist es"}, {text: "Wie ist das Wetter"}]);
+            assert.equal(results.uuid, "generated-uuid");
+        });
+    });
 });
 
 function newVirtualDevice() {
