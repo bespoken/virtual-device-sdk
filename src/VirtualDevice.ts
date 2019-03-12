@@ -6,10 +6,11 @@ import * as URL from "url";
 export class VirtualDevice {
     public baseURL: string;
     public homophones: {[id: string]: string[]} = {};
-    public constructor(public token: string, 
-        public locale?: string, 
-        public voiceID?: string,
-        public skipSTT?: boolean) {
+    public constructor( public token: string,
+                        public locale?: string,
+                        public voiceID?: string,
+                        public skipSTT?: boolean,
+                        public asyncMode?: boolean) {
         this.baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
             ? process.env.VIRTUAL_DEVICE_BASE_URL
             : "https://virtual-device.bespoken.io";
@@ -103,7 +104,7 @@ export class VirtualDevice {
         });
     }
 
-    public batchMessage(messages: IMessage[], debug?: boolean): Promise<IVirtualDeviceResult[]> {
+    public batchMessage(messages: IMessage[], debug?: boolean): Promise<IVirtualDeviceResult[] | any> {
         let path = "/batch_process?user_id=" + this.token;
 
         if (debug) {
@@ -122,9 +123,13 @@ export class VirtualDevice {
             path += "&skip_stt=true";
         }
 
+        if (this.asyncMode) {
+            path += "&async_mode=true";
+        }
+
         const url = URL.parse(this.baseURL);
 
-        return new Promise<IVirtualDeviceResult[]>((resolve, reject) => {
+        return new Promise<IVirtualDeviceResult[] | any>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
 
@@ -134,7 +139,11 @@ export class VirtualDevice {
 
                 response.on("end", () => {
                     if (response.statusCode === 200) {
-                        resolve(this.handleBatchResponse(data as string));
+                        if (this.asyncMode) {
+                            resolve(this.handleAsynchResponse(data as string));
+                        } else {
+                            resolve(this.handleBatchResponse(data as string));
+                        }
                     } else {
                         reject(data);
                     }
@@ -181,6 +190,10 @@ export class VirtualDevice {
         return json.results;
     }
 
+    private handleAsynchResponse(data: string): IConversationResult {
+        return JSON.parse(data);
+    }
+
     private applyHomophones(result: IVirtualDeviceResult) {
         if (!result.debug) {
             result.debug = {};
@@ -205,6 +218,10 @@ export class VirtualDevice {
             }
         }
     }
+}
+
+export interface IConversationResult {
+    uuid: string;
 }
 
 export interface IVirtualDeviceResult {

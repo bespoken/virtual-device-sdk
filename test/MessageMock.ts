@@ -20,6 +20,34 @@ export class MessageMock {
         const baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
             ? process.env.VIRTUAL_DEVICE_BASE_URL
             : "https://virtual-device.bespoken.io";
+        nock(baseURL)
+            .persist()
+            .post("/batch_process")
+            .query(function(queryObject: any) {
+                return !queryObject.async_mode;
+            })
+            .reply(200, function(uri: string, requestBody: any) {
+                if (MessageMock.onCallCallback) {
+                    MessageMock.onCallCallback(uri, requestBody);
+                }
+                return processBatchMessages(requestBody);
+            });
+
+        nock(baseURL)
+            .persist()
+            .post("/batch_process")
+            .query(function(queryObject: any) {
+                return queryObject.async_mode;
+            })
+            .reply(200, function(uri: string, requestBody: any) {
+                if (MessageMock.onCallCallback) {
+                    MessageMock.onCallCallback(uri, requestBody);
+                }
+                return {
+                    uuid: "generated-uuid",
+                };
+            });
+        // Mock f
         // Mock for batch process call
         nock(baseURL)
             .persist()
