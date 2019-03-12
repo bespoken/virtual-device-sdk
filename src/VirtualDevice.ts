@@ -175,6 +175,51 @@ export class VirtualDevice {
         });
     }
 
+    public getConversationResults(uuid: string): Promise<IVirtualDeviceResult[] | any> {
+        if (!this.asyncMode) {
+            throw Error("Conversation Results only available in async mode");
+        }
+
+        const path = "/conversation?uuid=" + uuid;
+
+        const url = URL.parse(this.baseURL);
+
+        return new Promise<IVirtualDeviceResult[] | any>((resolve, reject) => {
+            const callback = (response: IncomingMessage) => {
+                let data = "";
+
+                response.on("data", (chunk) => {
+                    data += chunk;
+                });
+
+                response.on("end", () => {
+                    if (response.statusCode === 200) {
+                        resolve(this.handleBatchResponse(data as string));
+                    } else {
+                        reject(data);
+                    }
+                });
+            };
+
+            const requestOptions = {
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                host: url.hostname,
+                method: "GET",
+                path,
+                port: this.httpInterfacePort(url),
+            };
+
+            const request = this.httpInterface(url).request(requestOptions, callback);
+            request.on("error", function(error: string) {
+                reject(error);
+            });
+
+            request.end();
+        });
+    }
+
     public async waitForSessionToEnd() {
         const ms: number = process.env.SESSION_IDLE_MS
             ? parseInt(process.env.SESSION_IDLE_MS, 10)
@@ -184,6 +229,10 @@ export class VirtualDevice {
 
     private handleBatchResponse(data: string): IVirtualDeviceResult[] {
         const json = JSON.parse(data);
+
+        if (!json || !json.results) {
+            return [];
+        }
         for (const result of json.results) {
             this.applyHomophones(result);
         }
@@ -221,7 +270,7 @@ export class VirtualDevice {
 }
 
 export interface IConversationResult {
-    uuid: string;
+    conversation_id: string;
 }
 
 export interface IVirtualDeviceResult {
