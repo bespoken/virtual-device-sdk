@@ -44,20 +44,28 @@ export class MessageMock {
                     MessageMock.onCallCallback(uri, requestBody);
                 }
                 return {
-                    uuid: "generated-uuid",
+                    conversation_id: "generated-uuid",
                 };
             });
-        // Mock f
-        // Mock for batch process call
+
         nock(baseURL)
             .persist()
-            .post("/batch_process")
+            .get("/conversation")
             .query(true)
-            .reply(200, function(uri: string, requestBody: any) {
+            .reply(200, function(uri: string) {
+                const messageData = {
+                    messages: [
+                        {
+                            phrases: ["Welcome to the Simple Audio Player"],
+                            text: "open test player",
+                        },
+                        {
+                            text: "tell test player to play",
+                        }]};
                 if (MessageMock.onCallCallback) {
-                    MessageMock.onCallCallback(uri, requestBody);
+                    MessageMock.onCallCallback(uri, messageData);
                 }
-                return processBatchMessages(requestBody);
+                return processBatchMessages(messageData);
             });
 
         // Mock for process call

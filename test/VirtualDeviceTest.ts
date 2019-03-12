@@ -186,8 +186,37 @@ describe("VirtualDevice", function() {
             const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
 
             const results = await sdk.batchMessage([{text: "wie spät ist es"}, {text: "Wie ist das Wetter"}]);
-            assert.equal(results.uuid, "generated-uuid");
+            assert.equal(results.conversation_id, "generated-uuid");
         });
+    });
+
+    describe("get conversation uuid", () => {
+        before(() => {
+            MessageMock.enable();
+        });
+
+        it("Should return from several inputs, using conversation uuid", async () => {
+            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
+
+            const results = await sdk.getConversationResults("generated-uuid");
+
+            console.log("Output: " + JSON.stringify(results));
+            assert.equal(results.length, 2);
+            assert.equal(results[1].message, "tell test player to play");
+            assert.include(results[1].streamURL as string, "https://feeds.soundcloud.com/stream/");
+        });
+
+        it("Should throw exception if not using async mode", async () => {
+            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined);
+
+            try {
+                await sdk.getConversationResults("generated-uuid");
+                assert(false, "Should have trigger an exception");
+            } catch (e) {
+                assert.equal(e.message, "Conversation Results only available in async mode");
+            }
+        });
+
     });
 });
 
