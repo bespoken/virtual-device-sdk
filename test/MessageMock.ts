@@ -53,19 +53,9 @@ export class MessageMock {
             .get("/conversation")
             .query(true)
             .reply(200, function(uri: string) {
-                const messageData = {
-                    messages: [
-                        {
-                            phrases: ["Welcome to the Simple Audio Player"],
-                            text: "open test player",
-                        },
-                        {
-                            text: "tell test player to play",
-                        }]};
-                if (MessageMock.onCallCallback) {
-                    MessageMock.onCallCallback(uri, messageData);
-                }
-                return processBatchMessages(messageData);
+                const url = URL.parse(uri);
+                const params: any = qs.parse(url.query as string);
+                return processConversationMessages(params.uuid);
             });
 
         // Mock for process call
@@ -118,6 +108,34 @@ function processBatchMessages(payload: any): any {
         results.push(messageHandler(message.text));
     }
     return { results };
+}
+
+function processConversationMessages(uuid: any) {
+    const messageData = {
+        messages: [
+            {
+                phrases: ["Welcome to the Simple Audio Player"],
+                text: "open test player",
+            },
+            {
+                text: "tell test player to play",
+            }]};
+    if (MessageMock.onCallCallback) {
+        MessageMock.onCallCallback(uri, messageData);
+    }
+
+    if (uuid === "generated-uuid") {
+        return processBatchMessages(messageData);
+    }
+
+    if (uuid === "error-uuid") {
+        const errorMessage =  "The locale es-US is invalid. For alexa, please pick a locale from here: " +
+            "https://developer.amazon.com/docs/custom-skills/develop-skills-in-multiple-languages.html#h2-code-changes";
+
+        return {
+            error: errorMessage,
+        };
+    }
 }
 
 function messageHandler(message: string, phrases?: string): IVirtualDeviceResult {
