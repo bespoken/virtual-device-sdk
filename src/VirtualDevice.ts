@@ -195,9 +195,8 @@ export class VirtualDevice {
                 response.on("end", () => {
                     if (response.statusCode === 200) {
                         const result = this.handleBatchResponse(data as string);
-
-                        if (result.error) {
-                            reject(new Error(result.error));
+                        if ((result as IVirtualDeviceError).error) {
+                            reject(new Error((result as IVirtualDeviceError).error));
                             return;
                         }
 
@@ -238,7 +237,7 @@ export class VirtualDevice {
         const json = JSON.parse(data);
 
         if (json && json.error) {
-            return json;
+            return json as IVirtualDeviceError;
         }
 
         if (!json || !json.results) {

@@ -120,9 +120,6 @@ function processConversationMessages(uuid: any) {
             {
                 text: "tell test player to play",
             }]};
-    if (MessageMock.onCallCallback) {
-        MessageMock.onCallCallback(uri, messageData);
-    }
 
     if (uuid === "generated-uuid") {
         return processBatchMessages(messageData);
