@@ -60,6 +60,20 @@ describe("VirtualDevice", function() {
             const results = await sdk.message("what is rock & roll", undefined, undefined, true);
             assert.isDefined(results);
         });
+
+        it("Should add stt and location paramenters", (done) => {
+            MessageMock.enable();
+            const sdk = new VirtualDevice("token", "de-DE", undefined, undefined, undefined, "google", "10", "11");
+            MessageMock.onCall((uri) => {
+                assert.include(uri, "stt=google");
+                assert.include(uri, "location_lat=10");
+                assert.include(uri, "location_long=11");
+            });
+            sdk.message("hi", true).then(() => {
+                MessageMock.disable();
+                done();
+            });
+        });
     });
 
     describe("#message() with phrases", () => {
@@ -111,6 +125,21 @@ describe("VirtualDevice", function() {
             console.log("Output: " + JSON.stringify(results));
             assert.equal(results.length, 2);
             assert.isNotNull(results[1].transcript);
+        });
+
+        it("Should add stt and location paramenters", (done) => {
+            MessageMock.enable();
+            const sdk = new VirtualDevice("token", "de-DE", undefined, undefined, undefined, "google", "10", "11");
+            MessageMock.onCall((uri) => {
+                assert.include(uri, "stt=google");
+                assert.include(uri, "location_lat=10");
+                assert.include(uri, "location_long=11");
+            });
+            sdk.batchMessage([{text: "hi"}]).then(() => {
+                MessageMock.disable();
+                done();
+            });
+
         });
     });
 

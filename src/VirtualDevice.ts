@@ -10,7 +10,11 @@ export class VirtualDevice {
                         public locale?: string,
                         public voiceID?: string,
                         public skipSTT?: boolean,
-                        public asyncMode?: boolean) {
+                        public asyncMode?: boolean,
+                        public stt?: string,
+                        public locationLat?: string,
+                        public locationLong?: string,
+                        ) {
         this.baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
             ? process.env.VIRTUAL_DEVICE_BASE_URL
             : "https://virtual-device.bespoken.io";
@@ -73,6 +77,18 @@ export class VirtualDevice {
             url += "&skip_stt=true";
         }
 
+        if (this.stt) {
+            url += "&stt=" + this.stt;
+        }
+
+        if (this.locationLat) {
+            url += "&location_lat=" + this.locationLat;
+        }
+
+        if (this.locationLong) {
+            url += "&location_long=" + this.locationLong;
+        }
+
         url = encodeURI(url);
         const urlParsed = URL.parse(this.baseURL);
         return new Promise<IVirtualDeviceResult>((resolve, reject) => {
@@ -125,6 +141,18 @@ export class VirtualDevice {
 
         if (this.asyncMode) {
             path += "&async_mode=true";
+        }
+
+        if (this.stt) {
+            path += "&stt=" + this.stt;
+        }
+
+        if (this.locationLat) {
+            path += "&location_lat=" + this.locationLat;
+        }
+
+        if (this.locationLong) {
+            path += "&location_long=" + this.locationLong;
         }
 
         const url = URL.parse(this.baseURL);
