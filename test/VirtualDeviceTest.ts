@@ -246,6 +246,20 @@ describe("VirtualDevice", function() {
             }
         });
 
+        it("Should throw an error if conversation result brings back an error", async () => {
+            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
+            const errorMessage =  "The locale es-US is invalid. For alexa, please pick a locale from here: " +
+                "https://developer.amazon.com/docs/custom-skills/" +
+                "develop-skills-in-multiple-languages.html#h2-code-changes";
+
+            try {
+                await sdk.getConversationResults("error-uuid");
+                assert(false, "Should have trigger an exception");
+            } catch (e) {
+                assert.equal(e.message, errorMessage);
+            }
+        });
+
     });
 });
 

@@ -222,7 +222,13 @@ export class VirtualDevice {
 
                 response.on("end", () => {
                     if (response.statusCode === 200) {
-                        resolve(this.handleBatchResponse(data as string));
+                        const result = this.handleBatchResponse(data as string);
+                        if ((result as IVirtualDeviceError).error) {
+                            reject(new Error((result as IVirtualDeviceError).error));
+                            return;
+                        }
+
+                        resolve(result);
                     } else {
                         reject(data);
                     }
@@ -255,8 +261,12 @@ export class VirtualDevice {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    private handleBatchResponse(data: string): IVirtualDeviceResult[] {
+    private handleBatchResponse(data: string): IVirtualDeviceResult[] | IVirtualDeviceError {
         const json = JSON.parse(data);
+
+        if (json && json.error) {
+            return json as IVirtualDeviceError;
+        }
 
         if (!json || !json.results) {
             return [];
@@ -312,6 +322,10 @@ export interface IVirtualDeviceResult {
     transcript: string | null;
     // message is the message used for this result.
     message: string;
+}
+
+export interface IVirtualDeviceError {
+    error: string;
 }
 
 export interface ICard {
