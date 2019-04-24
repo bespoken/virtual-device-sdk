@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { IncomingMessage } from "http";
 import * as http from "http";
 import * as https from "https";
+import * as pathModule from "path";
 import * as URL from "url";
 
 export class VirtualDevice {
@@ -156,7 +157,12 @@ export class VirtualDevice {
             path += "&location_long=" + this.locationLong;
         }
 
-        const procesedMessages = await this.processMessages(messages);
+        let procesedMessages: IMessageEndpoint[];
+        try {
+            procesedMessages = await this.processMessages(messages);
+        } catch (error) {
+            return Promise.reject(error);
+        }
 
         const url = URL.parse(this.baseURL);
 
@@ -349,7 +355,7 @@ class MessageProcesor {
                 extension =  this.getExtension(filePath);
 
             } else {
-                throw new Error("Invalid audio");
+                throw new Error("either audioPath or audioURL should be set.");
             }
         }
 
@@ -393,19 +399,11 @@ class MessageProcesor {
     }
 
     private getExtension(path: string) {
-        const basename = path.split(/[\\/]/).pop();
-        if (!basename) {
-            return "";
+        const extname = pathModule.extname(path);
+        if (extname && extname.length > 0) {
+            return extname.substr(1);
         }
-
-        let pos = -1;
-        if (basename) {
-            pos = basename.lastIndexOf(".");
-        }
-        if (basename === "" || pos < 1) {
-            return "";
-        }
-        return basename.slice(pos + 1);
+        return "";
     }
 }
 export interface IConversationResult {

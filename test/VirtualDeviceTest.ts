@@ -274,6 +274,9 @@ describe("VirtualDevice", function() {
                 {
                     audio: {
                         audioPath: "test/resources/open_guess_the_price_EN_US.raw",
+                        channels: 1,
+                        frameRate: 16000,
+                        sampleWidth: 2,
                     },
                 }, {
                     audio: {
@@ -298,7 +301,6 @@ describe("VirtualDevice", function() {
                 },
             ];
             const results = await sdk.batchMessage(messages);
-            console.log("Output: " + JSON.stringify(results));
             assert.equal(results.length, 6);
             assert.equal(results[0].message, "[audio]");
             assert.include(results[0].transcript, "welcome to guess the price");
@@ -341,7 +343,6 @@ describe("VirtualDevice", function() {
                 },
             ];
             const results = await sdk.batchMessage(messages);
-            console.log("Output: " + JSON.stringify(results));
             assert.equal(results.length, 6);
             assert.equal(results[0].message, "[audio]");
             assert.include(results[0].transcript, "welcome to guess the price");
@@ -350,6 +351,44 @@ describe("VirtualDevice", function() {
             assert.include(results[3].transcript, "you said 100 the actual price was");
             assert.include(results[4].transcript, "you said 100 the actual price was");
             assert.include(results[5].transcript, "game ended");
+        });
+
+        it("Should return error when using audios from invalid urls", async () => {
+            const sdk = new VirtualDevice(process.env.VIRTUAL_DEVICE_TOKEN as string, "en-US");
+
+            const messages: IMessage[] = [
+                {
+                    audio: {
+                        audioURL: "wrong url",
+                    },
+                },
+            ];
+
+            const errorMessage = "Unable to determine the domain name";
+            try {
+                await sdk.batchMessage(messages);
+                assert(false, "Should have trigger an exception");
+            } catch (e) {
+                assert.equal(e.message, errorMessage);
+            }
+        });
+
+        it("Should return error when using empty audios", async () => {
+            const sdk = new VirtualDevice(process.env.VIRTUAL_DEVICE_TOKEN as string, "en-US");
+
+            const messages: IMessage[] = [
+                {
+                    audio: {},
+                },
+            ];
+
+            const errorMessage = "either audioPath or audioURL should be set.";
+            try {
+                await sdk.batchMessage(messages);
+                assert(false, "Should have trigger an exception");
+            } catch (e) {
+                assert.equal(e.message, errorMessage);
+            }
         });
     });
 });
