@@ -358,12 +358,12 @@ describe("VirtualDevice", function() {
             const results = await sdk.batchMessage(messages);
             assert.equal(results.length, 6);
             assert.equal(results[0].message, "[audio]");
-            assert.include(results[0].transcript, "welcome to guess the price");
-            assert.include(results[1].transcript, "great please tell us your name");
-            assert.include(results[2].transcript, "okay let's start the game");
-            assert.include(results[3].transcript, "you said 100 the actual price was");
-            assert.include(results[4].transcript, "you said 100 the actual price was");
-            assert.include(results[5].transcript, "game ended");
+            assert.include(results[0].transcript.toLowerCase(), "welcome to guess the price");
+            assert.include(results[1].transcript.toLowerCase(), "great please tell us your name");
+            assert.include(results[2].transcript.toLowerCase(), "okay let's start the game");
+            assert.include(results[3].transcript.toLowerCase(), "you said 100 the actual price was");
+            assert.include(results[4].transcript.toLowerCase(), "you said 100 the actual price was");
+            assert.include(results[5].transcript.toLowerCase(), "game ended");
         });
 
         it("Should return error when using audios from invalid urls", async () => {
