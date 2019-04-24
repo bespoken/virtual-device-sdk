@@ -1,6 +1,8 @@
+import * as fs from "fs";
 import { IncomingMessage } from "http";
 import * as http from "http";
 import * as https from "https";
+import * as pathModule from "path";
 import * as URL from "url";
 
 export class VirtualDevice {
@@ -120,7 +122,7 @@ export class VirtualDevice {
         });
     }
 
-    public batchMessage(messages: IMessage[], debug?: boolean): Promise<IVirtualDeviceResult[] | any> {
+    public async batchMessage(messages: IMessage[], debug?: boolean): Promise<IVirtualDeviceResult[] | any> {
         let path = "/batch_process?user_id=" + this.token;
 
         if (debug) {
@@ -155,6 +157,13 @@ export class VirtualDevice {
             path += "&location_long=" + this.locationLong;
         }
 
+        let procesedMessages: IMessageEndpoint[];
+        try {
+            procesedMessages = await this.processMessages(messages);
+        } catch (error) {
+            return Promise.reject(error);
+        }
+
         const url = URL.parse(this.baseURL);
 
         return new Promise<IVirtualDeviceResult[] | any>((resolve, reject) => {
@@ -179,7 +188,7 @@ export class VirtualDevice {
             };
 
             const input = {
-                messages,
+                messages: procesedMessages,
             };
             const inputString = JSON.stringify(input);
             const requestOptions = {
@@ -305,8 +314,98 @@ export class VirtualDevice {
             }
         }
     }
+
+    private async processMessages(messages: IMessage[]): Promise<IMessageEndpoint[]> {
+        const mesageProcessor = new MessageProcesor(messages);
+        return await mesageProcessor.process();
+    }
 }
 
+class MessageProcesor {
+    public constructor( public messages: IMessage[]) {}
+
+    public process(): Promise<IMessageEndpoint[]> {
+        return Promise.all(this.messages.map((message) => this.processMessage(message)));
+    }
+
+    private async processMessage(message: IMessage): Promise<IMessageEndpoint> {
+        let fileContent: string | undefined;
+        let extension: string | undefined;
+
+        const frameRate: number | undefined =  message.audio ? message.audio.frameRate : undefined;
+        const channels: number | undefined =  message.audio ? message.audio.channels : undefined;
+        const sampleWidth: number | undefined =  message.audio ? message.audio.sampleWidth : undefined;
+
+        let filePath: string;
+
+        if (message.audio) {
+            if (message.audio.audioPath || message.audio.audioURL) {
+                if (message.audio.audioPath) {
+                    filePath = message.audio.audioPath;
+                    fileContent = this.getLocalFile(message.audio.audioPath);
+                } else if (message.audio.audioURL) {
+                    filePath = message.audio.audioURL;
+                    fileContent = await this.fetchFile(message.audio.audioURL);
+                } else {
+                    filePath = "";
+                    fileContent = "";
+                }
+
+                // get extension
+                extension =  this.getExtension(filePath);
+
+            } else {
+                throw new Error("either audioPath or audioURL should be set.");
+            }
+        }
+
+        return {
+            audio: fileContent,
+            channels,
+            format: extension,
+            frame_rate: frameRate,
+            phrases: message.phrases,
+            sample_width: sampleWidth,
+            text: message.text,
+        } as IMessageEndpoint;
+    }
+
+    private getLocalFile(path: string) {
+        const fileContents = fs.readFileSync(path);
+        return Buffer.from(fileContents).toString("base64");
+    }
+
+    private fetchFile(url: string): Promise<string> {
+        return new Promise((resolve, reject) => {
+            const data: Buffer[] = [];
+            const req = https.get(url as any, (res) => {
+                res.on("data", (chunk: Buffer) => {
+                    data.push(chunk);
+                });
+                res.on("end", () => {
+                    if (res.statusCode === 200) {
+                        const buffer = Buffer.concat(data);
+                        resolve(buffer.toString("base64"));
+                    } else {
+                        reject();
+                    }
+                });
+            });
+            req.on("error", function(error: Error) {
+                reject(error.message);
+            });
+            req.end();
+        });
+    }
+
+    private getExtension(path: string) {
+        const extname = pathModule.extname(path);
+        if (extname && extname.length > 0) {
+            return extname.substr(1);
+        }
+        return "";
+    }
+}
 export interface IConversationResult {
     conversation_id: string;
 }
@@ -337,6 +436,25 @@ export interface ICard {
 }
 
 export interface IMessage {
-    text: string;
+    text?: string;
     phrases?: string[];
+    audio?: IAudio;
+}
+
+export interface IAudio {
+    audioURL?: string;
+    audioPath?: string;
+    frameRate?: number;
+    channels?: number;
+    sampleWidth?: number;
+}
+
+interface IMessageEndpoint {
+    text?: string;
+    phrases?: string[];
+    audio?: string;
+    format?: string;
+    frame_rate?: number;
+    channels?: number;
+    sample_width?: number;
 }
