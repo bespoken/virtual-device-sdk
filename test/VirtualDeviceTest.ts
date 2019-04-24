@@ -219,6 +219,19 @@ describe("VirtualDevice", function() {
         });
     });
 
+    describe("Async batch process with provided id", () => {
+        before(() => {
+            MessageMock.enable();
+        });
+
+        it("return conversation uuid", async () => {
+            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
+            sdk.conversationId = "my-own-uuid";
+            const results = await sdk.batchMessage([{text: "wie spät ist es"}, {text: "Wie ist das Wetter"}]);
+            assert.equal(results.conversation_id, sdk.conversationId);
+        });
+    });
+
     describe("get conversation uuid", () => {
         before(() => {
             MessageMock.enable();

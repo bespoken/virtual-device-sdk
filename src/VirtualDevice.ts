@@ -16,6 +16,7 @@ export class VirtualDevice {
                         public stt?: string,
                         public locationLat?: string,
                         public locationLong?: string,
+                        public conversationId?: string,
                         ) {
         this.baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
             ? process.env.VIRTUAL_DEVICE_BASE_URL
@@ -155,6 +156,10 @@ export class VirtualDevice {
 
         if (this.locationLong) {
             path += "&location_long=" + this.locationLong;
+        }
+
+        if (this.conversationId) {
+            path += "&conversation_id=" + this.conversationId;
         }
 
         let procesedMessages: IMessageEndpoint[];
