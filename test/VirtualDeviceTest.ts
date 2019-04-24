@@ -1,7 +1,7 @@
 import {assert} from "chai";
 import * as dotenv from "dotenv";
 import * as URL from "url";
-import {VirtualDevice} from "../src/VirtualDevice";
+import {IMessage, VirtualDevice} from "../src/VirtualDevice";
 import {MessageMock} from "./MessageMock";
 
 dotenv.config();
@@ -260,6 +260,97 @@ describe("VirtualDevice", function() {
             }
         });
 
+    });
+
+    describe("batchMessage with audio", async () => {
+        before(() => {
+            MessageMock.disable();
+        });
+
+        it("Should return response when using local audios", async () => {
+            const sdk = new VirtualDevice(process.env.VIRTUAL_DEVICE_TOKEN as string, "en-US");
+
+            const messages: IMessage[] = [
+                {
+                    audio: {
+                        audioPath: "test/resources/open_guess_the_price_EN_US.raw",
+                    },
+                }, {
+                    audio: {
+                        audioPath: "test/resources/one_EN_US.raw",
+                    },
+                }, {
+                    audio: {
+                        audioPath: "test/resources/charles_EN_US.raw",
+                    },
+                }, {
+                    audio: {
+                        audioPath: "test/resources/one_hundred_dollars_EN_US.raw",
+                    },
+                }, {
+                    audio: {
+                        audioPath: "test/resources/one_hundred_dollars_EN_US.raw",
+                    },
+                }, {
+                    audio: {
+                        audioPath: "test/resources/one_hundred_dollars_EN_US.raw",
+                    },
+                },
+            ];
+            const results = await sdk.batchMessage(messages);
+            console.log("Output: " + JSON.stringify(results));
+            assert.equal(results.length, 6);
+            assert.equal(results[0].message, "[audio]");
+            assert.include(results[0].transcript, "welcome to guess the price");
+            assert.include(results[1].transcript, "great please tell us your name");
+            assert.include(results[2].transcript, "okay let's start the game");
+            assert.include(results[3].transcript, "you said 100 the actual price was");
+            assert.include(results[4].transcript, "you said 100 the actual price was");
+            assert.include(results[5].transcript, "game ended");
+        });
+
+        it("Should return response when using audios from urls", async () => {
+            const sdk = new VirtualDevice(process.env.VIRTUAL_DEVICE_TOKEN as string, "en-US");
+
+            const messages: IMessage[] = [
+                {
+                    audio: {
+                        audioURL:
+                            "https://s3.amazonaws.com/bespoken-encoder-test/public/open_guess_the_price_EN_US.raw",
+                    },
+                }, {
+                    audio: {
+                        audioURL: "https://s3.amazonaws.com/bespoken-encoder-test/public/one_EN_US.raw",
+                    },
+                }, {
+                    audio: {
+                        audioURL: "https://s3.amazonaws.com/bespoken-encoder-test/public/charles_EN_US.raw",
+                    },
+                }, {
+                    audio: {
+                        audioURL: "https://s3.amazonaws.com/bespoken-encoder-test/public/one_hundred_dollars_EN_US.raw",
+                    },
+                }, {
+                    audio: {
+                        audioURL: "https://s3.amazonaws.com/bespoken-encoder-test/public/one_hundred_dollars_EN_US.raw",
+                    },
+                }, {
+                    audio: {
+                        audioURL: "https://s3.amazonaws.com/bespoken-encoder-test/public/one_hundred_dollars_EN_US.raw",
+                    },
+                },
+            ];
+            const results = await sdk.batchMessage(messages);
+            console.log("Output: " + JSON.stringify(results));
+            assert.equal(results.length, 6);
+            assert.equal(results[0].message, "[audio]");
+            assert.include(results[0].transcript, "welcome to guess the price");
+            assert.include(results[1].transcript, "great please tell us your name");
+            assert.include(results[2].transcript, "okay let's start the game");
+            assert.include(results[3].transcript, "you said 100 the actual price was");
+            assert.include(results[4].transcript, "you said 100 the actual price was");
+            assert.include(results[5].transcript, "game ended");
+        });
     });
 });
 
