@@ -33,11 +33,35 @@ export class MessageMock {
                 return processBatchMessages(requestBody);
             });
 
+        let currentQueryObject: any;
         nock(baseURL)
             .persist()
             .post("/batch_process")
             .query(function(queryObject: any) {
-                return queryObject.async_mode;
+                if (queryObject.async_mode && queryObject.conversation_id) {
+                    currentQueryObject = queryObject;
+                    return true;
+                }
+                return false;
+            })
+            .reply(200, function(uri: string, requestBody: any) {
+                if (MessageMock.onCallCallback) {
+                    MessageMock.onCallCallback(uri, requestBody);
+                }
+                return {
+                    conversation_id: currentQueryObject.conversation_id,
+                };
+            });
+
+        nock(baseURL)
+            .persist()
+            .post("/batch_process")
+            .query(function(queryObject: any) {
+                if (queryObject.async_mode && !queryObject.conversation_id) {
+                    currentQueryObject = queryObject;
+                    return true;
+                }
+                return false;
             })
             .reply(200, function(uri: string, requestBody: any) {
                 if (MessageMock.onCallCallback) {

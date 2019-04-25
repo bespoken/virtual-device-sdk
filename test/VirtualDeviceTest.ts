@@ -219,6 +219,19 @@ describe("VirtualDevice", function() {
         });
     });
 
+    describe("Async batch process with provided id", () => {
+        before(() => {
+            MessageMock.enable();
+        });
+
+        it("return conversation uuid", async () => {
+            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
+            sdk.conversationId = "my-own-uuid";
+            const results = await sdk.batchMessage([{text: "wie spät ist es"}, {text: "Wie ist das Wetter"}]);
+            assert.equal(results.conversation_id, sdk.conversationId);
+        });
+    });
+
     describe("get conversation uuid", () => {
         before(() => {
             MessageMock.enable();
@@ -303,12 +316,12 @@ describe("VirtualDevice", function() {
             const results = await sdk.batchMessage(messages);
             assert.equal(results.length, 6);
             assert.equal(results[0].message, "[audio]");
-            assert.include(results[0].transcript, "welcome to guess the price");
-            assert.include(results[1].transcript, "great please tell us your name");
-            assert.include(results[2].transcript, "okay let's start the game");
-            assert.include(results[3].transcript, "you said 100 the actual price was");
-            assert.include(results[4].transcript, "you said 100 the actual price was");
-            assert.include(results[5].transcript, "game ended");
+            assert.include(results[0].transcript.toLowerCase(), "welcome to guess the price");
+            assert.include(results[1].transcript.toLowerCase(), "great please tell us your name");
+            assert.include(results[2].transcript.toLowerCase(), "okay let's start the game");
+            assert.include(results[3].transcript.toLowerCase(), "you said 100 the actual price was");
+            assert.include(results[4].transcript.toLowerCase(), "you said 100 the actual price was");
+            assert.include(results[5].transcript.toLowerCase(), "game ended");
         });
 
         it("Should return response when using audios from urls", async () => {
@@ -345,12 +358,12 @@ describe("VirtualDevice", function() {
             const results = await sdk.batchMessage(messages);
             assert.equal(results.length, 6);
             assert.equal(results[0].message, "[audio]");
-            assert.include(results[0].transcript, "welcome to guess the price");
-            assert.include(results[1].transcript, "great please tell us your name");
-            assert.include(results[2].transcript, "okay let's start the game");
-            assert.include(results[3].transcript, "you said 100 the actual price was");
-            assert.include(results[4].transcript, "you said 100 the actual price was");
-            assert.include(results[5].transcript, "game ended");
+            assert.include(results[0].transcript.toLowerCase(), "welcome to guess the price");
+            assert.include(results[1].transcript.toLowerCase(), "great please tell us your name");
+            assert.include(results[2].transcript.toLowerCase(), "okay let's start the game");
+            assert.include(results[3].transcript.toLowerCase(), "you said 100 the actual price was");
+            assert.include(results[4].transcript.toLowerCase(), "you said 100 the actual price was");
+            assert.include(results[5].transcript.toLowerCase(), "game ended");
         });
 
         it("Should return error when using audios from invalid urls", async () => {
