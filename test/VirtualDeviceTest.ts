@@ -1,7 +1,7 @@
 import {assert} from "chai";
 import * as dotenv from "dotenv";
 import * as URL from "url";
-import {IMessage, VirtualDevice} from "../src/VirtualDevice";
+import {IMessage, IVirtualDeviceConfiguration, VirtualDevice} from "../src/VirtualDevice";
 import {MessageMock} from "./MessageMock";
 
 dotenv.config();
@@ -68,6 +68,25 @@ describe("VirtualDevice", function() {
                 assert.include(uri, "stt=google");
                 assert.include(uri, "location_lat=10");
                 assert.include(uri, "location_long=11");
+            });
+            sdk.message("hi", true).then(() => {
+                MessageMock.disable();
+                done();
+            });
+        });
+
+        it("Should add client and screen mode", (done) => {
+            MessageMock.enable();
+            const configuration: IVirtualDeviceConfiguration = {
+                client: "monitoring",
+                screenMode: "OFF",
+                token: "myToken",
+            };
+            const sdk = new VirtualDevice(configuration);
+            MessageMock.onCall((uri) => {
+                assert.include(uri, "user_id=myToken");
+                assert.include(uri, "screen_mode=OFF");
+                assert.include(uri, "client=monitoring");
             });
             sdk.message("hi", true).then(() => {
                 MessageMock.disable();
