@@ -5,10 +5,26 @@ import * as https from "https";
 import * as pathModule from "path";
 import * as URL from "url";
 
+export interface IVirtualDeviceConfiguration {
+    token: string;
+    locale?: string;
+    voiceID?: string;
+    skipSTT?: boolean;
+    asyncMode?: boolean;
+    stt?: string;
+    locationLat?: string;
+    locationLong?: string;
+    conversationId?: string;
+    screenMode?: string;
+    client?: string;
+}
+
 export class VirtualDevice {
     public baseURL: string;
+    public token: string;
     public homophones: {[id: string]: string[]} = {};
-    public constructor( public token: string,
+
+    public constructor( public arg0: string | IVirtualDeviceConfiguration,
                         public locale?: string,
                         public voiceID?: string,
                         public skipSTT?: boolean,
@@ -17,10 +33,29 @@ export class VirtualDevice {
                         public locationLat?: string,
                         public locationLong?: string,
                         public conversationId?: string,
+                        public screenMode?: string,
+                        public client?: string,
                         ) {
         this.baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
             ? process.env.VIRTUAL_DEVICE_BASE_URL
             : "https://virtual-device.bespoken.io";
+
+        if (arg0 === Object(arg0)) {
+            const configuration = arg0 as IVirtualDeviceConfiguration;
+            this.token = configuration.token;
+            this.locale = configuration.locale;
+            this.voiceID = configuration.voiceID;
+            this.skipSTT = configuration.skipSTT;
+            this.asyncMode = configuration.asyncMode;
+            this.stt = configuration.stt;
+            this.locationLat = configuration.locationLat;
+            this.locationLong = configuration.locationLong;
+            this.conversationId = configuration.conversationId;
+            this.screenMode = configuration.screenMode;
+            this.client = configuration.client;
+        } else {
+            this.token = arg0 as string;
+        }
     }
 
     public addHomophones(word: string, homophones: string[]) {
@@ -90,6 +125,14 @@ export class VirtualDevice {
 
         if (this.locationLong) {
             url += "&location_long=" + this.locationLong;
+        }
+
+        if (this.screenMode) {
+            url += "&screen_mode=" + this.screenMode;
+        }
+
+        if (this.client) {
+            url += "&client=" + this.client;
         }
 
         url = encodeURI(url);
