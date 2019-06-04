@@ -205,6 +205,14 @@ export class VirtualDevice {
             path += "&conversation_id=" + this.conversationId;
         }
 
+        if (this.screenMode) {
+            path += "&screen_mode=" + this.screenMode;
+        }
+
+        if (this.client) {
+            path += "&client=" + this.client;
+        }
+
         let procesedMessages: IMessageEndpoint[];
         try {
             procesedMessages = await this.processMessages(messages);

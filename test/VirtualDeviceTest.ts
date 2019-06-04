@@ -75,7 +75,7 @@ describe("VirtualDevice", function() {
             });
         });
 
-        it("Should add client and screen mode", (done) => {
+        it("Should add client and screen mode on message", (done) => {
             MessageMock.enable();
             const configuration: IVirtualDeviceConfiguration = {
                 client: "monitoring",
@@ -89,6 +89,25 @@ describe("VirtualDevice", function() {
                 assert.include(uri, "client=monitoring");
             });
             sdk.message("hi", true).then(() => {
+                MessageMock.disable();
+                done();
+            });
+        });
+
+        it("Should add client and screen mode on batch message", (done) => {
+            MessageMock.enable();
+            const configuration: IVirtualDeviceConfiguration = {
+                client: "monitoring",
+                screenMode: "OFF",
+                token: "myToken",
+            };
+            const sdk = new VirtualDevice(configuration);
+            MessageMock.onCall((uri) => {
+                assert.include(uri, "user_id=myToken");
+                assert.include(uri, "screen_mode=OFF");
+                assert.include(uri, "client=monitoring");
+            });
+            sdk.batchMessage([{text: "hi"}], true).then(() => {
                 MessageMock.disable();
                 done();
             });
