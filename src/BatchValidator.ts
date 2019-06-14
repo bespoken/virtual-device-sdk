@@ -39,14 +39,25 @@ export class BatchValidator extends VirtualDeviceValidator {
         let results;
         try {
             results = await virtualDevice.batchMessage(messages);
-        } catch (e) {
+        } catch (err) {
+            let newError = err instanceof Error ? err : undefined;
+            if (!newError) {
+                const parsedError = this.parseError(err);
+                if (parsedError && parsedError.results) {
+                    newError = new Error(parsedError.results);
+                } else {
+                    newError = new Error(this.getError(err));
+                }
+            }
             result.result = "failure";
-            result.errorMessage = e.toString();
+            result.errorMessage = newError.toString();
             const test = sequence.tests[0];
             const resultItem: IVirtualDeviceValidatorResultItem = {test};
             resultItem.result = "failure";
             resultItem.status = "done";
-            resultItem.errors = [new ValidatorError(test.input, undefined, undefined, `SystemError: ${e.message}`)];
+            resultItem.errors = [
+                new ValidatorError(test.input, undefined, undefined, `SystemError: ${newError.message}`),
+            ];
             result.tests = [resultItem];
             return;
         }
