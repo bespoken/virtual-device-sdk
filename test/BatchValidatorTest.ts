@@ -319,4 +319,89 @@ describe("BatchValidator", function() {
             });
         });
     });
+
+    describe("#execute() sequence processing failure", () => {
+        const sequences = [
+            {
+                invocationName: "test player",
+                tests: [{
+                    comparison: "contains",
+                    expectedStreamURL: undefined,
+                    expectedTranscript: "welcome to the simple audio player",
+                    input: "open test player",
+                    sequence: 1,
+                }],
+            },
+        ];
+
+        let seMessageStub: any;
+
+        afterEach(() => {
+            seMessageStub.restore();
+        });
+
+        it("handle error object with error property", async () => {
+            seMessageStub = Sinon.stub(VirtualDevice.prototype, "batchMessage")
+                .callsFake((message: string): Promise<any> => {
+                    return Promise.reject({ error: "this is an error"});
+                });
+
+            const virtualDeviceValidator = new BatchValidator();
+            const validatorResult = await virtualDeviceValidator.execute(sequences);
+            for (const test of validatorResult.tests) {
+                assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
+                assert.equal(test.status, "done", `${JSON.stringify(test)}`);
+                const errors = (test.errors || []).map((error: any) => error.actual);
+                assert.include(errors, "SystemError: this is an error");
+            }
+        });
+
+        it("handle error object with error array property", async () => {
+            seMessageStub = Sinon.stub(VirtualDevice.prototype, "batchMessage")
+                .callsFake((message: string): Promise<any> => {
+                    return Promise.reject({ error: ["error1", "error2"]});
+                });
+
+            const virtualDeviceValidator = new BatchValidator();
+            const validatorResult = await virtualDeviceValidator.execute(sequences);
+            for (const test of validatorResult.tests) {
+                assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
+                assert.equal(test.status, "done", `${JSON.stringify(test)}`);
+                const errors = (test.errors || []).map((error: any) => error.actual);
+                assert.include(errors, "SystemError: error1, error2");
+            }
+        });
+
+        it("handle error object with message property", async () => {
+            seMessageStub = Sinon.stub(VirtualDevice.prototype, "batchMessage")
+                .callsFake((message: string): Promise<any> => {
+                    return Promise.reject({ message: "this is an error"});
+                });
+
+            const virtualDeviceValidator = new BatchValidator();
+            const validatorResult = await virtualDeviceValidator.execute(sequences);
+            for (const test of validatorResult.tests) {
+                assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
+                assert.equal(test.status, "done", `${JSON.stringify(test)}`);
+                const errors = (test.errors || []).map((error: any) => error.actual);
+                assert.include(errors, "SystemError: this is an error");
+            }
+        });
+
+        it("handle error object with results property", async () => {
+            seMessageStub = Sinon.stub(VirtualDevice.prototype, "batchMessage")
+                .callsFake((message: string): Promise<any> => {
+                    return Promise.reject("{results: \"this is an error\"}");
+                });
+
+            const virtualDeviceValidator = new BatchValidator();
+            const validatorResult = await virtualDeviceValidator.execute(sequences);
+            for (const test of validatorResult.tests) {
+                assert.equal(test.result, "failure", `${JSON.stringify(test)}`);
+                assert.equal(test.status, "done", `${JSON.stringify(test)}`);
+                const errors = (test.errors || []).map((error: any) => error.actual);
+                assert.include(errors, 'SystemError: {results: "this is an error"}');
+            }
+        });
+    });
 });
