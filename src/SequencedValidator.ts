@@ -45,11 +45,21 @@ export class SequencedValidator extends VirtualDeviceValidator {
                 result.tests.push(validator.resultItem);
                 this.emit("result", undefined, validator.resultItem, context);
             } catch (err) {
+                let newError = err instanceof Error ? err : undefined;
+                if (!newError) {
+                    const parsedError = this.parseError(err);
+                    if (parsedError && parsedError.results) {
+                        newError = new Error(parsedError.results);
+                    } else {
+                        newError = new Error(this.getError(err));
+                    }
+                }
+
                 const resultItem: IVirtualDeviceValidatorResultItem = { test };
-                const validator: Validator = new Validator(resultItem, err);
+                const validator: Validator = new Validator(resultItem, newError);
                 validator.resultItem.result = "failure";
                 validator.resultItem.status = "done";
-                const error = new ValidatorError(test.input, undefined, undefined, `SystemError: ${err.message}`);
+                const error = new ValidatorError(test.input, undefined, undefined, `SystemError: ${newError.message}`);
                 validator.resultItem.errors = [error];
                 result.tests.push(validator.resultItem);
                 this.emit("result", undefined, validator.resultItem, context);

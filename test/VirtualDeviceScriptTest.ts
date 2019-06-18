@@ -396,6 +396,38 @@ describe("VirtualDeviceScript", function() {
             virtualDeviceScript.voiceID("Matthew");
             virtualDeviceScript.execute(scriptContents);
         });
+
+        it("get error for token expired on secuencial mode", async () => {
+            const tests = [`
+"expiredToken":
+  transcript: "test"
+                `,
+            ];
+            const virtualDeviceScript = new VirtualDeviceScript("expiredToken", undefined, false);
+            for (const test of tests) {
+                const validatorResult = await virtualDeviceScript.execute(test);
+                assert.equal(validatorResult.result, "failure", `${JSON.stringify(validatorResult)}`);
+                for (const t of validatorResult.tests) {
+                    assert.equal(t.result, "failure", `${JSON.stringify(t)}`);
+                }
+            }
+        });
+
+        it("get error for token expired on batch mode", async () => {
+            const tests = [`
+"expiredToken":
+  transcript: "test"
+                `,
+            ];
+            const virtualDeviceScript = new VirtualDeviceScript("expiredToken", undefined, true);
+            for (const test of tests) {
+                const validatorResult = await virtualDeviceScript.execute(test);
+                assert.equal(validatorResult.result, "failure", `${JSON.stringify(validatorResult)}`);
+                for (const t of validatorResult.tests) {
+                    assert.equal(t.result, "failure", `${JSON.stringify(t)}`);
+                }
+            }
+        });
     });
 
     describe("#executeDir()", () => {

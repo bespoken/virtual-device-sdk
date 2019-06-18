@@ -20,6 +20,24 @@ export class MessageMock {
         const baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
             ? process.env.VIRTUAL_DEVICE_BASE_URL
             : "https://virtual-device.bespoken.io";
+
+        nock(baseURL)
+            .persist()
+            .post("/batch_process")
+            .query(function(queryObject: any) {
+                if (queryObject.user_id && queryObject.user_id === "expiredToken") {
+                    return true;
+                }
+                return false;
+            })
+            .reply(400, function() {
+                return {
+                    error: `The trial period for your virtual device has expired.
+                        Please visit https://bespoken.io/testing/ to learn about our pricing or send us an email at
+                        support@bespoken.io to request an extension of your trial period.`,
+                };
+            });
+
         nock(baseURL)
             .persist()
             .post("/batch_process")
@@ -80,6 +98,24 @@ export class MessageMock {
                 const url = URL.parse(uri);
                 const params: any = qs.parse(url.query as string);
                 return processConversationMessages(params.uuid);
+            });
+
+        // Mock for process call
+        nock(baseURL)
+            .persist()
+            .get("/process")
+            .query(function(queryObject: any) {
+                if (queryObject.user_id && queryObject.user_id === "expiredToken") {
+                    return true;
+                }
+                return false;
+            })
+            .reply(400, function() {
+                return {
+                    error: `The trial period for your virtual device has expired.
+                        Please visit https://bespoken.io/testing/ to learn about our pricing or send us an email at
+                        support@bespoken.io to request an extension of your trial period.`,
+                };
             });
 
         // Mock for process call
