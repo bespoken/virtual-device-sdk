@@ -319,6 +319,56 @@ export class VirtualDevice {
         });
     }
 
+    public stopConversation(uuid: string): Promise<IVirtualDeviceResult[] | any> {
+        if (!this.asyncMode) {
+            throw Error("Conversation stop only available in async mode");
+        }
+
+        const path = "/conversation_stop";
+
+        const url = URL.parse(this.baseURL);
+
+        return new Promise<IVirtualDeviceResult[] | any>((resolve, reject) => {
+            const callback = (response: IncomingMessage) => {
+                let data = "";
+
+                response.on("data", (chunk) => {
+                    data += chunk;
+                });
+
+                response.on("end", () => {
+                    if (response.statusCode === 200) {
+                        resolve();
+                    } else {
+                        reject(data);
+                    }
+                });
+            };
+
+            const input = {
+                uuid,
+            };
+            const inputString = JSON.stringify(input);
+            const requestOptions = {
+                headers: {
+                    "Content-Length": new Buffer(inputString).length,
+                    "Content-Type": "application/json",
+                },
+                host: url.hostname,
+                method: "POST",
+                path,
+                port: this.httpInterfacePort(url),
+            };
+
+            const request = this.httpInterface(url).request(requestOptions, callback);
+            request.on("error", function(error: string) {
+                reject(error);
+            });
+            request.write(inputString);
+            request.end();
+        });
+    }
+
     public async waitForSessionToEnd() {
         const ms: number = process.env.SESSION_IDLE_MS
             ? parseInt(process.env.SESSION_IDLE_MS, 10)
@@ -337,6 +387,7 @@ export class VirtualDevice {
             return [];
         }
         for (const result of json.results) {
+            result.status = json.status;
             this.applyHomophones(result);
         }
         return json.results;
@@ -477,6 +528,7 @@ export interface IVirtualDeviceResult {
     transcript: string | null;
     // message is the message used for this result.
     message: string;
+    status?: string | null;
 }
 
 export interface IVirtualDeviceError {
