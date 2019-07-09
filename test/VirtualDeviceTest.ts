@@ -311,6 +311,22 @@ describe("VirtualDevice", function() {
             }
         });
 
+        describe("stop conversation", () => {
+            before(() => {
+                MessageMock.enable();
+            });
+
+            it("send conversation id", async () => {
+                const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
+
+                MessageMock.onCall((uri: string, requestBody: any) => {
+                    assert.equal(requestBody.uuid, "generated-uuid");
+                });
+
+                await sdk.stopConversation("generated-uuid");
+            });
+        });
+
     });
 
     describe("batchMessage with audio", async () => {
