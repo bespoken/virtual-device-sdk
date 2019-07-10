@@ -132,6 +132,26 @@ export class MessageMock {
                 const params: any = qs.parse(url.query as string);
                 return processMessage(params.message, params.phrases);
             });
+
+        nock(baseURL)
+            .persist()
+            .post("/conversation_stop", "{\"uuid\":\"wrong-uuid\"}")
+            .reply(500, function(uri: string, requestBody: any) {
+                if (MessageMock.onCallCallback) {
+                    MessageMock.onCallCallback(uri, requestBody);
+                }
+                return { error: "custom error" };
+            });
+
+        nock(baseURL)
+            .persist()
+            .post("/conversation_stop")
+            .reply(200, function(uri: string, requestBody: any) {
+                if (MessageMock.onCallCallback) {
+                    MessageMock.onCallCallback(uri, requestBody);
+                }
+                return {};
+            });
     }
 
     /**

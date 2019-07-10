@@ -311,6 +311,37 @@ describe("VirtualDevice", function() {
             }
         });
 
+        describe("stop conversation", () => {
+            beforeEach(() => {
+                MessageMock.enable();
+            });
+
+            afterEach(() => {
+                MessageMock.disable();
+            });
+
+            it("send conversation id", async () => {
+                const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
+
+                MessageMock.onCall((uri: string, requestBody: any) => {
+                    assert.equal(requestBody.uuid, "generated-uuid");
+                });
+
+                await sdk.stopConversation("generated-uuid");
+            });
+
+            it("send wrong conversation id, getting error", async () => {
+                const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
+                try {
+                    await sdk.stopConversation("wrong-uuid");
+                    assert.equal(true, false, "not gettting exception");
+                } catch (error) {
+                    assert.equal(true, true, "got exception");
+                    assert.equal(error, "{\"error\":\"custom error\"}");
+                }
+            });
+        });
+
     });
 
     describe("batchMessage with audio", async () => {
