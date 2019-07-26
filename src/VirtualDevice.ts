@@ -17,6 +17,7 @@ export interface IVirtualDeviceConfiguration {
     conversationId?: string;
     screenMode?: string;
     client?: string;
+    projectId?: string;
 }
 
 export class VirtualDevice {
@@ -35,6 +36,7 @@ export class VirtualDevice {
                         public conversationId?: string,
                         public screenMode?: string,
                         public client?: string,
+                        public projectId?: string,
                         ) {
         this.baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
             ? process.env.VIRTUAL_DEVICE_BASE_URL
@@ -53,6 +55,7 @@ export class VirtualDevice {
             this.conversationId = configuration.conversationId;
             this.screenMode = configuration.screenMode;
             this.client = configuration.client;
+            this.projectId = configuration.projectId;
         } else {
             this.token = arg0 as string;
         }
@@ -135,6 +138,10 @@ export class VirtualDevice {
             url += "&client=" + this.client;
         }
 
+        if (this.projectId) {
+            url += "&project_id=" + this.projectId;
+        }
+
         url = encodeURI(url);
         const urlParsed = URL.parse(this.baseURL);
         return new Promise<IVirtualDeviceResult>((resolve, reject) => {
@@ -211,6 +218,10 @@ export class VirtualDevice {
 
         if (this.client) {
             path += "&client=" + this.client;
+        }
+
+        if (this.projectId) {
+            path += "&project_id=" + this.projectId;
         }
 
         let procesedMessages: IMessageEndpoint[];

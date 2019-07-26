@@ -112,6 +112,38 @@ describe("VirtualDevice", function() {
                 done();
             });
         });
+
+        it("Should add project id on message", (done) => {
+            MessageMock.enable();
+            const configuration: IVirtualDeviceConfiguration = {
+                projectId: "dummyProjectId",
+                token: "myToken",
+            };
+            const sdk = new VirtualDevice(configuration);
+            MessageMock.onCall((uri) => {
+                assert.include(uri, "project_id=dummyProjectId");
+            });
+            sdk.message("hi", true).then(() => {
+                MessageMock.disable();
+                done();
+            });
+        });
+
+        it("Should add project id on batch message", (done) => {
+            MessageMock.enable();
+            const configuration: IVirtualDeviceConfiguration = {
+                projectId: "dummyProjectId",
+                token: "myToken",
+            };
+            const sdk = new VirtualDevice(configuration);
+            MessageMock.onCall((uri) => {
+                assert.include(uri, "project_id=dummyProjectId");
+            });
+            sdk.batchMessage([{text: "hi"}], true).then(() => {
+                MessageMock.disable();
+                done();
+            });
+        });
     });
 
     describe("#message() with phrases", () => {
