@@ -328,7 +328,7 @@ describe("VirtualDeviceScript", function() {
             assert.equal(result.result, "success");
         });
 
-        it("Uses explicit voice and language code, Germany", async () => {
+        it.skip("Uses explicit voice and language code, Germany", async () => {
             const scriptContents = `
 "config":
   "voiceID": "Hans"
