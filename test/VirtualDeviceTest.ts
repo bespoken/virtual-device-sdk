@@ -144,6 +144,22 @@ describe("VirtualDevice", function() {
                 done();
             });
         });
+
+        it("Should add phoneNumber id on batch message", (done) => {
+            MessageMock.enable();
+            const configuration: IVirtualDeviceConfiguration = {
+                phoneNumber: "myNumber",
+                token: "myToken",
+            };
+            const sdk = new VirtualDevice(configuration);
+            MessageMock.onCall((uri) => {
+                assert.include(uri, "phone_number=myNumber");
+            });
+            sdk.batchMessage([{text: "hi"}], true).then(() => {
+                MessageMock.disable();
+                done();
+            });
+        });
     });
 
     describe("#message() with phrases", () => {
