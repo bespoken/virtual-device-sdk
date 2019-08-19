@@ -18,12 +18,14 @@ export interface IVirtualDeviceConfiguration {
     screenMode?: string;
     client?: string;
     projectId?: string;
+    phoneNumber?: string;
 }
 
 export class VirtualDevice {
     public baseURL: string;
     public token: string;
     public homophones: {[id: string]: string[]} = {};
+    public phoneNumber?: string;
 
     public constructor( public arg0: string | IVirtualDeviceConfiguration,
                         public locale?: string,
@@ -56,6 +58,7 @@ export class VirtualDevice {
             this.screenMode = configuration.screenMode;
             this.client = configuration.client;
             this.projectId = configuration.projectId;
+            this.phoneNumber = configuration.phoneNumber;
         } else {
             this.token = arg0 as string;
         }
@@ -222,6 +225,10 @@ export class VirtualDevice {
 
         if (this.projectId) {
             path += "&project_id=" + this.projectId;
+        }
+
+        if (this.phoneNumber) {
+            path += "&phone_number=" + this.phoneNumber;
         }
 
         let procesedMessages: IMessageEndpoint[];

@@ -57,7 +57,7 @@ describe("SequencedValidator", function() {
             }
         });
 
-        it("failure", async () => {
+        it.skip("failure", async () => {
             const sequences = [
                 {
                     invocationName: "test player",
