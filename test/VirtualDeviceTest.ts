@@ -41,7 +41,7 @@ describe("VirtualDevice", function() {
         });
 
         it("Should handle weird characters", async () => {
-            const token = process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] as string;
+            const token = process.env.VIRTUAL_DEVICE_TOKEN as string;
             const sdk = new VirtualDevice(token, "de-DE");
             const result = await sdk.message("wie spät ist es", true);
             console.log("Output: " + JSON.stringify(result));
@@ -189,7 +189,7 @@ describe("VirtualDevice", function() {
         });
 
         it("Should handle phrases correctly", async () => {
-            const token = process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] as string;
+            const token = process.env.VIRTUAL_DEVICE_TOKEN as string;
             const sdk = new VirtualDevice(token, "de-DE");
             const result = await sdk.message("phrases", false, ["phrases being passed"]);
             console.log("Output: " + JSON.stringify(result));
@@ -319,7 +319,14 @@ describe("VirtualDevice", function() {
         });
 
         it("return conversation uuid", async () => {
-            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
+            const configuration: IVirtualDeviceConfiguration = {
+                asyncMode: true,
+                conversationId: "my-own-uuid",
+                locale: "de-DE",
+                token: "DUMMY_TOKEN",
+                voiceID: "DUMMY_VOICE",
+            };
+            const sdk = new VirtualDevice(configuration);
 
             const results = await sdk.batchMessage([{text: "wie spät ist es"}, {text: "Wie ist das Wetter"}]);
             assert.equal(results.conversation_id, "generated-uuid");
@@ -332,10 +339,16 @@ describe("VirtualDevice", function() {
         });
 
         it("return conversation uuid", async () => {
-            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
-            sdk.conversationId = "my-own-uuid";
+            const configuration: IVirtualDeviceConfiguration = {
+                conversationId: "my-own-uuid",
+                locale: "de-DE",
+                token: "DUMMY_TOKEN",
+                voiceID: "DUMMY_VOICE",
+            };
+            const sdk = new VirtualDevice(configuration);
+
             const results = await sdk.batchMessage([{text: "wie spät ist es"}, {text: "Wie ist das Wetter"}]);
-            assert.equal(results.conversation_id, sdk.conversationId);
+            assert.equal(results.conversation_id, sdk.configuration.conversationId);
         });
     });
 
