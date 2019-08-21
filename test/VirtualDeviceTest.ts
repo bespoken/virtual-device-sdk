@@ -148,12 +148,33 @@ describe("VirtualDevice", function() {
         it("Should add phoneNumber id on batch message", (done) => {
             MessageMock.enable();
             const configuration: IVirtualDeviceConfiguration = {
+                another: "dfdf",
+                another_one: "dfdf",
                 phoneNumber: "myNumber",
                 token: "myToken",
             };
             const sdk = new VirtualDevice(configuration);
             MessageMock.onCall((uri) => {
                 assert.include(uri, "phone_number=myNumber");
+            });
+            sdk.batchMessage([{text: "hi"}], true).then(() => {
+                MessageMock.disable();
+                done();
+            });
+        });
+
+        it("Should add additional parameters on batch message", (done) => {
+            MessageMock.enable();
+            const configuration: IVirtualDeviceConfiguration = {
+                another: "value1",
+                another_one: "value2",
+                token: "myToken",
+            };
+            const sdk = new VirtualDevice(configuration);
+            MessageMock.onCall((uri) => {
+                assert.include(uri, "user_id=myToken");
+                assert.include(uri, "another=value1");
+                assert.include(uri, "another_one=value2");
             });
             sdk.batchMessage([{text: "hi"}], true).then(() => {
                 MessageMock.disable();
