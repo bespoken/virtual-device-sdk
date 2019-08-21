@@ -321,7 +321,6 @@ describe("VirtualDevice", function() {
         it("return conversation uuid", async () => {
             const configuration: IVirtualDeviceConfiguration = {
                 asyncMode: true,
-                conversationId: "my-own-uuid",
                 locale: "de-DE",
                 token: "DUMMY_TOKEN",
                 voiceID: "DUMMY_VOICE",
@@ -340,6 +339,7 @@ describe("VirtualDevice", function() {
 
         it("return conversation uuid", async () => {
             const configuration: IVirtualDeviceConfiguration = {
+                asyncMode: true,
                 conversationId: "my-own-uuid",
                 locale: "de-DE",
                 token: "DUMMY_TOKEN",
