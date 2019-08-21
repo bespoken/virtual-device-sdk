@@ -41,7 +41,7 @@ describe("VirtualDevice", function() {
         });
 
         it("Should handle weird characters", async () => {
-            const token = process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] as string;
+            const token = process.env.VIRTUAL_DEVICE_TOKEN as string;
             const sdk = new VirtualDevice(token, "de-DE");
             const result = await sdk.message("wie spät ist es", true);
             console.log("Output: " + JSON.stringify(result));
@@ -148,12 +148,33 @@ describe("VirtualDevice", function() {
         it("Should add phoneNumber id on batch message", (done) => {
             MessageMock.enable();
             const configuration: IVirtualDeviceConfiguration = {
+                another: "dfdf",
+                another_one: "dfdf",
                 phoneNumber: "myNumber",
                 token: "myToken",
             };
             const sdk = new VirtualDevice(configuration);
             MessageMock.onCall((uri) => {
                 assert.include(uri, "phone_number=myNumber");
+            });
+            sdk.batchMessage([{text: "hi"}], true).then(() => {
+                MessageMock.disable();
+                done();
+            });
+        });
+
+        it("Should add additional parameters on batch message", (done) => {
+            MessageMock.enable();
+            const configuration: IVirtualDeviceConfiguration = {
+                another: "value1",
+                another_one: "value2",
+                token: "myToken",
+            };
+            const sdk = new VirtualDevice(configuration);
+            MessageMock.onCall((uri) => {
+                assert.include(uri, "user_id=myToken");
+                assert.include(uri, "another=value1");
+                assert.include(uri, "another_one=value2");
             });
             sdk.batchMessage([{text: "hi"}], true).then(() => {
                 MessageMock.disable();
@@ -168,7 +189,7 @@ describe("VirtualDevice", function() {
         });
 
         it("Should handle phrases correctly", async () => {
-            const token = process.env["VIRTUAL_DEVICE_TOKEN.DE-DE"] as string;
+            const token = process.env.VIRTUAL_DEVICE_TOKEN as string;
             const sdk = new VirtualDevice(token, "de-DE");
             const result = await sdk.message("phrases", false, ["phrases being passed"]);
             console.log("Output: " + JSON.stringify(result));
@@ -298,7 +319,13 @@ describe("VirtualDevice", function() {
         });
 
         it("return conversation uuid", async () => {
-            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
+            const configuration: IVirtualDeviceConfiguration = {
+                asyncMode: true,
+                locale: "de-DE",
+                token: "DUMMY_TOKEN",
+                voiceID: "DUMMY_VOICE",
+            };
+            const sdk = new VirtualDevice(configuration);
 
             const results = await sdk.batchMessage([{text: "wie spät ist es"}, {text: "Wie ist das Wetter"}]);
             assert.equal(results.conversation_id, "generated-uuid");
@@ -311,10 +338,17 @@ describe("VirtualDevice", function() {
         });
 
         it("return conversation uuid", async () => {
-            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
-            sdk.conversationId = "my-own-uuid";
+            const configuration: IVirtualDeviceConfiguration = {
+                asyncMode: true,
+                conversationId: "my-own-uuid",
+                locale: "de-DE",
+                token: "DUMMY_TOKEN",
+                voiceID: "DUMMY_VOICE",
+            };
+            const sdk = new VirtualDevice(configuration);
+
             const results = await sdk.batchMessage([{text: "wie spät ist es"}, {text: "Wie ist das Wetter"}]);
-            assert.equal(results.conversation_id, sdk.conversationId);
+            assert.equal(results.conversation_id, sdk.configuration.conversationId);
         });
     });
 

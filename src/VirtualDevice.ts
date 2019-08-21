@@ -19,13 +19,32 @@ export interface IVirtualDeviceConfiguration {
     client?: string;
     projectId?: string;
     phoneNumber?: string;
+    [key: string]: any;
 }
+
+interface IKeyValue {
+    [key: string]: any;
+}
+
+const VirtualDeviceParameterMapper: IKeyValue = {
+    asyncMode: "async_mode",
+    conversationId: "conversation_id",
+    locale: "language_code",
+    locationLat: "location_lat",
+    locationLong: "location_long",
+    phoneNumber: "phone_number",
+    projectId: "project_id",
+    screenMode: "screen_mode",
+    skipSTT: "skip_stt",
+    stt: "stt",
+    token: "user_id",
+    voiceID: "voice_id",
+};
 
 export class VirtualDevice {
     public baseURL: string;
-    public token: string;
     public homophones: {[id: string]: string[]} = {};
-    public phoneNumber?: string;
+    public configuration: IVirtualDeviceConfiguration;
 
     public constructor( public arg0: string | IVirtualDeviceConfiguration,
                         public locale?: string,
@@ -43,24 +62,23 @@ export class VirtualDevice {
         this.baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
             ? process.env.VIRTUAL_DEVICE_BASE_URL
             : "https://virtual-device.bespoken.io";
-
         if (arg0 === Object(arg0)) {
-            const configuration = arg0 as IVirtualDeviceConfiguration;
-            this.token = configuration.token;
-            this.locale = configuration.locale;
-            this.voiceID = configuration.voiceID;
-            this.skipSTT = configuration.skipSTT;
-            this.asyncMode = configuration.asyncMode;
-            this.stt = configuration.stt;
-            this.locationLat = configuration.locationLat;
-            this.locationLong = configuration.locationLong;
-            this.conversationId = configuration.conversationId;
-            this.screenMode = configuration.screenMode;
-            this.client = configuration.client;
-            this.projectId = configuration.projectId;
-            this.phoneNumber = configuration.phoneNumber;
+            this.configuration = arg0 as IVirtualDeviceConfiguration;
         } else {
-            this.token = arg0 as string;
+            this.configuration = {
+                token: arg0,
+                locale,
+                voiceID,
+                skipSTT,
+                asyncMode,
+                stt,
+                locationLat,
+                locationLong,
+                conversationId,
+                screenMode,
+                client,
+                projectId,
+            } as IVirtualDeviceConfiguration;
         }
     }
 
@@ -91,9 +109,11 @@ export class VirtualDevice {
     public message(message: string, debug?: boolean,
                    phrases?: string[], newConversation?: boolean): Promise<IVirtualDeviceResult> {
         const encodedMessage = encodeURIComponent(message);
-        let url = this.baseURL + "/process"
-            + "?message=" + encodedMessage
-            + "&user_id=" + this.token;
+
+        let url = this.baseURL + "/process?";
+        if (encodedMessage) {
+            url += "&message=" + encodedMessage;
+        }
 
         if (phrases) {
             for (const phrase of phrases) {
@@ -104,45 +124,13 @@ export class VirtualDevice {
         if (debug) {
             url += "&debug=true";
         }
-
-        if (newConversation) {
-            url += "&new_conversation=true";
-        }
-
-        if (this.locale) {
-            url += "&language_code=" + this.locale;
-        }
-
-        if (this.voiceID) {
-            url += "&voice_id=" + this.voiceID;
-        }
-
-        if (this.skipSTT) {
-            url += "&skip_stt=true";
-        }
-
-        if (this.stt) {
-            url += "&stt=" + this.stt;
-        }
-
-        if (this.locationLat) {
-            url += "&location_lat=" + this.locationLat;
-        }
-
-        if (this.locationLong) {
-            url += "&location_long=" + this.locationLong;
-        }
-
-        if (this.screenMode) {
-            url += "&screen_mode=" + this.screenMode;
-        }
-
-        if (this.client) {
-            url += "&client=" + this.client;
-        }
-
-        if (this.projectId) {
-            url += "&project_id=" + this.projectId;
+        for (const key of Object.keys(this.configuration)) {
+            const parameterValue = this.configuration[key];
+            if (!parameterValue) {
+                continue;
+            }
+            const parameterName = VirtualDeviceParameterMapper[key] || key;
+            url += `&${parameterName}=${parameterValue}`;
         }
 
         url = encodeURI(url);
@@ -177,58 +165,18 @@ export class VirtualDevice {
     }
 
     public async batchMessage(messages: IMessage[], debug?: boolean): Promise<IVirtualDeviceResult[] | any> {
-        let path = "/batch_process?user_id=" + this.token;
+        let path = "/batch_process?";
+        for (const key of Object.keys(this.configuration)) {
+            const parameterValue = this.configuration[key];
+            if (!parameterValue) {
+                continue;
+            }
+            const parameterName = VirtualDeviceParameterMapper[key] || key;
+            path += `&${parameterName}=${parameterValue}`;
+        }
 
         if (debug) {
             path += "&debug=true";
-        }
-
-        if (this.locale) {
-            path += "&language_code=" + this.locale;
-        }
-
-        if (this.voiceID) {
-            path += "&voice_id=" + this.voiceID;
-        }
-
-        if (this.skipSTT) {
-            path += "&skip_stt=true";
-        }
-
-        if (this.asyncMode) {
-            path += "&async_mode=true";
-        }
-
-        if (this.stt) {
-            path += "&stt=" + this.stt;
-        }
-
-        if (this.locationLat) {
-            path += "&location_lat=" + this.locationLat;
-        }
-
-        if (this.locationLong) {
-            path += "&location_long=" + this.locationLong;
-        }
-
-        if (this.conversationId) {
-            path += "&conversation_id=" + this.conversationId;
-        }
-
-        if (this.screenMode) {
-            path += "&screen_mode=" + this.screenMode;
-        }
-
-        if (this.client) {
-            path += "&client=" + this.client;
-        }
-
-        if (this.projectId) {
-            path += "&project_id=" + this.projectId;
-        }
-
-        if (this.phoneNumber) {
-            path += "&phone_number=" + this.phoneNumber;
         }
 
         let procesedMessages: IMessageEndpoint[];
@@ -239,7 +187,6 @@ export class VirtualDevice {
         }
 
         const url = URL.parse(this.baseURL);
-
         return new Promise<IVirtualDeviceResult[] | any>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
@@ -250,7 +197,7 @@ export class VirtualDevice {
 
                 response.on("end", () => {
                     if (response.statusCode === 200) {
-                        if (this.asyncMode) {
+                        if (this.configuration.asyncMode) {
                             resolve(this.handleAsynchResponse(data as string));
                         } else {
                             resolve(this.handleBatchResponse(data as string));
@@ -287,7 +234,7 @@ export class VirtualDevice {
     }
 
     public getConversationResults(uuid: string): Promise<IVirtualDeviceResult[] | any> {
-        if (!this.asyncMode) {
+        if (!this.configuration.asyncMode) {
             throw Error("Conversation Results only available in async mode");
         }
 
@@ -338,7 +285,7 @@ export class VirtualDevice {
     }
 
     public stopConversation(uuid: string): Promise<IVirtualDeviceResult[] | any> {
-        if (!this.asyncMode) {
+        if (!this.configuration.asyncMode) {
             throw Error("Conversation stop only available in async mode");
         }
 
