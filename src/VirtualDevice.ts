@@ -439,6 +439,7 @@ class MessageProcesor {
             phrases: message.phrases,
             sample_width: sampleWidth,
             text: message.text,
+            url: message.url,
         } as IMessageEndpoint;
     }
 
@@ -511,6 +512,7 @@ export interface ICard {
 export interface IMessage {
     text?: string;
     phrases?: string[];
+    url?: string;
     audio?: IAudio;
 }
 
@@ -530,4 +532,5 @@ interface IMessageEndpoint {
     frame_rate?: number;
     channels?: number;
     sample_width?: number;
+    url?: string;
 }
