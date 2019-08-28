@@ -219,7 +219,7 @@ export class VirtualDevice {
                 },
                 host: url.hostname,
                 method: "POST",
-                path,
+                path: encodeURI(path),
                 port: this.httpInterfacePort(url),
             };
 
