@@ -1,7 +1,7 @@
 import {assert} from "chai";
 import * as dotenv from "dotenv";
 import * as URL from "url";
-import {IMessage, IVirtualDeviceConfiguration, VirtualDevice} from "../src/VirtualDevice";
+import {IMessage, IVirtualDeviceConfiguration, IVirtualDeviceResponse, VirtualDevice} from "../src/VirtualDevice";
 import {MessageMock} from "./MessageMock";
 
 dotenv.config();
@@ -360,9 +360,12 @@ describe("VirtualDevice", function() {
         it("Should return from several inputs, using conversation uuid", async () => {
             const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
 
-            const results = await sdk.getConversationResults("generated-uuid");
+            const response: IVirtualDeviceResponse = await sdk.getConversationResults("generated-uuid");
+            const results = response.results;
+            const status = response.status;
 
-            console.log("Output: " + JSON.stringify(results));
+            console.log("Output: " + JSON.stringify(response));
+            assert.equal(status, "COMPLETED");
             assert.equal(results.length, 2);
             assert.equal(results[1].message, "tell test player to play");
             assert.include(results[1].streamURL as string, "https://feeds.soundcloud.com/stream/");

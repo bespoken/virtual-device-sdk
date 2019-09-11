@@ -202,7 +202,9 @@ function processConversationMessages(uuid: any) {
             }]};
 
     if (uuid === "generated-uuid") {
-        return processBatchMessages(messageData);
+        const response = processBatchMessages(messageData);
+        response.status = "COMPLETED";
+        return response;
     }
 
     if (uuid === "error-uuid") {

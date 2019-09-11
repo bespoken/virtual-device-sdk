@@ -200,7 +200,13 @@ export class VirtualDevice {
                         if (this.configuration.asyncMode) {
                             resolve(this.handleAsynchResponse(data as string));
                         } else {
-                            resolve(this.handleBatchResponse(data as string));
+                            const virtualDeviceResponse: IVirtualDeviceResponse | IVirtualDeviceError =
+                                this.handleBatchResponse(data as string);
+                            if ((virtualDeviceResponse as IVirtualDeviceError).error) {
+                                resolve((virtualDeviceResponse as IVirtualDeviceError).error);
+                            } else {
+                                resolve((virtualDeviceResponse as IVirtualDeviceResponse).results);
+                            }
                         }
                     } else {
                         reject(data);
@@ -233,7 +239,7 @@ export class VirtualDevice {
         });
     }
 
-    public getConversationResults(uuid: string): Promise<IVirtualDeviceResult[] | any> {
+    public getConversationResults(uuid: string): Promise<IVirtualDeviceResponse | any> {
         if (!this.configuration.asyncMode) {
             throw Error("Conversation Results only available in async mode");
         }
@@ -242,7 +248,7 @@ export class VirtualDevice {
 
         const url = URL.parse(this.baseURL);
 
-        return new Promise<IVirtualDeviceResult[] | any>((resolve, reject) => {
+        return new Promise<IVirtualDeviceResponse | any>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
 
@@ -341,21 +347,28 @@ export class VirtualDevice {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    private handleBatchResponse(data: string): IVirtualDeviceResult[] | IVirtualDeviceError {
+    private handleBatchResponse(data: string): IVirtualDeviceResponse | IVirtualDeviceError {
         const json = JSON.parse(data);
 
         if (json && json.error) {
             return json as IVirtualDeviceError;
         }
 
+        let results: IVirtualDeviceResult[];
         if (!json || !json.results) {
-            return [];
+            results = [];
+        } else {
+            results = json.results;
         }
-        for (const result of json.results) {
+
+        for (const result of results) {
             result.status = json.status;
             this.applyHomophones(result);
         }
-        return json.results;
+        return {
+            results,
+            status: json.status,
+        } as  IVirtualDeviceResponse;
     }
 
     private handleAsynchResponse(data: string): IConversationResult {
@@ -481,6 +494,11 @@ class MessageProcesor {
 }
 export interface IConversationResult {
     conversation_id: string;
+}
+
+export interface IVirtualDeviceResponse {
+    results: IVirtualDeviceResult[];
+    status: string;
 }
 
 export interface IVirtualDeviceResult {
