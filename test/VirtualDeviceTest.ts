@@ -167,7 +167,9 @@ describe("VirtualDevice", function() {
             MessageMock.enable();
             const configuration: IVirtualDeviceConfiguration = {
                 another: "value1",
+                another_false_value: false,
                 another_one: "value2",
+                another_true_value: true,
                 token: "myToken",
             };
             const sdk = new VirtualDevice(configuration);
@@ -175,6 +177,8 @@ describe("VirtualDevice", function() {
                 assert.include(uri, "user_id=myToken");
                 assert.include(uri, "another=value1");
                 assert.include(uri, "another_one=value2");
+                assert.include(uri, "another_true_value=true");
+                assert.include(uri, "another_false_value=false");
             });
             sdk.batchMessage([{text: "hi"}], true).then(() => {
                 MessageMock.disable();

@@ -168,7 +168,7 @@ export class VirtualDevice {
         let path = "/batch_process?";
         for (const key of Object.keys(this.configuration)) {
             const parameterValue = this.configuration[key];
-            if (!parameterValue) {
+            if (parameterValue === undefined) {
                 continue;
             }
             const parameterName = VirtualDeviceParameterMapper[key] || key;
