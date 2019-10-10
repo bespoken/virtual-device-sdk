@@ -395,7 +395,7 @@ export class VirtualDevice {
             const homophones = this.homophones[key];
             for (const homophone of homophones) {
                 // Replace each of the homophones
-                result.transcript = result.transcript.split(new RegExp("\\b" + homophone + "\\b")).join(word);
+                result.transcript = result.transcript.split(new RegExp("\\b" + homophone + "\\b", "i")).join(word);
             }
         }
     }
