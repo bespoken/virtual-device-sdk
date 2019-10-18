@@ -47,15 +47,15 @@ describe("VirtualDevice", function() {
             console.log("Output: " + JSON.stringify(result));
             assert.isDefined(result.transcript);
         });
-
-        it("Should return a transcript when message has specials characters", async () => {
+        // TODO: revert skips after finish some test with virtual device dev
+        it.skip("Should return a transcript when message has specials characters", async () => {
             const sdk = newVirtualDevice();
             const results = await sdk.message("what is rock & roll", false, ["rock & roll", "rock & roll"]);
             assert.isDefined(results);
             assert.equal(results.message, "what is rock & roll");
         });
 
-        it("Should return a transcript when newConversation is active", async () => {
+        it.skip("Should return a transcript when newConversation is active", async () => {
             const sdk = newVirtualDevice();
             const results = await sdk.message("what is rock & roll", undefined, undefined, true);
             assert.isDefined(results);
