@@ -396,7 +396,9 @@ describe("VirtualDevice", function() {
                 await sdk.getConversationResults("error-uuid");
                 assert(false, "Should have trigger an exception");
             } catch (e) {
-                assert.equal(e.message, errorMessage);
+                assert.equal(e.error, errorMessage);
+                assert.equal(e.error_category, "user");
+
             }
         });
 

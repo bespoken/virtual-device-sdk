@@ -213,6 +213,8 @@ function processConversationMessages(uuid: any) {
 
         return {
             error: errorMessage,
+            error_category: "user",
+            status: "ERROR",
         };
     }
 }

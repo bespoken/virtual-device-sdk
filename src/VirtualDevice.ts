@@ -260,7 +260,7 @@ export class VirtualDevice {
                     if (response.statusCode === 200) {
                         const result = this.handleBatchResponse(data as string);
                         if ((result as IVirtualDeviceError).error) {
-                            reject(new Error((result as IVirtualDeviceError).error));
+                            reject(result);
                             return;
                         }
 
@@ -517,6 +517,7 @@ export interface IVirtualDeviceResult {
 
 export interface IVirtualDeviceError {
     error: string;
+    error_category?: string;
 }
 
 export interface ICard {
