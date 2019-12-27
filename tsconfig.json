@@ -14,6 +14,7 @@
         "outDir": "lib",
         "preserveConstEnums": true,
         "removeComments": true,
+        "skipLibCheck": true,
         "sourceMap": true,
         "strictNullChecks": true,
         "target": "ES5"

@@ -328,7 +328,7 @@ describe("VirtualDeviceScript", function() {
             assert.equal(result.result, "success");
         });
 
-        it("Uses explicit voice and language code, Germany", async () => {
+        it.skip("Uses explicit voice and language code, Germany", async () => {
             const scriptContents = `
 "config":
   "voiceID": "Hans"
@@ -395,6 +395,38 @@ describe("VirtualDeviceScript", function() {
             virtualDeviceScript.locale("en-GB");
             virtualDeviceScript.voiceID("Matthew");
             virtualDeviceScript.execute(scriptContents);
+        });
+
+        it("get error for token expired on secuencial mode", async () => {
+            const tests = [`
+"expiredToken":
+  transcript: "test"
+                `,
+            ];
+            const virtualDeviceScript = new VirtualDeviceScript("expiredToken", undefined, false);
+            for (const test of tests) {
+                const validatorResult = await virtualDeviceScript.execute(test);
+                assert.equal(validatorResult.result, "failure", `${JSON.stringify(validatorResult)}`);
+                for (const t of validatorResult.tests) {
+                    assert.equal(t.result, "failure", `${JSON.stringify(t)}`);
+                }
+            }
+        });
+
+        it("get error for token expired on batch mode", async () => {
+            const tests = [`
+"expiredToken":
+  transcript: "test"
+                `,
+            ];
+            const virtualDeviceScript = new VirtualDeviceScript("expiredToken", undefined, true);
+            for (const test of tests) {
+                const validatorResult = await virtualDeviceScript.execute(test);
+                assert.equal(validatorResult.result, "failure", `${JSON.stringify(validatorResult)}`);
+                for (const t of validatorResult.tests) {
+                    assert.equal(t.result, "failure", `${JSON.stringify(t)}`);
+                }
+            }
         });
     });
 

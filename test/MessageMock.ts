@@ -20,16 +20,102 @@ export class MessageMock {
         const baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
             ? process.env.VIRTUAL_DEVICE_BASE_URL
             : "https://virtual-device.bespoken.io";
-        // Mock for batch process call
+
         nock(baseURL)
             .persist()
             .post("/batch_process")
-            .query(true)
+            .query(function(queryObject: any) {
+                if (queryObject.user_id && queryObject.user_id === "expiredToken") {
+                    return true;
+                }
+                return false;
+            })
+            .reply(400, function() {
+                return {
+                    error: `The trial period for your virtual device has expired.
+                        Please visit https://bespoken.io/testing/ to learn about our pricing or send us an email at
+                        support@bespoken.io to request an extension of your trial period.`,
+                };
+            });
+
+        nock(baseURL)
+            .persist()
+            .post("/batch_process")
+            .query(function(queryObject: any) {
+                return !queryObject.async_mode;
+            })
             .reply(200, function(uri: string, requestBody: any) {
                 if (MessageMock.onCallCallback) {
                     MessageMock.onCallCallback(uri, requestBody);
                 }
                 return processBatchMessages(requestBody);
+            });
+
+        let currentQueryObject: any;
+        nock(baseURL)
+            .persist()
+            .post("/batch_process")
+            .query(function(queryObject: any) {
+                if (queryObject.async_mode && queryObject.conversation_id) {
+                    currentQueryObject = queryObject;
+                    return true;
+                }
+                return false;
+            })
+            .reply(200, function(uri: string, requestBody: any) {
+                if (MessageMock.onCallCallback) {
+                    MessageMock.onCallCallback(uri, requestBody);
+                }
+                return {
+                    conversation_id: currentQueryObject.conversation_id,
+                };
+            });
+
+        nock(baseURL)
+            .persist()
+            .post("/batch_process")
+            .query(function(queryObject: any) {
+                if (queryObject.async_mode && !queryObject.conversation_id) {
+                    currentQueryObject = queryObject;
+                    return true;
+                }
+                return false;
+            })
+            .reply(200, function(uri: string, requestBody: any) {
+                if (MessageMock.onCallCallback) {
+                    MessageMock.onCallCallback(uri, requestBody);
+                }
+                return {
+                    conversation_id: "generated-uuid",
+                };
+            });
+
+        nock(baseURL)
+            .persist()
+            .get("/conversation")
+            .query(true)
+            .reply(200, function(uri: string) {
+                const url = URL.parse(uri);
+                const params: any = qs.parse(url.query as string);
+                return processConversationMessages(params.uuid);
+            });
+
+        // Mock for process call
+        nock(baseURL)
+            .persist()
+            .get("/process")
+            .query(function(queryObject: any) {
+                if (queryObject.user_id && queryObject.user_id === "expiredToken") {
+                    return true;
+                }
+                return false;
+            })
+            .reply(400, function() {
+                return {
+                    error: `The trial period for your virtual device has expired.
+                        Please visit https://bespoken.io/testing/ to learn about our pricing or send us an email at
+                        support@bespoken.io to request an extension of your trial period.`,
+                };
             });
 
         // Mock for process call
@@ -45,6 +131,26 @@ export class MessageMock {
                 const url = URL.parse(uri);
                 const params: any = qs.parse(url.query as string);
                 return processMessage(params.message, params.phrases);
+            });
+
+        nock(baseURL)
+            .persist()
+            .post("/conversation_stop", "{\"uuid\":\"wrong-uuid\"}")
+            .reply(500, function(uri: string, requestBody: any) {
+                if (MessageMock.onCallCallback) {
+                    MessageMock.onCallCallback(uri, requestBody);
+                }
+                return { error: "custom error" };
+            });
+
+        nock(baseURL)
+            .persist()
+            .post("/conversation_stop")
+            .reply(200, function(uri: string, requestBody: any) {
+                if (MessageMock.onCallCallback) {
+                    MessageMock.onCallCallback(uri, requestBody);
+                }
+                return {};
             });
     }
 
@@ -82,6 +188,35 @@ function processBatchMessages(payload: any): any {
         results.push(messageHandler(message.text));
     }
     return { results };
+}
+
+function processConversationMessages(uuid: any) {
+    const messageData = {
+        messages: [
+            {
+                phrases: ["Welcome to the Simple Audio Player"],
+                text: "open test player",
+            },
+            {
+                text: "tell test player to play",
+            }]};
+
+    if (uuid === "generated-uuid") {
+        const response = processBatchMessages(messageData);
+        response.status = "COMPLETED";
+        return response;
+    }
+
+    if (uuid === "error-uuid") {
+        const errorMessage =  "The locale es-US is invalid. For alexa, please pick a locale from here: " +
+            "https://developer.amazon.com/docs/custom-skills/develop-skills-in-multiple-languages.html#h2-code-changes";
+
+        return {
+            error: errorMessage,
+            error_category: "user",
+            status: "ERROR",
+        };
+    }
 }
 
 function messageHandler(message: string, phrases?: string): IVirtualDeviceResult {

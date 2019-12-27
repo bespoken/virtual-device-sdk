@@ -161,6 +161,38 @@ export abstract class VirtualDeviceValidator {
         }
         return virtualDevice;
     }
+
+    protected parseError(error: any) {
+        try {
+            return JSON.parse(error);
+        } catch (error) {
+            return undefined;
+        }
+    }
+
+    protected getError(error: any) {
+        let objectError;
+        try {
+            objectError = JSON.parse(error);
+        } catch (_e) {
+            objectError = error;
+        }
+
+        if (typeof(objectError) === "string") {
+            return objectError;
+        } else if (typeof(objectError) === "object") {
+            if (objectError.error) {
+                if (typeof(objectError.error) === "string") {
+                    return objectError.error;
+                } else if (Array.isArray(objectError.error)) {
+                    return objectError.error.join(", ");
+                }
+            } else if (objectError.message) {
+                return objectError.message;
+            }
+            return "Error description missing.";
+        }
+    }
 }
 
 export interface IVirtualDeviceTest {
