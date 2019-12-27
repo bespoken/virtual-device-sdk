@@ -485,7 +485,12 @@ class MessageProcesor {
     }
 
     private getExtension(path: string) {
-        const extname = pathModule.extname(path);
+        let extname = pathModule.extname(path);
+        // The extname may include a ? if this is a URL - we want to remove that section
+        if (extname.indexOf("?") !== -1) {
+            extname = extname.split("?")[0];
+        }
+
         if (extname && extname.length > 0) {
             return extname.substr(1);
         }
