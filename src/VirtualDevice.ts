@@ -4,6 +4,7 @@ import * as http from "http";
 import * as https from "https";
 import * as pathModule from "path";
 import * as URL from "url";
+import { retry } from "./util";
 
 export interface IVirtualDeviceConfiguration {
     token: string;
@@ -239,7 +240,7 @@ export class VirtualDevice {
         });
     }
 
-    public getConversationResults(uuid: string): Promise<IVirtualDeviceResponse | any> {
+    public async getConversationResults(uuid: string): Promise<IVirtualDeviceResponse | any> {
         if (!this.configuration.asyncMode) {
             throw Error("Conversation Results only available in async mode");
         }
@@ -248,46 +249,62 @@ export class VirtualDevice {
 
         const url = URL.parse(this.baseURL);
 
-        return new Promise<IVirtualDeviceResponse | any>((resolve, reject) => {
-            const callback = (response: IncomingMessage) => {
-                let data = "";
+        const responsePromise = () => {
+            return new Promise<IVirtualDeviceResponse | any>((resolve, reject) => {
+                const callback = (response: IncomingMessage) => {
+                    let data = "";
 
-                response.on("data", (chunk) => {
-                    data += chunk;
-                });
+                    response.on("data", (chunk) => {
+                        data += chunk;
+                    });
 
-                response.on("end", () => {
-                    if (response.statusCode === 200) {
-                        const result = this.handleBatchResponse(data as string);
-                        if ((result as IVirtualDeviceError).error) {
-                            reject(result);
-                            return;
+                    response.on("end", () => {
+                        if (response.statusCode === 200) {
+                            const result = this.handleBatchResponse(data as string);
+                            if ((result as IVirtualDeviceError).error) {
+                                reject(result);
+                                return;
+                            }
+
+                            resolve(result);
+                        } else {
+                            reject(data);
                         }
+                    });
+                };
 
-                        resolve(result);
-                    } else {
-                        reject(data);
-                    }
+                const requestOptions = {
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    host: url.hostname,
+                    method: "GET",
+                    path,
+                    port: this.httpInterfacePort(url),
+                };
+
+                const request = this.httpInterface(url).request(requestOptions, callback);
+                request.on("socket", (socket: any) => {
+                    socket.setTimeout(2000);
+                    socket.on("timeout", () => {
+                        request.abort();
+                    });
                 });
-            };
+                request.on("error", function(error: string) {
+                    reject(error);
+                });
 
-            const requestOptions = {
-                headers: {
-                    "Content-Type": "application/json",
-                },
-                host: url.hostname,
-                method: "GET",
-                path,
-                port: this.httpInterfacePort(url),
-            };
-
-            const request = this.httpInterface(url).request(requestOptions, callback);
-            request.on("error", function(error: string) {
-                reject(error);
+                request.end();
             });
+        };
 
-            request.end();
-        });
+        return await retry(async () => {
+            return await responsePromise();
+          }, {
+            maxTimeout: 5000,
+            minTimeout: 2000,
+            retries: 2,
+          });
     }
 
     public stopConversation(uuid: string): Promise<IVirtualDeviceResult[] | any> {

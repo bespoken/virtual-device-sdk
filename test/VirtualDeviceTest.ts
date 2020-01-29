@@ -375,6 +375,23 @@ describe("VirtualDevice", function() {
             assert.include(results[1].streamURL as string, "https://feeds.soundcloud.com/stream/");
         });
 
+        it("Should retry 3 times on timeouts from the server", async () => {
+            const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
+
+            let callNumbers = 0;
+            MessageMock.onRequest(() => {
+                callNumbers++;
+            });
+
+            try {
+                await sdk.getConversationResults("delay");
+                assert.equal(true, false);
+            } catch (error) {
+                assert.equal(true, true);
+            }
+            assert.equal(callNumbers, 3);
+        });
+
         it("Should throw exception if not using async mode", async () => {
             const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined);
 
