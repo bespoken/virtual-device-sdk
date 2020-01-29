@@ -376,6 +376,10 @@ describe("VirtualDevice", function() {
         });
 
         it("Should retry 3 times on timeouts from the server", async () => {
+            process.env.VDSDK_TIMEOUT = "50";
+            process.env.VDSDK_MIN_RETRY_TIMEOUT = "50";
+            process.env.VDSDK_MAX_RETRY_TIMEOUT = "60";
+
             const sdk = new VirtualDevice("DUMMY_TOKEN", "de-DE", "DUMMY_VOICE", undefined, true);
 
             let callNumbers = 0;
@@ -390,6 +394,9 @@ describe("VirtualDevice", function() {
                 assert.equal(true, true);
             }
             assert.equal(callNumbers, 3);
+            process.env.VDSDK_TIMEOUT = "";
+            process.env.VDSDK_MIN_RETRY_TIMEOUT = "";
+            process.env.VDSDK_MAX_RETRY_TIMEOUT = "";
         });
 
         it("Should throw exception if not using async mode", async () => {

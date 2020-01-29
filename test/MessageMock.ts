@@ -99,7 +99,7 @@ export class MessageMock {
                 }
                 return queryObject.uuid === "delay";
             })
-            .delayConnection(10000)
+            .delayConnection(100)
             .reply(200, function(uri: string) {
                 const url = URL.parse(uri);
                 const params: any = qs.parse(url.query as string);

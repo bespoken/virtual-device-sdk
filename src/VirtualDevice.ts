@@ -46,6 +46,11 @@ export class VirtualDevice {
     public baseURL: string;
     public homophones: {[id: string]: string[]} = {};
     public configuration: IVirtualDeviceConfiguration;
+    private TIMEOUTMS = process.env.VDSDK_TIMEOUT ? Number.parseInt(process.env.VDSDK_TIMEOUT) : 2000;
+    private MIN_RETRY_TIMEOUTMS = process.env.VDSDK_MIN_RETRY_TIMEOUT ?
+        Number.parseInt(process.env.VDSDK_MIN_RETRY_TIMEOUT) : 2000;
+    private MAX_RETRY_TIMEOUTMS = process.env.VDSDK_MAX_RETRY_TIMEOUT ?
+        Number.parseInt(process.env.VDSDK_MAX_RETRY_TIMEOUT) : 5000;
 
     public constructor( public arg0: string | IVirtualDeviceConfiguration,
                         public locale?: string,
@@ -285,7 +290,7 @@ export class VirtualDevice {
 
                 const request = this.httpInterface(url).request(requestOptions, callback);
                 request.on("socket", (socket: any) => {
-                    socket.setTimeout(2000);
+                    socket.setTimeout(this.TIMEOUTMS);
                     socket.on("timeout", () => {
                         request.abort();
                     });
@@ -301,8 +306,8 @@ export class VirtualDevice {
         return await retry(async () => {
             return await responsePromise();
           }, {
-            maxTimeout: 5000,
-            minTimeout: 2000,
+            maxTimeout: this.MAX_RETRY_TIMEOUTMS,
+            minTimeout: this.MIN_RETRY_TIMEOUTMS,
             retries: 2,
           });
     }
