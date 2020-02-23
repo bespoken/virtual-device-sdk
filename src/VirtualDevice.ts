@@ -473,6 +473,7 @@ class MessageProcesor {
             frame_rate: frameRate,
             phrases: message.phrases,
             sample_width: sampleWidth,
+            settings: message.settings,
             text: message.text,
             url: message.url,
         } as IMessageEndpoint;
@@ -555,6 +556,7 @@ export interface IMessage {
     phrases?: string[];
     url?: string;
     audio?: IAudio;
+    settings?: { [id: string]: any }; 
 }
 
 export interface IAudio {
