@@ -556,7 +556,7 @@ export interface IMessage {
     phrases?: string[];
     url?: string;
     audio?: IAudio;
-    settings?: { [id: string]: any }; 
+    settings?: { [id: string]: any };
 }
 
 export interface IAudio {
