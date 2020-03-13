@@ -93,6 +93,22 @@ export class MessageMock {
         nock(baseURL)
             .persist()
             .get("/conversation")
+            .query(function(queryObject: any) {
+                if (MessageMock.onRequestCallback) {
+                    MessageMock.onRequestCallback();
+                }
+                return queryObject.uuid === "delay";
+            })
+            .delayConnection(100)
+            .reply(200, function(uri: string) {
+                const url = URL.parse(uri);
+                const params: any = qs.parse(url.query as string);
+                return processConversationMessages(params.uuid);
+            });
+
+        nock(baseURL)
+            .persist()
+            .get("/conversation")
             .query(true)
             .reply(200, function(uri: string) {
                 const url = URL.parse(uri);
@@ -162,14 +178,24 @@ export class MessageMock {
         MessageMock.onCallCallback = callback;
     }
 
+    /**
+     * Add an interceptor for nock calls
+     * @param {(uri: string, requestBody: any) => void} callback
+     */
+    public static onRequest(callback?: () => void) {
+        MessageMock.onRequestCallback = callback;
+    }
+
     public static disable() {
         MessageMock.onCallCallback = undefined;
+        MessageMock.onRequestCallback = undefined;
         // Turn off Nock and remove all interceptors
         nock.cleanAll();
         nock.restore();
     }
 
     private static onCallCallback?: (uri: string, requestBody: any) => void;
+    private static onRequestCallback?: () => void;
 
 }
 
