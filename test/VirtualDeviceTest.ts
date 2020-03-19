@@ -519,7 +519,7 @@ describe("VirtualDevice", function() {
                     },
                 }, {
                     audio: {
-                        audioURL: "https://s3.amazonaws.com/bespoken-encoder-test/public/one_EN_US.raw",
+                        audioURL: "https://s3.amazonaws.com/bespoken-encoder-test/public/one_EN_US.raw?query=value",
                     },
                 }, {
                     audio: {
