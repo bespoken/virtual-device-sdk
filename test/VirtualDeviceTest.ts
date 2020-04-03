@@ -23,6 +23,14 @@ describe("VirtualDevice", function() {
             assert.isDefined(results);
         });
 
+        it("Should work with proxy", async () => {
+            process.env.HTTPS_PROXY = "http://my-proxy.com:8081"
+            const sdk = newVirtualDevice();
+            const results = await sdk.message("what time is it");
+            assert.isDefined(results);
+            process.env.HTTPS_PROXY = undefined;
+        });
+
         it("Should have stream URL", async () => {
             const sdk = newVirtualDevice();
             const result = await sdk.message("open test player and play");
@@ -556,17 +564,17 @@ describe("VirtualDevice", function() {
             const messages: IMessage[] = [
                 {
                     audio: {
-                        audioURL: "wrong url",
+                        audioURL: "https://wrong",
                     },
                 },
             ];
 
-            const errorMessage = "Unable to determine the domain name";
+            const errorMessage = "ENOTFOUND";
             try {
                 await sdk.batchMessage(messages);
                 assert(false, "Should have trigger an exception");
             } catch (e) {
-                assert.equal(e.message, errorMessage);
+                assert.include(e, errorMessage);
             }
         });
 

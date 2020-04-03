@@ -270,7 +270,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
             streamURL: null,
             transcript: "",
         };
-    } else if (message.includes("what time")) {
+    } else if (message.includes("what%20time") || message.includes("what time") ) {
         return {
             card: null,
             debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
@@ -288,7 +288,8 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
             streamURL: null,
             transcript: "the teds tools are good too tess with",
         };
-    } else if (message.includes("wie spät ist es")) {
+    } else if (message.includes("wie%20sp%C3%A4t%20ist%20es") ||
+    message.includes("wie spät ist es")) {
         return {
             card: null,
             debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
@@ -306,7 +307,8 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
             streamURL: null,
             transcript: phrases as string,
         };
-    } else if (message.includes("what is the weather")) {
+    } else if (message.includes("what%20is%20the%20weather") ||
+        message.includes("what is the weather")) {
         return {
             card: null,
             debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
@@ -315,7 +317,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
             streamURL: null,
             transcript: "the weather is nice",
         };
-    } else if (message.includes("Wie ist das Wetter")) {
+    } else if (message.includes("Wie%20ist%20das%20Wetter") || message.includes("Wie ist das Wetter")) {
         return {
             card: null,
             debug: {rawTranscript: "", rawJSON: {messageBody: ""}},
@@ -324,7 +326,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
             streamURL: null,
             transcript: "das Wetter ist schön",
         };
-    } else if (message.includes("special characters")) {
+    } else if (message.includes("special%20characters")) {
         return {
             card: {
                 imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
@@ -351,7 +353,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
             debug: {},
             message,
             sessionTimeout: 0,
-            streamURL: "",
+            streamURL: "https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010",
             transcript: "welcome to the simple audio player to play some audio",
         };
     } else if (message.includes("tell")) {
