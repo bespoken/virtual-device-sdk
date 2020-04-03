@@ -327,7 +327,7 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
             streamURL: null,
             transcript: "das Wetter ist schön",
         };
-    } else if (message.includes("special%20characters")) {
+    } else if (message.includes("special%20characters") || message.includes("special characters")) {
         return {
             card: {
                 imageURL: "https://bespoken.io/wp-content/uploads/Bespoken-Logo-Web-White-e1500590667994.png",
