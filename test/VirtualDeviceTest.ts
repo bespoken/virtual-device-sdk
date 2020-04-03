@@ -24,7 +24,7 @@ describe("VirtualDevice", function() {
         });
 
         it("Should work with proxy", async () => {
-            process.env.HTTPS_PROXY = "http://my-proxy.com:8081"
+            process.env.HTTPS_PROXY = "http://my-proxy.com:8081";
             const sdk = newVirtualDevice();
             const results = await sdk.message("what time is it");
             assert.isDefined(results);

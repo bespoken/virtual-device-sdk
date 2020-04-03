@@ -245,6 +245,7 @@ function processConversationMessages(uuid: any) {
     }
 }
 
+/* tslint:disable:cyclomatic-complexity */
 function messageHandler(message: string, phrases?: string): IVirtualDeviceResult {
     if (message.includes("Hi")) {
         return {
