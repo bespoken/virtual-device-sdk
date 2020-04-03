@@ -28,7 +28,7 @@ describe("VirtualDevice", function() {
             const sdk = newVirtualDevice();
             const results = await sdk.message("what time is it");
             assert.isDefined(results);
-            process.env.HTTPS_PROXY = undefined;
+            process.env.HTTPS_PROXY = "";
         });
 
         it("Should have stream URL", async () => {
@@ -511,8 +511,8 @@ describe("VirtualDevice", function() {
             assert.include(results[0].transcript.toLowerCase(), "welcome to guess the price");
             assert.include(results[1].transcript.toLowerCase(), "great please tell us your name");
             assert.include(results[2].transcript.toLowerCase(), "okay let's start the game");
-            assert.include(results[3].transcript.toLowerCase(), "you said 100 the actual price was");
-            assert.include(results[4].transcript.toLowerCase(), "you said 100 the actual price was");
+            assert.include(results[3].transcript.toLowerCase(), "you said 100 the actual price");
+            assert.include(results[4].transcript.toLowerCase(), "you said 100 the actual price");
             assert.include(results[5].transcript.toLowerCase(), "game ended");
         });
 

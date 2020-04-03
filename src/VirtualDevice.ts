@@ -458,7 +458,7 @@ class MessageProcesor {
     private agent?: HttpsProxyAgent;
     public constructor( public messages: IMessage[]) {
         this.proxy = process.env.HTTPS_PROXY;
-        if (this.proxy) {
+        if (!!this.proxy) {
             this.agent = new HttpsProxyAgent(this.proxy);
         }
     }
