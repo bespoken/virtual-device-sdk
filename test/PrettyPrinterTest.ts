@@ -66,7 +66,7 @@ describe("PrettyPrinter", function() {
                             <td style="border:1px solid black;padding:5px;text-align:center;">&#10004;</td>
                             <td style="border:1px solid black;padding:5px;">open test player</td>
                             <td style="border:1px solid black;padding:5px;">welcome to the simple audio player</td>
-                            <td style="border:1px solid black;padding:5px;">welcome to the simple audio player to play some audio</td>
+                            <td style="border:1px solid black;padding:5px;">https://feeds.soundcloud.com/stream/309340878-user-652822799-episode-010</td>
                         </tr>
                         <tr style="color:rgb(76,175,80);">
                             <td style="border:1px solid black;padding:5px;text-align:center;">&#10004;</td>

@@ -2,6 +2,7 @@ import * as fs from "fs";
 import { IncomingMessage } from "http";
 import * as http from "http";
 import * as https from "https";
+import * as HttpsProxyAgent from "https-proxy-agent";
 import * as pathModule from "path";
 import * as URL from "url";
 import { retry } from "./util";
@@ -46,6 +47,8 @@ export class VirtualDevice {
     public baseURL: string;
     public homophones: {[id: string]: string[]} = {};
     public configuration: IVirtualDeviceConfiguration;
+    private proxy?: string;
+    private agent?: HttpsProxyAgent;
     private TIMEOUTMS = process.env.VDSDK_TIMEOUT ? Number.parseInt(process.env.VDSDK_TIMEOUT) : 2000;
     private MIN_RETRY_TIMEOUTMS = process.env.VDSDK_MIN_RETRY_TIMEOUT ?
         Number.parseInt(process.env.VDSDK_MIN_RETRY_TIMEOUT) : 2000;
@@ -68,6 +71,10 @@ export class VirtualDevice {
         this.baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
             ? process.env.VIRTUAL_DEVICE_BASE_URL
             : "https://virtual-device.bespoken.io";
+
+        this.proxy = process.env.HTTPS_PROXY;
+        this.agent = this.proxy ? new HttpsProxyAgent(this.proxy) : undefined;
+
         if (arg0 === Object(arg0)) {
             this.configuration = arg0 as IVirtualDeviceConfiguration;
         } else {
@@ -161,7 +168,13 @@ export class VirtualDevice {
                 });
             };
 
-            const request = this.httpInterface(urlParsed).get(url as any, callback);
+            const requestOptions: http.RequestOptions = URL.parse(url);
+
+            if (this.agent) {
+                requestOptions.agent = this.agent || false;
+            }
+
+            const request = this.httpInterface(urlParsed).get(requestOptions as any, callback);
             request.on("error", function(error: string) {
                 reject(error);
             });
@@ -224,7 +237,7 @@ export class VirtualDevice {
                 messages: procesedMessages,
             };
             const inputString = JSON.stringify(input);
-            const requestOptions = {
+            const requestOptions: http.RequestOptions = {
                 headers: {
                     "Content-Length": new Buffer(inputString).length,
                     "Content-Type": "application/json",
@@ -234,6 +247,10 @@ export class VirtualDevice {
                 path: encodeURI(path),
                 port: this.httpInterfacePort(url),
             };
+
+            if (this.agent) {
+                requestOptions.agent = this.agent || false;
+            }
 
             const request = this.httpInterface(url).request(requestOptions, callback);
             request.on("error", function(error: string) {
@@ -278,7 +295,7 @@ export class VirtualDevice {
                     });
                 };
 
-                const requestOptions = {
+                const requestOptions: http.RequestOptions = {
                     headers: {
                         "Content-Type": "application/json",
                     },
@@ -287,6 +304,10 @@ export class VirtualDevice {
                     path,
                     port: this.httpInterfacePort(url),
                 };
+
+                if (this.agent) {
+                    requestOptions.agent = this.agent || false;
+                }
 
                 const request = this.httpInterface(url).request(requestOptions, callback);
                 request.on("socket", (socket: any) => {
@@ -342,7 +363,7 @@ export class VirtualDevice {
                 uuid,
             };
             const inputString = JSON.stringify(input);
-            const requestOptions = {
+            const requestOptions: http.RequestOptions = {
                 headers: {
                     "Content-Length": new Buffer(inputString).length,
                     "Content-Type": "application/json",
@@ -352,6 +373,10 @@ export class VirtualDevice {
                 path,
                 port: this.httpInterfacePort(url),
             };
+
+            if (this.agent) {
+                requestOptions.agent = this.agent || false;
+            }
 
             const request = this.httpInterface(url).request(requestOptions, callback);
             request.on("error", function(error: string) {
@@ -429,7 +454,14 @@ export class VirtualDevice {
 }
 
 class MessageProcesor {
-    public constructor( public messages: IMessage[]) {}
+    private proxy?: string;
+    private agent?: HttpsProxyAgent;
+    public constructor( public messages: IMessage[]) {
+        this.proxy = process.env.HTTPS_PROXY;
+        if (!!this.proxy) {
+            this.agent = new HttpsProxyAgent(this.proxy);
+        }
+    }
 
     public process(): Promise<IMessageEndpoint[]> {
         return Promise.all(this.messages.map((message) => this.processMessage(message)));
@@ -487,7 +519,13 @@ class MessageProcesor {
     private fetchFile(url: string): Promise<string> {
         return new Promise((resolve, reject) => {
             const data: Buffer[] = [];
-            const req = https.get(url as any, (res) => {
+            const requestOptions: http.RequestOptions = URL.parse(url);
+
+            if (this.agent) {
+                requestOptions.agent = this.agent || false;
+            }
+
+            const req = https.get(requestOptions, (res) => {
                 res.on("data", (chunk: Buffer) => {
                     data.push(chunk);
                 });
