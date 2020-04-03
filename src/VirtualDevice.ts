@@ -45,10 +45,10 @@ const VirtualDeviceParameterMapper: IKeyValue = {
 
 export class VirtualDevice {
     public baseURL: string;
-    private proxy?: string;
-    private agent?: HttpsProxyAgent;
     public homophones: {[id: string]: string[]} = {};
     public configuration: IVirtualDeviceConfiguration;
+    private proxy?: string;
+    private agent?: HttpsProxyAgent;
     private TIMEOUTMS = process.env.VDSDK_TIMEOUT ? Number.parseInt(process.env.VDSDK_TIMEOUT) : 2000;
     private MIN_RETRY_TIMEOUTMS = process.env.VDSDK_MIN_RETRY_TIMEOUT ?
         Number.parseInt(process.env.VDSDK_MIN_RETRY_TIMEOUT) : 2000;
