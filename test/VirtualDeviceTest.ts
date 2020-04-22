@@ -260,6 +260,64 @@ describe("VirtualDevice", function() {
             });
 
         });
+
+        it("Should use a filter if added", async () => {
+            MessageMock.enable();
+            const sdk = new VirtualDevice("token");
+            MessageMock.onCall((uri, body) => {
+                assert.deepEqual(body, { messages: [{text: "what time is it"}] });
+            });
+            sdk.addFilter((request) => {
+                request.messages[0].text = "what time is it";
+            });
+            await sdk.batchMessage([{text: "hi"}]);
+            MessageMock.disable();
+        });
+
+        it("Should use multiple filters if added", async () => {
+            MessageMock.enable();
+            const sdk = new VirtualDevice("token");
+            MessageMock.onCall((uri, body) => {
+                assert.deepEqual(body, { messages: [{text: "what time is it"}, {text: "hi"}] });
+            });
+            sdk.addFilter((request) => {
+                request.messages[0].text = "what time is it";
+            });
+
+            sdk.addFilter((request) => {
+                request.messages.push({ text: "hi" });
+            });
+
+            await sdk.batchMessage([{text: "hello"}]);
+            MessageMock.disable();
+        });
+
+        it("Should keep the same payload if filter function fails", async () => {
+            MessageMock.enable();
+            const sdk = new VirtualDevice("token");
+            MessageMock.onCall((uri, body) => {
+                assert.deepEqual(body, { messages: [{text: "hi"}] });
+            });
+            sdk.addFilter((request) => {
+                throw new Error("We want the filter to fail");
+            });
+            await sdk.batchMessage([{text: "hi"}]);
+            MessageMock.disable();
+        });
+
+        it("Should disable filters as expected", async () => {
+            MessageMock.enable();
+            const sdk = new VirtualDevice("token");
+            MessageMock.onCall((uri, body) => {
+                assert.deepEqual(body, { messages: [{text: "hi"}] });
+            });
+            sdk.addFilter((request) => {
+                throw new Error("We want the filter to fail");
+            });
+            sdk.clearFilters();
+            await sdk.batchMessage([{text: "hi"}]);
+            MessageMock.disable();
+        });
     });
 
     describe("#normalizeMessage()", () => {
