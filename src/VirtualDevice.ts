@@ -47,6 +47,7 @@ export class VirtualDevice {
     public baseURL: string;
     public homophones: {[id: string]: string[]} = {};
     public configuration: IVirtualDeviceConfiguration;
+    private filters: Array<(data: any) => void>= [];
     private proxy?: string;
     private agent?: HttpsProxyAgent;
     private TIMEOUTMS = process.env.VDSDK_TIMEOUT ? Number.parseInt(process.env.VDSDK_TIMEOUT) : 2000;
@@ -117,6 +118,14 @@ export class VirtualDevice {
         } else {
             return 80;
         }
+    }
+
+    public addFilter(filter: (data: any) => void) {
+        this.filters.push(filter);
+    }
+
+    public clearFilters() {
+        this.filters = [];
     }
 
     public message(message: string, debug?: boolean,
@@ -236,7 +245,18 @@ export class VirtualDevice {
             const input = {
                 messages: procesedMessages,
             };
-            const inputString = JSON.stringify(input);
+
+            const filteredInput = this.filters.reduce((accInput, filter) => {
+                try {
+                    filter(accInput);
+                } catch (error) {
+                    console.error("WARNING: Error while modifying the request\n", error,
+                        "\n Ignoring the error and keeping the batch message the same");
+                }
+                return accInput;
+            }, input);
+
+            const inputString = JSON.stringify(filteredInput);
             const requestOptions: http.RequestOptions = {
                 headers: {
                     "Content-Length": new Buffer(inputString).length,
