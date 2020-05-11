@@ -49,7 +49,7 @@ export class VirtualDevice {
     public configuration: IVirtualDeviceConfiguration;
     private filters: Array<(data: any) => void>= [];
     private proxy?: string;
-    private agent?: HttpsProxyAgent;
+    private agent?: HttpsProxyAgent.HttpsProxyAgent;
     private TIMEOUTMS = process.env.VDSDK_TIMEOUT ? Number.parseInt(process.env.VDSDK_TIMEOUT) : 2000;
     private MIN_RETRY_TIMEOUTMS = process.env.VDSDK_MIN_RETRY_TIMEOUT ?
         Number.parseInt(process.env.VDSDK_MIN_RETRY_TIMEOUT) : 2000;
@@ -74,7 +74,7 @@ export class VirtualDevice {
             : "https://virtual-device.bespoken.io";
 
         this.proxy = process.env.HTTPS_PROXY;
-        this.agent = this.proxy ? new HttpsProxyAgent(this.proxy) : undefined;
+        this.agent = this.proxy ? new HttpsProxyAgent.HttpsProxyAgent(this.proxy) : undefined;
 
         if (arg0 === Object(arg0)) {
             this.configuration = arg0 as IVirtualDeviceConfiguration;
@@ -475,11 +475,11 @@ export class VirtualDevice {
 
 class MessageProcesor {
     private proxy?: string;
-    private agent?: HttpsProxyAgent;
+    private agent?: HttpsProxyAgent.HttpsProxyAgent;
     public constructor( public messages: IMessage[]) {
         this.proxy = process.env.HTTPS_PROXY;
         if (!!this.proxy) {
-            this.agent = new HttpsProxyAgent(this.proxy);
+            this.agent = new HttpsProxyAgent.HttpsProxyAgent(this.proxy);
         }
     }
 
