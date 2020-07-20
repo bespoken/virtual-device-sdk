@@ -16,7 +16,7 @@ chai.use(sinonChai);
 const expect = chai.expect;
 dotenv.config();
 
-describe("VirtualDeviceScript", function() {
+describe.skip("VirtualDeviceScript", function() {
     this.timeout(120000);
 
     before(() => {
