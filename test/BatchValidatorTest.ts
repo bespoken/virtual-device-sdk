@@ -12,7 +12,7 @@ import {IVirtualDeviceTest,
     VirtualDeviceValidatorUnauthorizedMessage} from "../src/VirtualDeviceValidator";
 import {MessageMock} from "./MessageMock";
 
-describe("BatchValidator", function() {
+describe.skip("BatchValidator", function() {
     this.timeout(60000);
     dotenv.config();
 

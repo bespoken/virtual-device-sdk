@@ -228,12 +228,11 @@ export class VirtualDevice {
                         if (this.configuration.asyncMode) {
                             resolve(this.handleAsynchResponse(data as string));
                         } else {
-                            const virtualDeviceResponse: IVirtualDeviceResponse | IVirtualDeviceError =
-                                this.handleBatchResponse(data as string);
-                            if ((virtualDeviceResponse as IVirtualDeviceError).error) {
-                                resolve((virtualDeviceResponse as IVirtualDeviceError).error);
-                            } else {
-                                resolve((virtualDeviceResponse as IVirtualDeviceResponse).results);
+                            try {
+                                const result = this.handleBatchResponse(data as string);
+                                resolve(result);
+                            } catch (error) {
+                                reject(data);
                             }
                         }
                     } else {
@@ -302,13 +301,12 @@ export class VirtualDevice {
 
                     response.on("end", () => {
                         if (response.statusCode === 200) {
-                            const result = this.handleBatchResponse(data as string);
-                            if ((result as IVirtualDeviceError).error) {
-                                reject(result);
-                                return;
+                            try {
+                                const result = this.handleBatchResponse(data as string);
+                                resolve(result);
+                            } catch (error) {
+                                reject(data);
                             }
-
-                            resolve(result);
                         } else {
                             reject(data);
                         }
@@ -414,12 +412,8 @@ export class VirtualDevice {
         return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    private handleBatchResponse(data: string): IVirtualDeviceResponse | IVirtualDeviceError {
+    private handleBatchResponse(data: string): IVirtualDeviceResponse {
         const json = JSON.parse(data);
-
-        if (json && json.error) {
-            return json as IVirtualDeviceError;
-        }
 
         let results: IVirtualDeviceResult[];
         if (!json || !json.results) {
@@ -432,7 +426,10 @@ export class VirtualDevice {
             result.status = json.status;
             this.applyHomophones(result);
         }
+        const errorCode = json.errorCode || json.error_code;
         return {
+            error: json.error,
+            errorCode,
             results,
             status: json.status,
         } as  IVirtualDeviceResponse;
@@ -585,6 +582,8 @@ export interface IConversationResult {
 export interface IVirtualDeviceResponse {
     results: IVirtualDeviceResult[];
     status: string;
+    error: string;
+    errorCode: number;
 }
 
 export interface IVirtualDeviceResult {
