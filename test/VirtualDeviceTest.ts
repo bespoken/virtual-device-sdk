@@ -171,13 +171,14 @@ describe("VirtualDevice", function() {
             });
         });
 
-        it("Should add additional parameters on batch message", (done) => {
+        it("Should add additional parameters on message", (done) => {
             MessageMock.enable();
             const configuration: IVirtualDeviceConfiguration = {
                 another: "value1",
                 another_false_value: false,
                 another_one: "value2",
                 another_true_value: true,
+                array_value: ["value1", "value2", "value3"],
                 token: "myToken",
             };
             const sdk = new VirtualDevice(configuration);
@@ -187,8 +188,9 @@ describe("VirtualDevice", function() {
                 assert.include(uri, "another_one=value2");
                 assert.include(uri, "another_true_value=true");
                 assert.include(uri, "another_false_value=false");
+                assert.include(uri, "array_value=value1&array_value=value2&array_value=value3");
             });
-            sdk.batchMessage([{text: "hi"}], true).then(() => {
+            sdk.message("hi", true).then(() => {
                 MessageMock.disable();
                 done();
             });
@@ -320,6 +322,32 @@ describe("VirtualDevice", function() {
             sdk.clearFilters();
             await sdk.batchMessage([{text: "hi"}]);
             MessageMock.disable();
+        });
+
+        it("Should add additional parameters on batch message", (done) => {
+            MessageMock.enable();
+            const configuration: IVirtualDeviceConfiguration = {
+                another: "value1",
+                another_false_value: false,
+                another_one: "value2",
+                another_true_value: true,
+                array_value: ["value1", "value2", "value3"],
+                token: "myToken",
+            };
+            const sdk = new VirtualDevice(configuration);
+            MessageMock.onCall((uri) => {
+                console.log(uri);
+                assert.include(uri, "user_id=myToken");
+                assert.include(uri, "another=value1");
+                assert.include(uri, "another_one=value2");
+                assert.include(uri, "another_true_value=true");
+                assert.include(uri, "another_false_value=false");
+                assert.include(uri, "array_value=value1&array_value=value2&array_value=value3");
+            });
+            sdk.batchMessage([{text: "hi"}], true).then(() => {
+                MessageMock.disable();
+                done();
+            });
         });
     });
 

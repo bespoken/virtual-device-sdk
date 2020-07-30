@@ -148,11 +148,17 @@ export class VirtualDevice {
         }
         for (const key of Object.keys(this.configuration)) {
             const parameterValue = this.configuration[key];
-            if (!parameterValue) {
+            if (parameterValue === undefined) {
                 continue;
             }
             const parameterName = VirtualDeviceParameterMapper[key] || key;
-            url += `&${parameterName}=${parameterValue}`;
+            if (Array.isArray(parameterValue)) {
+                for (const element of parameterValue) {
+                    url += "&" + parameterName + "=" + element;
+                }
+            } else {
+                url += `&${parameterName}=${parameterValue}`;
+            }
         }
 
         url = encodeURI(url);
@@ -200,7 +206,13 @@ export class VirtualDevice {
                 continue;
             }
             const parameterName = VirtualDeviceParameterMapper[key] || key;
-            path += `&${parameterName}=${parameterValue}`;
+            if (Array.isArray(parameterValue)) {
+                for (const element of parameterValue) {
+                    path += "&" + parameterName + "=" + element;
+                }
+            } else {
+                path += `&${parameterName}=${parameterValue}`;
+            }
         }
 
         if (debug) {
