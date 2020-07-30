@@ -46,7 +46,7 @@
     "@types/sinon": "^2.3.3",
     "@types/sinon-chai": "^2.7.29",
     "chai": "^4.0.2",
-    "codecov": "^3.6.5",
+    "codecov": "^3.7.1",
     "mocha": "^5.2.0",
     "nock": "^9.0.24",
     "nyc": "^10.1.2",
