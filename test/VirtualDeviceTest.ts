@@ -578,9 +578,7 @@ describe("VirtualDevice", function() {
                         audioPath: "test/resources/one_EN_US.raw",
                     },
                 }, {
-                    audio: {
-                        audioPath: "test/resources/charles_EN_US.raw",
-                    },
+                    text: "charles",
                 }, {
                     audio: {
                         audioPath: "test/resources/one_hundred_dollars_EN_US.raw",
@@ -621,9 +619,7 @@ describe("VirtualDevice", function() {
                         audioURL: "https://s3.amazonaws.com/bespoken-encoder-test/public/one_EN_US.raw?query=value",
                     },
                 }, {
-                    audio: {
-                        audioURL: "https://s3.amazonaws.com/bespoken-encoder-test/public/charles_EN_US.raw",
-                    },
+                    text: "Charles",
                 }, {
                     audio: {
                         audioURL: "https://s3.amazonaws.com/bespoken-encoder-test/public/one_hundred_dollars_EN_US.raw",

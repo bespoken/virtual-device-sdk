@@ -270,7 +270,7 @@ export class VirtualDevice {
             const inputString = JSON.stringify(filteredInput);
             const requestOptions: http.RequestOptions = {
                 headers: {
-                    "Content-Length": new Buffer(inputString).length,
+                    "Content-Length": Buffer.from(inputString).length,
                     "Content-Type": "application/json",
                 },
                 host: url.hostname,
@@ -395,7 +395,7 @@ export class VirtualDevice {
             const inputString = JSON.stringify(input);
             const requestOptions: http.RequestOptions = {
                 headers: {
-                    "Content-Length": new Buffer(inputString).length,
+                    "Content-Length": Buffer.from(inputString).length,
                     "Content-Type": "application/json",
                 },
                 host: url.hostname,
@@ -426,7 +426,6 @@ export class VirtualDevice {
 
     private handleBatchResponse(data: string): IVirtualDeviceResponse {
         const json = JSON.parse(data);
-
         let results: IVirtualDeviceResult[];
         if (!json || !json.results) {
             results = [];
@@ -438,12 +437,10 @@ export class VirtualDevice {
             result.status = json.status;
             this.applyHomophones(result);
         }
-        const errorCode = json.errorCode || json.error_code;
+
         return {
-            error: json.error,
-            errorCode,
+            ...json,
             results,
-            status: json.status,
         } as  IVirtualDeviceResponse;
     }
 
