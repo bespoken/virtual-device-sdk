@@ -270,7 +270,7 @@ export class VirtualDevice {
             const inputString = JSON.stringify(filteredInput);
             const requestOptions: http.RequestOptions = {
                 headers: {
-                    "Content-Length": new Buffer(inputString).length,
+                    "Content-Length": Buffer.from(inputString).length,
                     "Content-Type": "application/json",
                 },
                 host: url.hostname,
@@ -395,7 +395,7 @@ export class VirtualDevice {
             const inputString = JSON.stringify(input);
             const requestOptions: http.RequestOptions = {
                 headers: {
-                    "Content-Length": new Buffer(inputString).length,
+                    "Content-Length": Buffer.from(inputString).length,
                     "Content-Type": "application/json",
                 },
                 host: url.hostname,
