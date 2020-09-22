@@ -143,9 +143,7 @@ export class VirtualDevice {
             }
         }
 
-        if (debug) {
-            url += "&debug=true";
-        }
+        url += `&debug=${debug}`;
         for (const key of Object.keys(this.configuration)) {
             const parameterValue = this.configuration[key];
             if (parameterValue === undefined) {
@@ -215,9 +213,7 @@ export class VirtualDevice {
             }
         }
 
-        if (debug) {
-            path += "&debug=true";
-        }
+        path += `&debug=${debug}`;
 
         let procesedMessages: IMessageEndpoint[];
         try {
