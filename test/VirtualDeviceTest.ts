@@ -615,7 +615,7 @@ describe("VirtualDevice", function() {
             assert.include(results[5].transcript.toLowerCase(), "game ended");
         });
 
-        it("Should return response when using audios from urls", async () => {
+        it.skip("Should return response when using audios from urls", async () => {
             const sdk = new VirtualDevice(process.env.VIRTUAL_DEVICE_TOKEN as string, "en-US");
 
             const messages: IMessage[] = [
