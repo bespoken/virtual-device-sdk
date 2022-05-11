@@ -615,7 +615,7 @@ describe("VirtualDevice", function() {
             assert.include(results[5].transcript.toLowerCase(), "game ended");
         });
 
-        it.skip("Should return response when using audios from urls", async () => {
+        it("Should return response when using audios from urls", async () => {
             const sdk = new VirtualDevice(process.env.VIRTUAL_DEVICE_TOKEN as string, "en-US");
 
             const messages: IMessage[] = [
@@ -644,16 +644,20 @@ describe("VirtualDevice", function() {
                     },
                 },
             ];
-            const response = await sdk.batchMessage(messages);
-            const results = response.results;
-            assert.equal(results.length, 6);
-            assert.equal(results[0].message, "[audio]");
-            assert.include(results[0].transcript.toLowerCase(), "welcome to guess the price");
-            assert.include(results[1].transcript.toLowerCase(), "great please tell us your name");
-            assert.include(results[2].transcript.toLowerCase(), "okay let's start the game");
-            assert.include(results[3].transcript.toLowerCase(), "you said 100 the actual price was");
-            assert.include(results[4].transcript.toLowerCase(), "you said 100 the actual price was");
-            assert.include(results[5].transcript.toLowerCase(), "game ended");
+            try {
+                const response = await sdk.batchMessage(messages);
+                const results = response.results;
+                assert.equal(results.length, 6);
+                assert.equal(results[0].message, "[audio]");
+                assert.include(results[0].transcript.toLowerCase(), "welcome to guess the price");
+                assert.include(results[1].transcript.toLowerCase(), "great please tell us your name");
+                assert.include(results[2].transcript.toLowerCase(), "okay let's start the game");
+                assert.include(results[3].transcript.toLowerCase(), "you said 100 the actual price was");
+                assert.include(results[4].transcript.toLowerCase(), "you said 100 the actual price was");
+                assert.include(results[5].transcript.toLowerCase(), "game ended");
+            } catch (error) {
+                console.error(error);
+            }
         });
 
         it("Should return error when using audios from invalid urls", async () => {
