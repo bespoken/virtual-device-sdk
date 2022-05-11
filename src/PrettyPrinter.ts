@@ -96,7 +96,7 @@ export class PrettyPrinter {
                 const testsHTML = [];
                 for (const test of tests) {
                     const icon = statusIcon(test);
-                    const html = `
+                    const htmlTest = `
                         <tr${(test.result && trStyles(test.result)) || ""}>
                             <td style="${tdAndThStyleProps}text-align:center;">${icon ? icon : ""}</td>
                             <td ${tdStyles}>${test.test.input}</td>
@@ -107,7 +107,7 @@ export class PrettyPrinter {
                         ? test.actual.streamURL
                         : (test.actual && test.actual.transcript) || ""}</td>
                         </tr>`;
-                    testsHTML.push(html);
+                    testsHTML.push(htmlTest);
                 }
                 const html = `
                     <div style="margin-bottom:16px;" class="sequence">

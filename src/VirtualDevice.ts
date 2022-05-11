@@ -47,7 +47,7 @@ export class VirtualDevice {
     public baseURL: string;
     public homophones: {[id: string]: string[]} = {};
     public configuration: IVirtualDeviceConfiguration;
-    private filters: Array<(data: any) => void>= [];
+    private filters: Array<(data: any) => void> = [];
     private proxy?: string;
     private agent?: HttpsProxyAgent.HttpsProxyAgent;
     private TIMEOUTMS = process.env.VDSDK_TIMEOUT ? Number.parseInt(process.env.VDSDK_TIMEOUT) : 2000;

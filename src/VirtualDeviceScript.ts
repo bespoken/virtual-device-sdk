@@ -179,7 +179,7 @@ export class VirtualDeviceScript {
             return Promise.reject("File to execute does not exist: " + filePath);
         }
 
-        const fileContents = fs.readFileSync(filePath, "UTF-8");
+        const fileContents = fs.readFileSync(filePath, "utf-8");
         return this.execute(fileContents);
     }
 
