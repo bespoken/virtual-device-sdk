@@ -4,12 +4,12 @@
   "private": false,
   "main": "./lib/src/Index.js",
   "typings": "./lib/src/Index.d.ts",
-  "version": "1.7.5",
+  "version": "1.8.4",
   "engines": {
     "node": "> 6.0.0"
   },
   "bin": {
-    "bvd": "./lib/src/ScriptRunner.js"
+    "bvd": "lib/src/ScriptRunner.js"
   },
   "files": [
     "lib/src/*.js",

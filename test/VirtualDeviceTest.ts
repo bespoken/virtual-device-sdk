@@ -391,6 +391,16 @@ describe("VirtualDevice", function() {
             assert.equal(result[1].transcript, "the test tools are good to test with");
             assert.equal((result[1].debug as any).rawTranscript, "the teds tools are good too tess with");
         });
+
+        it("Should apply homophones on batch message call with non ASCI characters", async () => {
+            const sdk = new VirtualDevice("DUMMY_TOKEN", "pt-BR");
+            sdk.addHomophones("Oi Ter você", ["Oi tem você"]);
+            const response = await sdk.batchMessage([{text: "olá"}]);
+            const result = response.results;
+            console.log("Output: " + JSON.stringify(result));
+            assert.equal(result[0].transcript, "Oi Ter você pra mim");
+            assert.equal((result[0].debug as any).rawTranscript, "Oi tem você pra mim");
+        });
     });
 
     describe("httpInterface and httpInterfacePort", () => {
@@ -634,16 +644,20 @@ describe("VirtualDevice", function() {
                     },
                 },
             ];
-            const response = await sdk.batchMessage(messages);
-            const results = response.results;
-            assert.equal(results.length, 6);
-            assert.equal(results[0].message, "[audio]");
-            assert.include(results[0].transcript.toLowerCase(), "welcome to guess the price");
-            assert.include(results[1].transcript.toLowerCase(), "great please tell us your name");
-            assert.include(results[2].transcript.toLowerCase(), "okay let's start the game");
-            assert.include(results[3].transcript.toLowerCase(), "you said 100 the actual price was");
-            assert.include(results[4].transcript.toLowerCase(), "you said 100 the actual price was");
-            assert.include(results[5].transcript.toLowerCase(), "game ended");
+            try {
+                const response = await sdk.batchMessage(messages);
+                const results = response.results;
+                assert.equal(results.length, 6);
+                assert.equal(results[0].message, "[audio]");
+                assert.include(results[0].transcript.toLowerCase(), "welcome to guess the price");
+                assert.include(results[1].transcript.toLowerCase(), "great please tell us your name");
+                assert.include(results[2].transcript.toLowerCase(), "okay let's start the game");
+                assert.include(results[3].transcript.toLowerCase(), "you said 100 the actual price was");
+                assert.include(results[4].transcript.toLowerCase(), "you said 100 the actual price was");
+                assert.include(results[5].transcript.toLowerCase(), "game ended");
+            } catch (error) {
+                console.error(error);
+            }
         });
 
         it("Should return error when using audios from invalid urls", async () => {

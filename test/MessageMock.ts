@@ -421,6 +421,15 @@ function messageHandler(message: string, phrases?: string): IVirtualDeviceResult
             streamURL: "",
             transcript: "hallo welt",
         };
+    } else if (message.includes("olá")) {
+        return {
+            card: null,
+            debug: {},
+            message,
+            sessionTimeout: 0,
+            streamURL: "",
+            transcript: "Oi tem você pra mim",
+        };
     }
 
     throw new Error("No match for message: " + message + " in mock.");

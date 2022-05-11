@@ -468,7 +468,10 @@ export class VirtualDevice {
             const homophones = this.homophones[key];
             for (const homophone of homophones) {
                 // Replace each of the homophones
-                result.transcript = result.transcript.split(new RegExp("\\b" + homophone + "\\b", "i")).join(word);
+                // replace word boundary \b because only works for ANSI characters
+                // https://shiba1014.medium.com/regex-word-boundaries-with-unicode-207794f6e7ed
+                result.transcript = result.transcript.split(
+                    new RegExp("(?<=[\\s,.:;\"']|^)"  + homophone + "(?=[\\s,.:;\"']|$)", "i")).join(word);
             }
         }
     }
