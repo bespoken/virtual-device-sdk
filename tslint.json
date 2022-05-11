@@ -5,6 +5,16 @@
     "max-classes-per-file": 3,
     "no-console": false,
     "only-arrow-functions": false,
-    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case", "allow-leading-underscore"]
+    "variable-name": [true, "ban-keywords", "check-format", "allow-pascal-case", "allow-leading-underscore"],
+    "prefer-conditional-expression": false,
+    "space-within-parens": false,
+    "radix": false,
+    "no-object-literal-type-assertion": false,
+    "no-return-await": false,
+    "array-type": false,
+    "no-duplicate-imports": false,
+    "no-implicit-dependencies": false,
+    "no-trailing-whitespace": false,
+    "align": false
   }
 }

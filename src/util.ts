@@ -7,6 +7,7 @@ export const retry = (fn: (bailFunction: any, num: any) => any, opts: OperationO
     let op: RetryOperation;
 
     if (!("randomize" in options)) {
+      // @ts-ignore
       options.randomize = true;
     }
 

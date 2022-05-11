@@ -35,7 +35,7 @@ const TestRunner = {
         // If it is a directory, we run all the tests in it
         // If it is a file, we run that one test
         let directory = ".";
-        let file: string | undefined;
+        let fileTest: string | undefined;
         if (path) {
             if (!fs.existsSync(path)) {
                 throw new Error(Path.resolve(path) + " does not exist");
@@ -44,14 +44,14 @@ const TestRunner = {
             if (fs.statSync(path).isDirectory()) {
                 directory = path;
             } else {
-                file = path;
+                fileTest = path;
             }
         }
 
-        if (file) {
-            console.log("Running Test:" + file);
-            script.executeFile(file).then((result) => {
-                console.log(printer.printResult(file as string, result));
+        if (fileTest) {
+            console.log("Running Test:" + fileTest);
+            script.executeFile(fileTest).then((result) => {
+                console.log(printer.printResult(fileTest as string, result));
                 if (result.result !== "success") {
                     process.exit(1);
                 }
