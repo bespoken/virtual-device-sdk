@@ -1,9 +1,9 @@
 version: 2
 jobs:
-  node8:
+  node12:
     docker:
       # specify the version you desire here
-      - image: circleci/node:8
+      - image: circleci/node:12
 
     steps:
       - checkout
@@ -55,4 +55,4 @@ workflows:
   version: 2
   build-and-test:
     jobs:
-      - node8
+      - node12
