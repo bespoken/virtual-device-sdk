@@ -208,10 +208,10 @@ export class VirtualDevice {
             const parameterName = VirtualDeviceParameterMapper[key] || key;
             if (Array.isArray(parameterValue)) {
                 for (const element of parameterValue) {
-                    path += "&" + parameterName + "=" + element;
+                    path += "&" + parameterName + "=" + encodeURIComponent(element);
                 }
             } else {
-                path += `&${parameterName}=${parameterValue}`;
+                path += `&${parameterName}=${encodeURIComponent(parameterValue)}`;
             }
         }
 
