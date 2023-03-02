@@ -227,6 +227,7 @@ export class VirtualDevice {
         }
 
         const url = URL.parse(this.baseURL);
+        path = pathModule.join(url.pathname as string, path);
         return new Promise<IVirtualDeviceResult[] | any>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
@@ -298,9 +299,10 @@ export class VirtualDevice {
             throw Error("Conversation Results only available in async mode");
         }
 
-        const path = "/conversation?uuid=" + uuid;
+        let path = "/conversation?uuid=" + uuid;
 
         const url = URL.parse(this.baseURL);
+        path = pathModule.join(url.pathname as string, path);
 
         const responsePromise = () => {
             return new Promise<IVirtualDeviceResponse | any>((resolve, reject) => {
@@ -368,9 +370,10 @@ export class VirtualDevice {
             throw Error("Conversation stop only available in async mode");
         }
 
-        const path = "/conversation_stop";
+        let path = "/conversation_stop";
 
         const url = URL.parse(this.baseURL);
+        path = pathModule.join(url.pathname as string, path);
 
         return new Promise<IVirtualDeviceResult[] | any>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
@@ -382,7 +385,7 @@ export class VirtualDevice {
 
                 response.on("end", () => {
                     if (response.statusCode === 200) {
-                        resolve();
+                        resolve('');
                     } else {
                         reject(data);
                     }
