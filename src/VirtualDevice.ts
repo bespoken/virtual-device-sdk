@@ -227,7 +227,7 @@ export class VirtualDevice {
         }
 
         const url = URL.parse(this.baseURL);
-        path = url.pathname?.endsWith('/') ? `${url.pathname}${path}` : `${url.pathname}/${path}`;
+        path = url.pathname === '/' ? path : `${url.pathname}/${path}`;
         return new Promise<IVirtualDeviceResult[] | any>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
@@ -302,7 +302,7 @@ export class VirtualDevice {
         let path = "/conversation?uuid=" + uuid;
 
         const url = URL.parse(this.baseURL);
-        path = url.pathname?.endsWith('/') ? `${url.pathname}${path}` : `${url.pathname}/${path}`;
+        path = url.pathname === '/' ? path : `${url.pathname}/${path}`;
 
         const responsePromise = () => {
             return new Promise<IVirtualDeviceResponse | any>((resolve, reject) => {
@@ -373,7 +373,7 @@ export class VirtualDevice {
         let path = "/conversation_stop";
 
         const url = URL.parse(this.baseURL);
-        path = url.pathname?.endsWith('/') ? `${url.pathname}${path}` : `${url.pathname}/${path}`;
+        path = url.pathname === '/' ? path : `${url.pathname}/${path}`;
 
         return new Promise<IVirtualDeviceResult[] | any>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
