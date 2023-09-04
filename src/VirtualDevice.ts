@@ -1,10 +1,9 @@
 import * as fs from "fs";
 import { IncomingMessage } from "http";
-import * as http from "http";
-import * as https from "https";
+import { http, https } from "follow-redirects";
 import * as HttpsProxyAgent from "https-proxy-agent";
 import * as pathModule from "path";
-import * as URL from "url";
+import { URL } from "url";
 import { retry } from "./util";
 
 export interface IVirtualDeviceConfiguration {
@@ -71,7 +70,8 @@ export class VirtualDevice {
                         ) {
         this.baseURL = process.env.VIRTUAL_DEVICE_BASE_URL
             ? process.env.VIRTUAL_DEVICE_BASE_URL
-            : "https://virtual-device.bespoken.io";
+            : "https://devices.bespoken.io/";
+        this.baseURL = this.baseURL.endsWith('/') ? this.baseURL : `${this.baseURL}/`
 
         this.proxy = process.env.HTTPS_PROXY;
         this.agent = this.proxy ? new HttpsProxyAgent.HttpsProxyAgent(this.proxy) : undefined;
@@ -132,19 +132,19 @@ export class VirtualDevice {
                    phrases?: string[], newConversation?: boolean): Promise<IVirtualDeviceResult> {
         const encodedMessage = encodeURIComponent(message);
 
-        let url = this.baseURL + "/process?";
+        let path = "process?";
         if (encodedMessage) {
-            url += "&message=" + encodedMessage;
+            path += "&message=" + encodedMessage;
         }
 
         if (phrases) {
             for (const phrase of phrases) {
-                url += "&phrases=" + encodeURIComponent(phrase);
+                path += "&phrases=" + encodeURIComponent(phrase);
             }
         }
 
         if (typeof(debug) !== "undefined") {
-            url += `&debug=${debug}`;
+            path += `&debug=${debug}`;
         }
         for (const key of Object.keys(this.configuration)) {
             const parameterValue = this.configuration[key];
@@ -154,15 +154,13 @@ export class VirtualDevice {
             const parameterName = VirtualDeviceParameterMapper[key] || key;
             if (Array.isArray(parameterValue)) {
                 for (const element of parameterValue) {
-                    url += "&" + parameterName + "=" + element;
+                    path += "&" + parameterName + "=" + element;
                 }
             } else {
-                url += `&${parameterName}=${parameterValue}`;
+                path += `&${parameterName}=${parameterValue}`;
             }
         }
 
-        url = encodeURI(url);
-        const urlParsed = URL.parse(this.baseURL);
         return new Promise<IVirtualDeviceResult>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
@@ -183,13 +181,15 @@ export class VirtualDevice {
                 });
             };
 
-            const requestOptions: http.RequestOptions = URL.parse(url);
-
+            const url = new URL(path, this.baseURL);
+            const requestOptions: any = {
+                method: 'GET',
+            };
             if (this.agent) {
                 requestOptions.agent = this.agent || false;
             }
 
-            const request = this.httpInterface(urlParsed).get(requestOptions as any, callback);
+            const request = this.httpInterface(url).request(url, requestOptions, callback);
             request.on("error", function(error: string) {
                 reject(error);
             });
@@ -199,7 +199,7 @@ export class VirtualDevice {
     }
 
     public async batchMessage(messages: IMessage[], debug?: boolean): Promise<IVirtualDeviceResult[] | any> {
-        let path = "/batch_process?";
+        let path = "batch_process?";
         for (const key of Object.keys(this.configuration)) {
             const parameterValue = this.configuration[key];
             if (parameterValue === undefined) {
@@ -226,8 +226,6 @@ export class VirtualDevice {
             return Promise.reject(error);
         }
 
-        const url = URL.parse(this.baseURL);
-        path = url.pathname === '/' ? path : `${url.pathname}/${path}`;
         return new Promise<IVirtualDeviceResult[] | any>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
                 let data = "";
@@ -269,22 +267,22 @@ export class VirtualDevice {
             }, input);
 
             const inputString = JSON.stringify(filteredInput);
-            const requestOptions: http.RequestOptions = {
+
+            const url = new URL(path, this.baseURL);
+            const requestOptions: any = {
+                method: 'POST',
                 headers: {
                     "Content-Length": Buffer.from(inputString).length,
                     "Content-Type": "application/json",
-                },
-                host: url.hostname,
-                method: "POST",
-                path: encodeURI(path),
-                port: this.httpInterfacePort(url),
+                }
             };
 
             if (this.agent) {
                 requestOptions.agent = this.agent || false;
             }
 
-            const request = this.httpInterface(url).request(requestOptions, callback);
+            const request = this.httpInterface(url).request(url, requestOptions, callback);
+
             request.on("error", function(error: string) {
                 reject(error);
             });
@@ -299,10 +297,7 @@ export class VirtualDevice {
             throw Error("Conversation Results only available in async mode");
         }
 
-        let path = "/conversation?uuid=" + uuid;
-
-        const url = URL.parse(this.baseURL);
-        path = url.pathname === '/' ? path : `${url.pathname}/${path}`;
+        let path = "conversation?uuid=" + uuid;
 
         const responsePromise = () => {
             return new Promise<IVirtualDeviceResponse | any>((resolve, reject) => {
@@ -327,21 +322,15 @@ export class VirtualDevice {
                     });
                 };
 
-                const requestOptions: http.RequestOptions = {
-                    headers: {
-                        "Content-Type": "application/json",
-                    },
-                    host: url.hostname,
-                    method: "GET",
-                    path,
-                    port: this.httpInterfacePort(url),
+                const url = new URL(path, this.baseURL);
+                const requestOptions: any = {
+                    method: 'GET',
                 };
-
                 if (this.agent) {
                     requestOptions.agent = this.agent || false;
                 }
 
-                const request = this.httpInterface(url).request(requestOptions, callback);
+                const request = this.httpInterface(url).request(url, requestOptions, callback);
                 request.on("socket", (socket: any) => {
                     socket.setTimeout(this.TIMEOUTMS);
                     socket.on("timeout", () => {
@@ -370,10 +359,7 @@ export class VirtualDevice {
             throw Error("Conversation stop only available in async mode");
         }
 
-        let path = "/conversation_stop";
-
-        const url = URL.parse(this.baseURL);
-        path = url.pathname === '/' ? path : `${url.pathname}/${path}`;
+        let path = "conversation_stop";
 
         return new Promise<IVirtualDeviceResult[] | any>((resolve, reject) => {
             const callback = (response: IncomingMessage) => {
@@ -396,22 +382,15 @@ export class VirtualDevice {
                 uuid,
             };
             const inputString = JSON.stringify(input);
-            const requestOptions: http.RequestOptions = {
-                headers: {
-                    "Content-Length": Buffer.from(inputString).length,
-                    "Content-Type": "application/json",
-                },
-                host: url.hostname,
-                method: "POST",
-                path,
-                port: this.httpInterfacePort(url),
+            const url = new URL(path, this.baseURL);
+            const requestOptions: any = {
+                method: 'POST',
             };
-
             if (this.agent) {
                 requestOptions.agent = this.agent || false;
             }
 
-            const request = this.httpInterface(url).request(requestOptions, callback);
+            const request = this.httpInterface(url).request(url, requestOptions, callback);
             request.on("error", function(error: string) {
                 reject(error);
             });
@@ -551,13 +530,16 @@ class MessageProcesor {
     private fetchFile(url: string): Promise<string> {
         return new Promise((resolve, reject) => {
             const data: Buffer[] = [];
-            const requestOptions: http.RequestOptions = URL.parse(url);
+            const urlObj = new URL(url);
+            const requestOptions: any = {
+                followAllRedirects: true,
+            };
 
             if (this.agent) {
                 requestOptions.agent = this.agent || false;
             }
 
-            const req = https.get(requestOptions, (res) => {
+            const req = https.get(urlObj, requestOptions, (res) => {
                 res.on("data", (chunk: Buffer) => {
                     data.push(chunk);
                 });
